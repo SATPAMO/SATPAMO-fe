@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Link } from "react-router-dom";
+
 import {
   Camera, RefreshCw, MapPin, CheckCircle2, AlertTriangle,
-  XCircle, Sparkles, Navigation, User, ArrowLeft,
+  XCircle, Sparkles, Navigation, User,
   ShieldCheck, Upload
 } from "lucide-react";
 import { Button } from "../components/ui/button";
@@ -457,7 +457,7 @@ export function StudentCheckIn() {
                     <div className="flex items-center gap-2">
                       <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                       <span className="text-xs font-mono text-slate-700">
-                        {location.lat.toFixed(6)}, {location.lon.toFixed(6)} (Akurasi: ±{location.accuracy}m)
+                        {location.lat.toFixed(6)}, {location.lon.toFixed(6)} (Akurasi: ï¿½{location.accuracy}m)
                       </span>
                     </div>
                     {locationError && (

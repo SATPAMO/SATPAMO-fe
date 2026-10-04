@@ -1,11 +1,11 @@
+import { Navbar } from "../components/Navbar";
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, Link } from "react-router-dom";
 import {
-  Search, Users, CheckCircle, Clock, XCircle, LogOut,
+  Search, Users, CheckCircle, BookOpen, Clock, XCircle, LogOut,
   BrainCircuit, RefreshCw, TrendingUp, AlertTriangle,
-  Info, ChevronDown, ChevronUp, CalendarDays,
-  Camera, MapPin, Sparkles, X, Eye
+  Info, ChevronDown, ChevronUp, MapPin, Sparkles, X, Eye
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
@@ -462,7 +462,9 @@ export function AttendanceDashboard() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 text-foreground p-6 md:p-12 font-sans">
+    <div className="min-h-screen bg-gray-50 text-foreground font-sans">
+      <Navbar />
+      <div className="p-6 md:p-12">
       {/* Modal Detail Verifikasi Foto & Lokasi */}
       {selectedRecordForModal && (
         <VerificationModal
@@ -491,6 +493,12 @@ export function AttendanceDashboard() {
           <div className="flex flex-wrap items-center gap-2">
 
 
+            <Link to="/kelas">
+              <Button className="gap-2 bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm shadow-indigo-100">
+                <BookOpen className="w-4 h-4" />
+                Kelola Kelas & Jadwal
+              </Button>
+            </Link>
             <Button
               variant="outline"
               className="gap-2 border-gray-300 text-gray-700 hover:text-blue-600 hover:border-blue-300 hover:bg-blue-50"
@@ -598,7 +606,7 @@ export function AttendanceDashboard() {
                     Semua Riwayat
                   </button>
                 </div>
-                <Badge variant="secondary" className="text-xs font-normal">
+                <Badge variant="outline" className="text-xs font-normal">
                   {filteredRecords.length} data
                 </Badge>
               </div>
@@ -666,7 +674,15 @@ export function AttendanceDashboard() {
                         </TableCell>
 
                         <TableCell className="font-mono text-xs text-gray-500">{row.nim}</TableCell>
-                        <TableCell className="font-medium text-slate-800">{row.name}</TableCell>
+                        <TableCell className="font-medium text-slate-800">
+                          {row.name}
+                          {(row as any).kelas && (
+                            <span className="block text-[10px] font-mono text-indigo-600 font-semibold mt-0.5">
+                              {(row as any).kelas.kode} - {(row as any).kelas.nama}
+                              {(row as any).pertemuanKe ? ` (P-${(row as any).pertemuanKe})` : ""}
+                            </span>
+                          )}
+                        </TableCell>
                         <TableCell className="text-sm text-gray-500">{row.jurusan}</TableCell>
                         
                         {/* Waktu Check In & Out */}
@@ -784,6 +800,7 @@ export function AttendanceDashboard() {
           </CardContent>
         </Card>
       </motion.div>
+      </div>
     </div>
   );
 }
