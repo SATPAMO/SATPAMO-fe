@@ -267,8 +267,8 @@ export function AttendanceDashboard() {
               key={item.label}
               onClick={() => navigate(item.path)}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all text-left ${item.active
-                  ? "bg-sky-400/30 text-white border border-sky-400/40"
-                  : "text-sky-200 hover:bg-white/10 hover:text-white"
+                ? "bg-sky-400/30 text-white border border-sky-400/40"
+                : "text-sky-200 hover:bg-white/10 hover:text-white"
                 }`}
             >
               {item.icon}
@@ -525,8 +525,8 @@ export function AttendanceDashboard() {
                   key={tab.key}
                   onClick={() => setActiveTab(tab.key)}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${activeTab === tab.key
-                      ? "bg-sky-500 text-white shadow-md"
-                      : "text-slate-500 hover:bg-sky-50 hover:text-sky-700"
+                    ? "bg-sky-500 text-white shadow-md"
+                    : "text-slate-500 hover:bg-sky-50 hover:text-sky-700"
                     }`}
                 >
                   {tab.label}
