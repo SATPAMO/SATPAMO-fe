@@ -8,6 +8,9 @@ import { KelasList } from "./pages/KelasList";
 import { KelasDetail } from "./pages/KelasDetail";
 import { KelasAttendance } from "./pages/KelasAttendance";
 import { StudentCheckIn } from "./pages/StudentCheckIn";
+import { JadwalSesi } from "./pages/JadwalSesi";
+import { StatistikKelas } from "./pages/StatistikKelas";
+import { PengaturanKuota } from "./pages/PengaturanKuota";
 
 function App() {
   return (
@@ -25,6 +28,54 @@ function App() {
             element={
               <ProtectedRoute>
                 <AttendanceDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/jadwal-sesi"
+            element={
+              <ProtectedRoute>
+                <JadwalSesi />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/jadwal"
+            element={
+              <ProtectedRoute>
+                <JadwalSesi />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/statistik-kelas"
+            element={
+              <ProtectedRoute>
+                <StatistikKelas />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/statistik"
+            element={
+              <ProtectedRoute>
+                <StatistikKelas />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/pengaturan-kuota"
+            element={
+              <ProtectedRoute>
+                <PengaturanKuota />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/pengaturan"
+            element={
+              <ProtectedRoute>
+                <PengaturanKuota />
               </ProtectedRoute>
             }
           />

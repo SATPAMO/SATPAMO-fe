@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
@@ -13,19 +13,16 @@ import {
   BarChart2,
   Settings,
   HelpCircle,
-  ChevronRight,
-  QrCode,
-  Wifi,
   Download,
-  MoreVertical,
   FileText,
   CheckCircle2,
   Clock3,
-  AlertCircle,
   TrendingUp,
   Users,
   Projector,
   RotateCcw,
+  DoorOpen,
+  Maximize2
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import {
@@ -55,24 +52,24 @@ function getInitials(name: string): string {
 
 function QrCodeDisplay({ pin }: { pin: string }) {
   return (
-    <div className="flex flex-col items-center gap-3">
-      <div className="relative bg-white rounded-xl p-3 shadow-inner border border-sky-200">
+    <div className="flex flex-col items-center gap-2.5">
+      <div className="relative bg-white rounded-2xl p-3 shadow-sm border border-sky-200">
         <svg
-          width="140"
-          height="140"
+          width="135"
+          height="135"
           viewBox="0 0 21 21"
           className="block"
           style={{ imageRendering: "pixelated" }}
         >
-          <rect x="0" y="0" width="7" height="7" fill="#1e3a5f" rx="0.5" />
+          <rect x="0" y="0" width="7" height="7" fill="#0f172a" rx="0.5" />
           <rect x="1" y="1" width="5" height="5" fill="white" rx="0.3" />
-          <rect x="2" y="2" width="3" height="3" fill="#1e3a5f" rx="0.2" />
-          <rect x="14" y="0" width="7" height="7" fill="#1e3a5f" rx="0.5" />
+          <rect x="2" y="2" width="3" height="3" fill="#0f172a" rx="0.2" />
+          <rect x="14" y="0" width="7" height="7" fill="#0f172a" rx="0.5" />
           <rect x="15" y="1" width="5" height="5" fill="white" rx="0.3" />
-          <rect x="16" y="2" width="3" height="3" fill="#1e3a5f" rx="0.2" />
-          <rect x="0" y="14" width="7" height="7" fill="#1e3a5f" rx="0.5" />
+          <rect x="16" y="2" width="3" height="3" fill="#0f172a" rx="0.2" />
+          <rect x="0" y="14" width="7" height="7" fill="#0f172a" rx="0.5" />
           <rect x="1" y="15" width="5" height="5" fill="white" rx="0.3" />
-          <rect x="2" y="16" width="3" height="3" fill="#1e3a5f" rx="0.2" />
+          <rect x="2" y="16" width="3" height="3" fill="#0f172a" rx="0.2" />
           {[
             [8, 0], [10, 0], [12, 0], [8, 2], [9, 2], [11, 2], [13, 2], [8, 4], [10, 4], [12, 4],
             [8, 6], [9, 6], [13, 6], [0, 8], [2, 8], [4, 8], [6, 8], [8, 8], [10, 8], [12, 8], [14, 8], [16, 8], [18, 8], [20, 8],
@@ -88,49 +85,19 @@ function QrCodeDisplay({ pin }: { pin: string }) {
             [9, 19], [11, 19], [13, 19], [15, 19], [17, 19], [19, 19],
             [8, 20], [10, 20], [12, 20], [14, 20], [16, 20], [18, 20], [20, 20],
           ].map(([cx, cy], i) => (
-            <rect key={i} x={cx} y={cy} width="1" height="1" fill="#1e3a5f" />
+            <rect key={i} x={cx} y={cy} width="1" height="1" fill="#0f172a" />
           ))}
         </svg>
         <motion.div
-          className="absolute inset-0 rounded-xl border-2 border-sky-400 pointer-events-none"
+          className="absolute inset-0 rounded-2xl border-2 border-sky-400 pointer-events-none"
           animate={{ opacity: [0.3, 1, 0.3] }}
           transition={{ duration: 2, repeat: Infinity }}
         />
       </div>
       <div className="text-center">
-        <p className="text-xs text-sky-600 font-semibold">KODE PIN DARURAT</p>
-        <p className="text-2xl font-black text-sky-700 tracking-widest">{pin}</p>
+        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">KODE PIN DARURAT</p>
+        <p className="text-xl font-black text-sky-800 tracking-widest">{pin}</p>
       </div>
-    </div>
-  );
-}
-
-interface StatCardProps {
-  title: string;
-  value: string | number;
-  subtitle?: string;
-  sub2?: string;
-  icon: React.ReactNode;
-  iconBg: string;
-  valueColor?: string;
-  badge?: React.ReactNode;
-}
-
-function StatCard({ title, value, subtitle, sub2, icon, iconBg, valueColor, badge }: StatCardProps) {
-  return (
-    <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 border border-white/60 shadow-sm flex flex-col gap-1 min-w-0">
-      <div className="flex items-center justify-between mb-1">
-        <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide leading-tight">
-          {title}
-        </span>
-        <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${iconBg}`}>
-          {icon}
-        </div>
-      </div>
-      <div className={`text-3xl font-black ${valueColor ?? "text-slate-800"}`}>{value}</div>
-      {subtitle && <p className="text-[11px] text-slate-500 leading-tight">{subtitle}</p>}
-      {sub2 && <p className="text-[11px] text-slate-400 leading-tight">{sub2}</p>}
-      {badge}
     </div>
   );
 }
@@ -139,16 +106,16 @@ function ActivityItem({ name, nim, time, accuracy }: {
   name: string; nim: string; time: string; accuracy: string;
 }) {
   return (
-    <div className="flex items-center gap-3 py-2 border-b border-sky-100/60 last:border-0">
-      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-sky-400 to-blue-600 flex items-center justify-center text-white text-[11px] font-bold shrink-0">
+    <div className="flex items-center gap-3 py-2 border-b border-slate-100 last:border-0">
+      <div className="w-8 h-8 rounded-full bg-sky-600 text-white text-[10px] font-black flex items-center justify-center shrink-0">
         {getInitials(name)}
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-xs font-semibold text-slate-700 truncate">{name}</p>
-        <p className="text-[10px] text-slate-400 truncate">{nim}</p>
-        <p className="text-[10px] text-sky-600">{accuracy}</p>
+        <p className="text-xs font-bold text-slate-900 truncate">{name}</p>
+        <p className="text-[10px] text-slate-500 truncate">{nim}</p>
+        <p className="text-[10px] text-sky-700 font-semibold">{accuracy}</p>
       </div>
-      <span className="text-[10px] text-slate-400 shrink-0">{time}</span>
+      <span className="text-[10px] text-slate-500 font-medium shrink-0">{time}</span>
     </div>
   );
 }
@@ -164,6 +131,9 @@ export function AttendanceDashboard() {
   const [activeTab, setActiveTab] = useState<TabFilter>("semua");
   const [qrTimer, setQrTimer] = useState(15);
   const [selectedRecord, setSelectedRecord] = useState<AttendanceRecord | null>(null);
+  const [showProjectorModal, setShowProjectorModal] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
   const { logout, dosen } = useAuth();
   const navigate = useNavigate();
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -175,23 +145,35 @@ export function AttendanceDashboard() {
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, []);
 
-  const fetchData = useCallback(async () => {
-    setLoadingData(true);
-    try {
-      const [recordsRes, statsRes] = await Promise.all([
-        attendanceApi.getAll(),
-        attendanceApi.getStats(),
-      ]);
-      if (recordsRes.success) setRecords(recordsRes.data || []);
-      if (statsRes.success) setStats(statsRes.data || null);
-    } catch (err) {
-      console.error("Fetch error:", err);
-    } finally {
-      setLoadingData(false);
-    }
-  }, [refreshKey]);
+  const triggerToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3500);
+  };
 
-  useEffect(() => { fetchData(); }, [fetchData]);
+  useEffect(() => {
+    let isSubscribed = true;
+    const loadData = async () => {
+      try {
+        const [recordsRes, statsRes] = await Promise.all([
+          attendanceApi.getAll(),
+          attendanceApi.getStats(),
+        ]);
+        if (isSubscribed) {
+          if (recordsRes.success) setRecords(recordsRes.data || []);
+          if (statsRes.success) setStats(statsRes.data || null);
+        }
+      } catch (err) {
+        console.error("Fetch error:", err);
+      } finally {
+        if (isSubscribed) setLoadingData(false);
+      }
+    };
+
+    loadData();
+    return () => {
+      isSubscribed = false;
+    };
+  }, [refreshKey]);
 
   useEffect(() => {
     const interval = setInterval(() => setRefreshKey((k) => k + 1), 20000);
@@ -205,10 +187,10 @@ export function AttendanceDashboard() {
   const totalEnrolled = stats?.total ?? 42;
   const hadirCount = stats?.present ?? 38;
   const lateCount = stats?.late ?? 0;
-  const izinCount = stats?.izin ?? 3;
+  const izinCount = stats?.izin ?? 2;
   const belumCount = Math.max(0, totalEnrolled - hadirCount - lateCount - izinCount);
-  const hadirPct = totalEnrolled > 0 ? Math.round(((hadirCount + lateCount) / totalEnrolled) * 100) : 90;
-  const kumulatif = 94.7;
+  const hadirPct = totalEnrolled > 0 ? Math.round(((hadirCount + lateCount) / totalEnrolled) * 100) : 90.5;
+  const kumulatif = 92.5;
 
   const sorted = [...records].sort((a, b) => {
     const tA = a.checkIn ? new Date(a.checkIn).getTime() : 0;
@@ -231,25 +213,48 @@ export function AttendanceDashboard() {
 
   const navItems = [
     { icon: <Radio className="w-4 h-4" />, label: "Live Monitoring", active: true, path: "/" },
-    { icon: <Calendar className="w-4 h-4" />, label: "Jadwal Sesi", path: "/kelas" },
-    { icon: <BarChart2 className="w-4 h-4" />, label: "Statistik Kelas", path: "/kelas" },
-    { icon: <Settings className="w-4 h-4" />, label: "Pengaturan Kelas", path: "/kelas" },
+    { icon: <Calendar className="w-4 h-4" />, label: "Jadwal Sesi", active: false, path: "/jadwal-sesi" },
+    { icon: <BarChart2 className="w-4 h-4" />, label: "Statistik Kelas", active: false, path: "/statistik-kelas" },
+    { icon: <Settings className="w-4 h-4" />, label: "Pengaturan Kuota", active: false, path: "/pengaturan-kuota" },
   ];
 
   return (
     <div
-      className="min-h-screen flex"
-      style={{ background: "linear-gradient(135deg,#38bdf8 0%,#0ea5e9 30%,#0284c7 60%,#60d8f7 100%)" }}
+      className="min-h-screen flex text-slate-800"
+      style={{
+        background: "linear-gradient(135deg, #38bdf8 0%, #0ea5e9 30%, #0284c7 60%, #60d8f7 100%)",
+        fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+      }}
     >
+      {/* Toast Notification */}
+      <AnimatePresence>
+        {toastMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="fixed top-5 right-5 z-50 bg-sky-900/90 backdrop-blur-md text-white text-sm font-semibold px-4 py-3 rounded-2xl shadow-xl border border-sky-400/40 flex items-center gap-2"
+          >
+            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+            <span>{toastMessage}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Sidebar */}
       <aside
-        className="w-56 shrink-0 flex flex-col py-6 px-4 gap-4"
-        style={{ background: "linear-gradient(180deg,#1e6fa8 0%,#155e86 60%,#0c4a6e 100%)", boxShadow: "4px 0 24px rgba(0,0,0,0.18)" }}
+        className="w-60 shrink-0 flex flex-col py-6 px-4 gap-4"
+        style={{
+          background: "linear-gradient(180deg, #1e6fa8 0%, #155e86 60%, #0c4a6e 100%)",
+          boxShadow: "4px 0 24px rgba(0,0,0,0.18)",
+        }}
       >
         <div className="mb-2">
           <h1 className="text-3xl font-black text-yellow-400 tracking-tight leading-none">SATPAMO</h1>
           <p className="text-sky-300 text-xs font-semibold tracking-widest mt-0.5">ADMIN</p>
         </div>
+
+        {/* Profile Card */}
         <div className="flex items-center gap-3 bg-white/10 rounded-2xl px-3 py-2.5">
           <div className="w-9 h-9 rounded-full bg-gradient-to-br from-sky-300 to-blue-500 flex items-center justify-center text-white text-sm font-black shrink-0">
             {dosen ? getInitials(dosen.username) : "YK"}
@@ -261,46 +266,40 @@ export function AttendanceDashboard() {
             <p className="text-sky-300 text-[10px] truncate">NIP: 123456789098761</p>
           </div>
         </div>
-        <nav className="flex flex-col gap-1 flex-1">
+
+        {/* Navigation */}
+        <nav className="flex flex-col gap-1.5 flex-1 mt-2">
           {navItems.map((item) => (
             <button
               key={item.label}
               onClick={() => navigate(item.path)}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all text-left ${item.active
-                ? "bg-sky-400/30 text-white border border-sky-400/40"
-                : "text-sky-200 hover:bg-white/10 hover:text-white"
-                }`}
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all text-left ${
+                item.active
+                  ? "bg-sky-400/35 text-white shadow-sm border border-sky-300/40"
+                  : "text-sky-100 hover:bg-white/10 hover:text-white"
+              }`}
             >
               {item.icon}
-              {item.label}
-              {item.active && <span className="ml-auto w-2 h-2 rounded-full bg-sky-300 animate-pulse" />}
+              <span className="flex-1">{item.label}</span>
+              {item.active && (
+                <span className="w-2.5 h-2.5 rounded-full bg-sky-950 ring-2 ring-sky-300 shrink-0" />
+              )}
             </button>
           ))}
-          <div className="mt-4 border-t border-white/10 pt-4">
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-sky-200 text-[11px] font-semibold uppercase tracking-wide">Mode Radar GPS</span>
-              <span className="text-[10px] text-green-300 bg-green-900/40 px-2 py-0.5 rounded-full font-semibold">Aktif 50m</span>
-            </div>
-            <p className="text-sky-300 text-[10px] leading-tight">
-              Presensi hanya sah dalam perimeter Ruang 207 Kampus Pusat
-            </p>
-            <button
-              onClick={() => setRefreshKey((k) => k + 1)}
-              className="mt-3 w-full flex items-center justify-center gap-2 bg-sky-400 hover:bg-sky-300 text-white font-bold text-xs py-2.5 rounded-xl transition-all shadow-md"
-            >
-              <QrCode className="w-4 h-4" />
-              Generate QR Dinamis
-            </button>
-          </div>
         </nav>
+
+        {/* Sidebar Footer */}
         <div className="flex flex-col gap-1 border-t border-white/10 pt-3">
-          <button className="flex items-center gap-2 text-sky-300 hover:text-white text-xs px-2 py-1.5 rounded-lg hover:bg-white/10 transition-all">
+          <button
+            onClick={() => triggerToast("Pusat Bantuan SATPAMO: satpamo-support@ac.id")}
+            className="flex items-center gap-2 text-sky-200 hover:text-white text-xs px-2 py-2 rounded-lg hover:bg-white/10 transition-all font-medium"
+          >
             <HelpCircle className="w-4 h-4" />
             Bantuan SATPAMO
           </button>
           <button
             onClick={handleLogout}
-            className="flex items-center gap-2 text-red-400 hover:text-red-300 text-xs px-2 py-1.5 rounded-lg hover:bg-red-500/10 transition-all font-semibold"
+            className="flex items-center gap-2 text-red-300 hover:text-red-200 text-xs px-2 py-2 rounded-lg hover:bg-red-500/10 transition-all font-semibold"
           >
             <LogOut className="w-4 h-4" />
             Keluar
@@ -308,211 +307,325 @@ export function AttendanceDashboard() {
         </div>
       </aside>
 
-      {/* Main */}
-      <main className="flex-1 overflow-auto flex flex-col gap-4 p-5">
-        {/* Top bar */}
+      {/* Main Content Area */}
+      <main className="flex-1 overflow-y-auto px-7 py-5 flex flex-col gap-5">
+        {/* Top Header Pill & User Avatar */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3 bg-white/80 backdrop-blur-sm rounded-2xl px-4 py-2.5 shadow-sm border border-white/60">
-            <Wifi className="w-4 h-4 text-green-500" />
-            <div>
-              <p className="text-xs font-black text-slate-800 leading-none">Ruang 207:</p>
-              <p className="text-xs font-semibold text-sky-600">Pemrograman Mobile (Kelas T3A)</p>
-            </div>
-            <button className="ml-1 text-slate-400 hover:text-slate-600 transition-colors">
-              <Settings className="w-4 h-4" />
-            </button>
+          <div className="inline-flex items-center gap-2.5 bg-white/70 backdrop-blur-md rounded-2xl px-4 py-2 border border-white/70 shadow-sm">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0 animate-pulse" />
+            <span className="text-xs font-semibold text-slate-800">
+              Ruang 207: Pemrograman Mobile (Kelas T3A)
+            </span>
+            <DoorOpen className="w-3.5 h-3.5 text-slate-700 ml-1" />
           </div>
-          <div className="flex items-center gap-2">
+
+          <div className="flex items-center gap-2.5">
             <button
               onClick={() => setRefreshKey((k) => k + 1)}
               disabled={loadingData}
-              className="bg-white/80 backdrop-blur-sm rounded-xl p-2.5 shadow-sm border border-white/60 text-slate-500 hover:text-sky-600 transition-colors"
+              className="p-2 rounded-xl bg-white/70 hover:bg-white text-slate-700 border border-white/80 shadow-sm transition-all"
+              title="Refresh Data Presensi"
             >
-              <RefreshCw className={`w-4 h-4 ${loadingData ? "animate-spin" : ""}`} />
+              <RefreshCw className={`w-4 h-4 ${loadingData ? "animate-spin text-sky-600" : ""}`} />
             </button>
-            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-sky-400 to-blue-600 flex items-center justify-center text-white text-sm font-black shadow-md">
+
+            <div className="w-9 h-9 rounded-full bg-sky-600 border border-sky-300 flex items-center justify-center text-white text-xs font-black shadow-sm">
               {dosen ? getInitials(dosen.username) : "YK"}
             </div>
           </div>
         </div>
 
-        {/* Title */}
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-black text-white tracking-tight drop-shadow-md">
-            DASBOARD PRESENSI REAL-TIME
-          </h2>
-          <button className="flex items-center gap-2 bg-sky-100/80 backdrop-blur-sm text-sky-800 text-xs font-semibold px-4 py-2 rounded-xl border border-sky-200 hover:bg-sky-200 transition-all shadow-sm">
-            <Download className="w-3.5 h-3.5" />
-            Unduh berita acara presensi
-          </button>
+        {/* Title, Badge Info & Action Buttons */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center flex-wrap gap-2.5 mb-1">
+              <span className="bg-sky-950 text-sky-200 text-[11px] font-bold px-3 py-1 rounded-full shadow-sm">
+                SEMESTER GANJIL 2026/2027
+              </span>
+              <span className="text-slate-800 text-[11px] font-semibold flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                Radar Geofence: Aktif 50m (Ruang 207 Lab Mobile)
+              </span>
+            </div>
+            <h2 className="text-2xl font-black text-slate-900 tracking-tight">
+              Live Monitoring Presensi Kelas
+            </h2>
+            <p className="text-xs text-slate-700 mt-0.5">
+              Pantau kehadiran mahasiswa secara real-time melalui integrasi radar GPS perimeter & deteksi biometrik.
+            </p>
+          </div>
+
+          <div className="flex items-center flex-wrap gap-2.5">
+            <button
+              onClick={() => setShowProjectorModal(true)}
+              className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-white/60 hover:bg-white/80 backdrop-blur-sm text-sky-800 border border-white/70 shadow-sm transition-all flex items-center gap-2"
+            >
+              <Projector className="w-3.5 h-3.5 text-sky-700" />
+              Mode Proyektor Layar Dosen
+            </button>
+
+            <button
+              onClick={() => triggerToast("Mengunduh Berita_Acara_Presensi_Sesi10.pdf...")}
+              className="px-4 py-2 rounded-xl text-xs font-bold bg-sky-500 hover:bg-sky-600 text-white shadow-md transition-all flex items-center gap-1.5"
+            >
+              <Download className="w-3.5 h-3.5" />
+              Unduh Berita Acara Presensi
+            </button>
+          </div>
         </div>
 
-        {/* Stat Cards */}
-        <div className="grid grid-cols-5 gap-3">
-          <StatCard
-            title="Total Terdaftar"
-            value={loadingData ? "—" : totalEnrolled}
-            subtitle="Mahasiswa"
-            sub2="100% Terverifikasi KRS"
-            icon={<Users className="w-4 h-4 text-blue-500" />}
-            iconBg="bg-blue-100"
-          />
-          <StatCard
-            title="Sudah Hadir"
-            value={loadingData ? "—" : hadirCount}
-            subtitle={`${hadirPct}% · Mahasiswa`}
-            sub2="Terakhir masuk: 2 menit yang lalu"
-            icon={<CheckCircle2 className="w-4 h-4 text-green-500" />}
-            iconBg="bg-green-100"
-            valueColor="text-green-600"
-          />
-          <StatCard
-            title="Izin / Sakit"
-            value={loadingData ? "—" : izinCount}
-            subtitle="Berkas Unggah"
-            sub2="Memerlukan verifikasi"
-            icon={<FileText className="w-4 h-4 text-orange-500" />}
-            iconBg="bg-orange-100"
-            valueColor="text-orange-500"
-          />
-          <StatCard
-            title="Belum Presensi"
-            value={loadingData ? "—" : belumCount}
-            subtitle="Mahasiswa"
-            badge={
-              <div className="flex items-center gap-1 mt-0.5">
-                <AlertTriangle className="w-3 h-3 text-red-500" />
-                <span className="text-[10px] text-red-500 font-semibold">Batas sisa 43 menit</span>
+        {/* 5 Metric Summary Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
+          {/* Card 1: Total Terdaftar */}
+          <div className="bg-white/70 backdrop-blur-md rounded-2xl p-4 border border-white/70 shadow-sm flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between text-slate-600 mb-1">
+                <p className="text-[10px] font-bold tracking-wider uppercase">TOTAL TERDAFTAR</p>
+                <div className="w-6 h-6 rounded-lg bg-sky-100 text-sky-700 flex items-center justify-center">
+                  <Users className="w-3.5 h-3.5" />
+                </div>
               </div>
-            }
-            icon={<AlertCircle className="w-4 h-4 text-red-500" />}
-            iconBg="bg-red-100"
-            valueColor="text-red-500"
-          />
-          <StatCard
-            title="Kumulatif SMT"
-            value={`${kumulatif}%`}
-            subtitle="Target min. 75%"
-            badge={
-              <div className="flex items-center gap-1">
-                <CheckCircle2 className="w-3 h-3 text-green-500" />
-                <span className="text-[10px] text-green-600 font-semibold">Aman</span>
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-3xl font-black text-slate-900 leading-none">
+                  {loadingData ? "—" : totalEnrolled}
+                </span>
+                <span className="text-xs font-semibold text-slate-600">Mahasiswa</span>
               </div>
-            }
-            icon={<TrendingUp className="w-4 h-4 text-purple-500" />}
-            iconBg="bg-purple-100"
-            valueColor="text-purple-600"
-          />
+            </div>
+            <p className="text-[10px] text-slate-500 mt-3 font-medium">100% Terverifikasi KRS</p>
+          </div>
+
+          {/* Card 2: Sudah Hadir */}
+          <div className="bg-white/70 backdrop-blur-md rounded-2xl p-4 border border-white/70 shadow-sm flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between text-slate-600 mb-1">
+                <p className="text-[10px] font-bold tracking-wider uppercase">SUDAH HADIR</p>
+                <div className="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                </div>
+              </div>
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-3xl font-black text-slate-900 leading-none">
+                  {loadingData ? "—" : hadirCount}
+                </span>
+                <span className="text-[10px] font-bold text-emerald-600">
+                  ({hadirPct}%)
+                </span>
+              </div>
+            </div>
+            <p className="text-[10px] text-slate-500 mt-3 font-medium">Terakhir masuk: 2 menit yang lalu</p>
+          </div>
+
+          {/* Card 3: Izin / Sakit */}
+          <div className="bg-white/70 backdrop-blur-md rounded-2xl p-4 border border-white/70 shadow-sm flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between text-slate-600 mb-1">
+                <p className="text-[10px] font-bold tracking-wider uppercase">IZIN / SAKIT</p>
+                <div className="w-6 h-6 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center">
+                  <Clock3 className="w-3.5 h-3.5" />
+                </div>
+              </div>
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-3xl font-black text-slate-900 leading-none">
+                  {loadingData ? "—" : izinCount}
+                </span>
+                <span className="text-xs font-semibold text-slate-600">Berkas</span>
+              </div>
+            </div>
+            <p className="text-[10px] text-slate-500 mt-3 font-medium">Memerlukan verifikasi dosen</p>
+          </div>
+
+          {/* Card 4: Belum Presensi */}
+          <div className="bg-white/70 backdrop-blur-md rounded-2xl p-4 border border-white/70 shadow-sm flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between text-rose-600 mb-1">
+                <p className="text-[10px] font-bold tracking-wider uppercase">BELUM PRESENSI</p>
+                <div className="w-6 h-6 rounded-lg bg-rose-100 text-rose-600 flex items-center justify-center">
+                  <AlertTriangle className="w-3.5 h-3.5" />
+                </div>
+              </div>
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-3xl font-black text-rose-600 leading-none">
+                  {loadingData ? "—" : belumCount}
+                </span>
+                <span className="text-xs font-bold text-rose-600">Mahasiswa</span>
+              </div>
+            </div>
+            <p className="text-[10px] text-rose-600 font-medium mt-3 leading-snug">
+              Batas sesi tersisa 43 menit
+            </p>
+          </div>
+
+          {/* Card 5: Kumulatif SMT */}
+          <div className="bg-white/70 backdrop-blur-md rounded-2xl p-4 border border-white/70 shadow-sm flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between text-slate-600 mb-1">
+                <p className="text-[10px] font-bold tracking-wider uppercase">KUMULATIF SMT</p>
+                <div className="w-6 h-6 rounded-lg bg-sky-100 text-sky-700 flex items-center justify-center">
+                  <TrendingUp className="w-3.5 h-3.5" />
+                </div>
+              </div>
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-3xl font-black text-slate-900 leading-none">{kumulatif}%</span>
+                <span className="text-[10px] font-bold text-emerald-600">Aman</span>
+              </div>
+            </div>
+            <p className="text-[10px] text-slate-500 mt-3 font-medium">Target min. 75% BAAK Terpenuhi</p>
+          </div>
         </div>
 
-        {/* QR + Warning + Activity */}
-        <div className="grid grid-cols-5 gap-3">
-          <div className="col-span-3 bg-white/80 backdrop-blur-sm rounded-2xl p-4 border border-white/60 shadow-sm">
-            <div className="flex gap-6 items-start">
-              <div className="flex flex-col items-center gap-2">
+        {/* Middle Section: QR Code & Radar + Warning & Activity Feed */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+          {/* Left: Dynamic QR & Radar Geofence (7 cols) */}
+          <div className="lg:col-span-7 bg-white/80 backdrop-blur-md rounded-3xl p-5 border border-white/85 shadow-md flex flex-col justify-between">
+            <div className="flex flex-col sm:flex-row gap-6 items-start">
+              {/* QR Code Container */}
+              <div className="flex flex-col items-center gap-2.5 shrink-0 self-center sm:self-start">
                 <QrCodeDisplay pin="15710" />
-                <div className="w-full mt-1">
-                  <div className="flex justify-between text-[10px] text-slate-400 mb-1">
+
+                {/* Progress bar */}
+                <div className="w-36 mt-0.5">
+                  <div className="flex justify-between text-[10px] text-slate-500 font-semibold mb-1">
                     <span>Auto-Refresh</span>
-                    <span className="text-sky-600 font-bold">{qrTimer}s</span>
+                    <span className="text-sky-700 font-bold">{qrTimer}s</span>
                   </div>
-                  <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                  <div className="h-1.5 bg-slate-200 rounded-full overflow-hidden">
                     <motion.div
-                      className="h-full bg-gradient-to-r from-sky-400 to-blue-500 rounded-full"
+                      className="h-full bg-gradient-to-r from-sky-400 to-sky-600 rounded-full"
                       style={{ width: `${(qrTimer / 15) * 100}%` }}
                       transition={{ duration: 0.5 }}
                     />
                   </div>
                 </div>
+
                 <div className="flex gap-2 mt-1">
-                  <button className="flex items-center gap-1.5 text-[10px] border border-slate-200 text-slate-500 px-3 py-1.5 rounded-lg hover:bg-slate-50 transition-all">
+                  <button
+                    onClick={() => {
+                      setQrTimer(15);
+                      triggerToast("Token QR sesi berhasil di-generate ulang!");
+                    }}
+                    className="flex items-center gap-1.5 text-[10px] font-bold border border-slate-200 text-slate-600 px-2.5 py-1.5 rounded-xl hover:bg-slate-50 transition-all shadow-sm"
+                  >
                     <RotateCcw className="w-3 h-3" />
-                    Reset token sesi
+                    Reset Token
                   </button>
-                  <button className="flex items-center gap-1.5 text-[10px] bg-sky-500 text-white px-3 py-1.5 rounded-lg hover:bg-sky-600 transition-all">
-                    <Projector className="w-3 h-3" />
-                    Proyeksikan ke layar dosen
+                  <button
+                    onClick={() => setShowProjectorModal(true)}
+                    className="flex items-center gap-1.5 text-[10px] font-bold bg-sky-500 text-white px-2.5 py-1.5 rounded-xl hover:bg-sky-600 transition-all shadow-sm"
+                  >
+                    <Maximize2 className="w-3 h-3" />
+                    Layar Penuh
                   </button>
                 </div>
               </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="text-lg font-black text-slate-800 leading-tight">
-                  QR-Code Dinamis<br />
-                  <span className="text-sky-600">Presensi Berjalan</span>
-                </h3>
-                <p className="text-xs text-slate-500 mt-2 leading-relaxed">
-                  Setiap QR berganti otomatis setiap 15 detik dan dienkripsi dengan koordinat satelit GPS ruang 207 Gedung B. Mahasiswa yang berada di luar radius 50 meter tidak dapat melakukan validasi.
-                </p>
-                <div className="grid grid-cols-2 gap-3 mt-4">
-                  <div className="bg-sky-50 rounded-xl p-3 border border-sky-100">
-                    <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-wide">Kode Pin Darurat</p>
-                    <p className="text-2xl font-black text-sky-600 tracking-widest mt-0.5">15710</p>
-                    <p className="text-[10px] text-slate-400 mt-0.5">Gunakan ketika kamera ponsel bermasalah</p>
+
+              {/* Information Side */}
+              <div className="flex-1 min-w-0 flex flex-col justify-between">
+                <div>
+                  <h3 className="text-lg font-black text-slate-900 leading-tight">
+                    QR-Code Dinamis &amp; Radar Perimeter
+                  </h3>
+                  <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                    Setiap QR berganti otomatis setiap 15 detik dan dienkripsi dengan koordinat GPS satelit ruang 207 Gedung B. Mahasiswa yang berada di luar radius 50 meter tidak dapat melakukan validasi presensi.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
+                  <div className="bg-sky-50/80 rounded-2xl p-3 border border-sky-100">
+                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wide">
+                      Kode Pin Darurat
+                    </p>
+                    <p className="text-2xl font-black text-sky-800 tracking-widest mt-0.5">15710</p>
+                    <p className="text-[10px] text-slate-500 mt-0.5">
+                      Gunakan ketika kamera ponsel mahasiswa bermasalah
+                    </p>
                   </div>
-                  <div className="bg-green-50 rounded-xl p-3 border border-green-100">
-                    <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-wide">Area Geofence Valid</p>
+
+                  <div className="bg-emerald-50/80 rounded-2xl p-3 border border-emerald-100">
+                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wide">
+                      Area Geofence Valid
+                    </p>
                     <div className="flex items-center gap-1.5 mt-1">
-                      <MapPin className="w-4 h-4 text-green-600" />
-                      <p className="text-sm font-black text-green-700">Radius 50m</p>
+                      <MapPin className="w-4 h-4 text-emerald-600" />
+                      <p className="text-sm font-black text-emerald-800">Radius 50m</p>
                     </div>
-                    <p className="text-[10px] text-slate-500 mt-0.5 font-mono">-6.890423.107,<br />61031(Ruang 207)</p>
+                    <p className="text-[10px] text-slate-600 mt-0.5 font-mono">
+                      -6.89042, 107.61031 (Ruang 207)
+                    </p>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="col-span-2 flex flex-col gap-3">
-            <div className="bg-red-50/90 backdrop-blur-sm rounded-2xl p-4 border border-red-200 shadow-sm">
-              <div className="flex items-start gap-2">
-                <AlertTriangle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-xs font-black text-red-700">Peringatan Kuota Kehadiran</p>
-                  <p className="text-[11px] text-red-600 mt-1 leading-relaxed">
-                    1 Mahasiswa (Y. Kharlistov) dalam pantauan kritis ambang batas absensi (&lt;75%). Risiko tidak dapat mengikuti Ujian Akhir Semester
-                  </p>
-                </div>
+          {/* Right: Warning Card & Live Activity Feed (5 cols) */}
+          <div className="lg:col-span-5 flex flex-col gap-4">
+            {/* Warning Card */}
+            <div className="bg-rose-50/90 backdrop-blur-md rounded-2xl p-4 border border-rose-200/80 shadow-sm flex items-start gap-3">
+              <div className="w-8 h-8 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center shrink-0 mt-0.5">
+                <AlertTriangle className="w-4 h-4" />
+              </div>
+              <div>
+                <p className="text-xs font-black text-rose-700">Peringatan Kuota Kehadiran</p>
+                <p className="text-[11px] text-rose-600 mt-0.5 leading-relaxed font-medium">
+                  1 Mahasiswa (Y. Kharlistov) dalam pantauan kritis ambang batas absensi (&lt;75%). Terancam tidak dapat mengikuti Ujian Akhir Semester.
+                </p>
               </div>
             </div>
-            <div className="flex-1 bg-white/80 backdrop-blur-sm rounded-2xl p-4 border border-white/60 shadow-sm">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                  <span className="text-xs font-bold text-slate-700">Live Activity Feed</span>
+
+            {/* Live Activity Feed */}
+            <div className="flex-1 bg-white/80 backdrop-blur-md rounded-2xl p-4 border border-white/85 shadow-sm flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-2 pb-2 border-b border-slate-100">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
+                    <h4 className="text-xs font-black text-slate-900">Live Activity Feed</h4>
+                  </div>
+                  <span className="text-[10px] font-semibold text-slate-400">Real-time update</span>
                 </div>
-                <span className="text-[10px] text-slate-400">Real-time update</span>
+
+                <div className="overflow-y-auto max-h-48 pr-1">
+                  {records.slice(0, 5).length > 0 ? (
+                    records.slice(0, 5).map((r, i) => (
+                      <ActivityItem
+                        key={i}
+                        name={r.name}
+                        nim={r.nim}
+                        time={formatTime(r.checkIn)}
+                        accuracy="QR GPS · Akurasi 12 meter"
+                      />
+                    ))
+                  ) : (
+                    ["Yurii Kharlistov", "Muhammad Farhan", "Siti Aisyah"].map((name, i) => (
+                      <ActivityItem
+                        key={i}
+                        name={name}
+                        nim="253140707111000"
+                        time={`10:52:${String(i * 10).padStart(2, "0")}`}
+                        accuracy="QR GPS · Terverifikasi 14m"
+                      />
+                    ))
+                  )}
+                </div>
               </div>
-              <div className="overflow-y-auto max-h-44 pr-1">
-                {records.slice(0, 5).length > 0 ? (
-                  records.slice(0, 5).map((r, i) => (
-                    <ActivityItem
-                      key={i}
-                      name={r.name}
-                      nim={r.nim}
-                      time={formatTime(r.checkIn)}
-                      accuracy="QR GPS · Akurasi 12 meter"
-                    />
-                  ))
-                ) : (
-                  ["Yurii Kharlistov", "Yurii Kharlistov", "Yurii Kharlistov"].map((name, i) => (
-                    <ActivityItem
-                      key={i}
-                      name={name}
-                      nim="yuriikharlistov@student.ub.ac.id"
-                      time={`10:52:${String(i * 10).padStart(2, "0")} ●`}
-                      accuracy="QR GPS · Akurasi 12 meter"
-                    />
-                  ))
-                )}
+
+              <div className="pt-2 text-right">
+                <button
+                  onClick={() => navigate("/statistik-kelas")}
+                  className="text-[10px] font-bold text-sky-700 hover:text-sky-950 hover:underline"
+                >
+                  Lihat Analisis Statistik Lengkap &rarr;
+                </button>
               </div>
             </div>
           </div>
         </div>
 
         {/* Attendance Table */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/60 shadow-sm overflow-hidden">
-          <div className="flex items-center justify-between px-4 pt-4 pb-3 border-b border-slate-100">
-            <div className="flex items-center gap-2">
+        <div className="bg-white/80 backdrop-blur-md rounded-3xl border border-white/85 shadow-md overflow-hidden flex flex-col">
+          {/* Table Header Filter & Search */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-4 border-b border-slate-100">
+            <div className="flex items-center flex-wrap gap-1.5 bg-white/40 p-1 rounded-2xl backdrop-blur-sm border border-white/50">
               {(
                 [
                   { key: "semua", label: "Semua Mahasiswa", count: totalEnrolled },
@@ -524,212 +637,298 @@ export function AttendanceDashboard() {
                 <button
                   key={tab.key}
                   onClick={() => setActiveTab(tab.key)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${activeTab === tab.key
-                    ? "bg-sky-500 text-white shadow-md"
-                    : "text-slate-500 hover:bg-sky-50 hover:text-sky-700"
-                    }`}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                    activeTab === tab.key
+                      ? "bg-sky-800 text-white shadow-sm"
+                      : "text-slate-700 hover:bg-white/30"
+                  }`}
                 >
-                  {tab.label}
-                  <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-black ${activeTab === tab.key ? "bg-white/20 text-white" : "bg-slate-100 text-slate-600"}`}>
+                  <span>{tab.label}</span>
+                  <span
+                    className={`px-1.5 py-0.2 rounded-md text-[10px] font-bold ${
+                      activeTab === tab.key ? "bg-sky-950 text-white" : "bg-white/60 text-slate-700"
+                    }`}
+                  >
                     {tab.count}
                   </span>
                 </button>
               ))}
             </div>
+
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
               <input
                 type="text"
-                placeholder="Cari NIM atau nama..."
+                placeholder="Cari NIM atau nama mahasiswa..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-52 text-xs pl-9 pr-4 py-2 rounded-xl border border-slate-200 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-sky-300 focus:border-sky-300 transition-all"
+                className="w-full sm:w-64 text-xs pl-9 pr-4 py-2 rounded-xl border border-slate-200 bg-white/90 focus:outline-none focus:ring-2 focus:ring-sky-500 shadow-sm"
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-[2fr_1.5fr_1fr_1.5fr_1.5fr_1fr_1fr] px-4 py-2 bg-slate-50/80 border-b border-slate-100">
-            {["Mahasiswa", "NIM", "Waktu Presensi", "Metode & Akurasi GPS", "Status Kehadiran", "Bukti/lampiran", "Aksi"].map((h) => (
-              <span key={h} className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide">{h}</span>
-            ))}
-          </div>
+          {/* Table Columns */}
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead>
+                <tr className="border-b border-slate-200/80 bg-slate-50/50 text-slate-500 font-bold text-[11px]">
+                  <th className="py-3 px-4">Mahasiswa</th>
+                  <th className="py-3 px-4">NIM</th>
+                  <th className="py-3 px-4">Waktu Presensi</th>
+                  <th className="py-3 px-4">Metode & Akurasi GPS</th>
+                  <th className="py-3 px-4">Status Kehadiran</th>
+                  <th className="py-3 px-4">Bukti/Lampiran</th>
+                  <th className="py-3 px-4 text-right">Aksi</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 font-medium">
+                <AnimatePresence>
+                  {loadingData ? (
+                    [...Array(5)].map((_, i) => (
+                      <tr key={i} className="animate-pulse">
+                        <td colSpan={7} className="py-3 px-4">
+                          <div className="h-4 bg-slate-100 rounded w-full" />
+                        </td>
+                      </tr>
+                    ))
+                  ) : filtered.length > 0 ? (
+                    filtered.map((row) => (
+                      <tr key={row.id} className="hover:bg-sky-50/40 transition-colors">
+                        {/* Mahasiswa */}
+                        <td className="py-3 px-4">
+                          <div className="flex items-center gap-2.5">
+                            <div className="w-8 h-8 rounded-full bg-sky-600 text-white text-xs font-black flex items-center justify-center shrink-0">
+                              {getInitials(row.name)}
+                            </div>
+                            <div>
+                              <p className="text-xs font-bold text-slate-900">{row.name}</p>
+                              <p className="text-[10px] text-sky-700 font-medium">
+                                Kehadiran {hadirPct}% (10 sesi)
+                              </p>
+                            </div>
+                          </div>
+                        </td>
 
-          <div className="divide-y divide-slate-50">
-            <AnimatePresence>
-              {loadingData ? (
-                [...Array(5)].map((_, i) => (
-                  <div key={i} className="flex gap-4 px-4 py-3">
-                    <div className="w-8 h-8 rounded-full bg-slate-100 animate-pulse" />
-                    <div className="flex-1 space-y-2">
-                      <div className="h-3 bg-slate-100 animate-pulse rounded w-1/3" />
-                      <div className="h-2 bg-slate-100 animate-pulse rounded w-1/4" />
-                    </div>
-                  </div>
-                ))
-              ) : filtered.length > 0 ? (
-                filtered.map((row, i) => (
-                  <motion.div
-                    key={row.id}
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.2, delay: i * 0.03 }}
-                    className="grid grid-cols-[2fr_1.5fr_1fr_1.5fr_1.5fr_1fr_1fr] px-4 py-3 items-center hover:bg-sky-50/40 transition-colors"
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-sky-400 to-blue-600 flex items-center justify-center text-white text-xs font-black shrink-0">
-                        {getInitials(row.name)}
-                      </div>
-                      <div>
-                        <p className="text-xs font-bold text-slate-800">{row.name}</p>
-                        <p className="text-[10px] text-sky-600">Kehadiran {hadirPct}% (30 sesi)</p>
-                      </div>
-                    </div>
-                    <span className="text-xs font-mono text-slate-500">{row.nim}</span>
-                    <div>
-                      <p className="text-xs font-bold text-slate-700">
-                        {formatTime(row.checkIn)} WIB
-                      </p>
-                    </div>
-                    <div className="flex items-start gap-1.5">
-                      <MapPin className="w-3.5 h-3.5 text-sky-500 shrink-0 mt-0.5" />
-                      <div>
-                        {row.status === "IZIN" ? (
-                          <>
-                            <p className="text-[11px] font-semibold text-slate-600">Portal Mandiri Mahasiswa</p>
-                            <p className="text-[10px] text-slate-400">Klinik kampus medika</p>
-                          </>
-                        ) : (
-                          <>
-                            <p className="text-[11px] font-semibold text-slate-600">QR+ Geolocation</p>
-                            <p className="text-[10px] text-slate-400">Radius {row.distance ?? 14}m dari R.207</p>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                    <div>
-                      {row.status === "PRESENT" || row.status === "LATE" ? (
-                        <span className="inline-flex items-center gap-1 text-[11px] bg-green-100 text-green-700 font-semibold px-3 py-1 rounded-full">
-                          <CheckCircle2 className="w-3 h-3" />
-                          Hadir tepat waktu
-                        </span>
-                      ) : row.status === "IZIN" ? (
-                        <span className="inline-flex items-center gap-1 text-[11px] bg-orange-100 text-orange-700 font-semibold px-3 py-1 rounded-full">
-                          <Clock3 className="w-3 h-3" />
-                          Sakit (Menunggu Validasi)
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 text-[11px] bg-red-100 text-red-700 font-semibold px-3 py-1 rounded-full">
-                          <X className="w-3 h-3" />
-                          Belum Hadir
-                        </span>
-                      )}
-                    </div>
-                    <div>
-                      {row.status === "IZIN" ? (
-                        <span className="flex items-center gap-1 text-[10px] text-sky-600 font-semibold">
-                          <FileText className="w-3.5 h-3.5" />
-                          surat_sakit.pdf
-                        </span>
-                      ) : (
-                        <span className="text-[10px] text-slate-300">—</span>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => setSelectedRecord(row)}
-                        className="text-[10px] font-semibold text-slate-500 hover:text-sky-600 px-3 py-1.5 rounded-lg border border-slate-200 hover:border-sky-300 hover:bg-sky-50 transition-all"
-                      >
-                        Ubah Status
-                      </button>
-                      <button className="text-slate-400 hover:text-slate-600 transition-colors">
-                        <MoreVertical className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </motion.div>
-                ))
-              ) : (
-                <div className="py-16 text-center text-slate-400">
-                  <Users className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                  <p className="text-sm font-medium">
-                    {searchTerm ? `Tidak ada mahasiswa "${searchTerm}"` : "Belum ada data presensi"}
-                  </p>
-                </div>
-              )}
-            </AnimatePresence>
+                        {/* NIM */}
+                        <td className="py-3 px-4 text-slate-600 font-mono text-[11px]">
+                          {row.nim}
+                        </td>
+
+                        {/* Waktu Presensi */}
+                        <td className="py-3 px-4 text-slate-800 font-bold text-xs">
+                          {formatTime(row.checkIn)} WIB
+                        </td>
+
+                        {/* Metode & Akurasi GPS */}
+                        <td className="py-3 px-4">
+                          <div className="flex items-start gap-1.5">
+                            <MapPin className="w-3.5 h-3.5 text-sky-600 shrink-0 mt-0.5" />
+                            <div>
+                              {row.status === "IZIN" ? (
+                                <>
+                                  <p className="text-[11px] font-semibold text-slate-700">Portal Mandiri Mahasiswa</p>
+                                  <p className="text-[10px] text-slate-400">Klinik Kampus Medika</p>
+                                </>
+                              ) : (
+                                <>
+                                  <p className="text-[11px] font-semibold text-slate-700">QR+ Geolocation</p>
+                                  <p className="text-[10px] text-slate-500 font-mono">Radius {row.distance ?? 14}m dari Lab 207</p>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+
+                        {/* Status Kehadiran */}
+                        <td className="py-3 px-4">
+                          {row.status === "PRESENT" || row.status === "LATE" ? (
+                            <span className="inline-flex items-center gap-1 text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2.5 py-1 rounded-full">
+                              <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                              Hadir tepat waktu
+                            </span>
+                          ) : row.status === "IZIN" ? (
+                            <span className="inline-flex items-center gap-1 text-[10px] bg-amber-100 text-amber-800 font-bold px-2.5 py-1 rounded-full">
+                              <Clock3 className="w-3 h-3 text-amber-600" />
+                              Sakit (Menunggu Validasi)
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 text-[10px] bg-rose-100 text-rose-700 font-bold px-2.5 py-1 rounded-full">
+                              <X className="w-3 h-3 text-rose-600" />
+                              Belum Hadir
+                            </span>
+                          )}
+                        </td>
+
+                        {/* Bukti/Lampiran */}
+                        <td className="py-3 px-4">
+                          {row.status === "IZIN" ? (
+                            <button
+                              onClick={() => triggerToast("Membuka surat_sakit.pdf...")}
+                              className="flex items-center gap-1 text-[11px] text-sky-800 hover:text-sky-950 font-bold hover:underline"
+                            >
+                              <FileText className="w-3.5 h-3.5 text-sky-600" />
+                              surat_sakit.pdf
+                            </button>
+                          ) : (
+                            <span className="text-[11px] text-slate-300 font-mono">—</span>
+                          )}
+                        </td>
+
+                        {/* Aksi */}
+                        <td className="py-3 px-4 text-right">
+                          <button
+                            onClick={() => setSelectedRecord(row)}
+                            className="px-3 py-1 text-[11px] font-bold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 rounded-lg border border-slate-200 shadow-sm transition-all"
+                          >
+                            Ubah Status
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={7} className="py-12 text-center text-slate-400">
+                        <Users className="w-10 h-10 mx-auto mb-2 opacity-30" />
+                        <p className="text-xs font-bold text-slate-500">
+                          {searchTerm ? `Tidak ada mahasiswa "${searchTerm}"` : "Belum ada rekaman presensi"}
+                        </p>
+                      </td>
+                    </tr>
+                  )}
+                </AnimatePresence>
+              </tbody>
+            </table>
           </div>
         </div>
       </main>
 
-      {/* Detail Modal */}
+      {/* Detail & Ubah Status Modal */}
       <AnimatePresence>
         {selectedRecord && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
             onClick={() => setSelectedRecord(null)}
           >
             <motion.div
-              initial={{ scale: 0.95, y: 20 }}
+              initial={{ scale: 0.95, y: 15 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.95 }}
-              className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl"
+              className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 flex flex-col gap-4 text-slate-800"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-bold text-slate-800">Detail Presensi</h3>
-                <button onClick={() => setSelectedRecord(null)} className="text-slate-400 hover:text-slate-600 transition-colors">
-                  <X className="w-5 h-5" />
+              <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                <h3 className="font-bold text-slate-900 text-sm">Detail &amp; Verifikasi Presensi</h3>
+                <button onClick={() => setSelectedRecord(null)} className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100">
+                  <X className="w-4 h-4" />
                 </button>
               </div>
-              <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-sky-400 to-blue-600 flex items-center justify-center text-white font-black">
-                    {getInitials(selectedRecord.name)}
-                  </div>
-                  <div>
-                    <p className="font-bold text-slate-800">{selectedRecord.name}</p>
-                    <p className="text-sm text-slate-500">{selectedRecord.nim}</p>
-                    <p className="text-xs text-slate-400">{selectedRecord.jurusan}</p>
-                  </div>
+
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-2xl bg-sky-600 text-white font-black text-sm flex items-center justify-center shadow-sm">
+                  {getInitials(selectedRecord.name)}
                 </div>
-                <div className="grid grid-cols-2 gap-3 bg-slate-50 rounded-xl p-3">
-                  <div>
-                    <p className="text-xs text-slate-400">Waktu Check-in</p>
-                    <p className="text-sm font-bold text-slate-700">{formatTime(selectedRecord.checkIn)} WIB</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-slate-400">Status</p>
-                    <p className="text-sm font-bold text-slate-700">{selectedRecord.status}</p>
-                  </div>
-                  {selectedRecord.distance != null && (
-                    <div>
-                      <p className="text-xs text-slate-400">Jarak GPS</p>
-                      <p className="text-sm font-bold text-slate-700">{selectedRecord.distance}m dari kampus</p>
-                    </div>
-                  )}
-                  <div>
-                    <p className="text-xs text-slate-400">Lokasi Valid</p>
-                    <p className={`text-sm font-bold ${selectedRecord.isLocationValid ? "text-green-600" : "text-red-500"}`}>
-                      {selectedRecord.isLocationValid ? "Di dalam kampus" : "Di luar kampus"}
-                    </p>
-                  </div>
+                <div>
+                  <p className="font-bold text-slate-900 text-sm">{selectedRecord.name}</p>
+                  <p className="text-xs text-slate-500 font-mono">{selectedRecord.nim}</p>
+                  <p className="text-[11px] text-sky-700 font-semibold">{selectedRecord.jurusan || "Teknik Informatika"}</p>
                 </div>
               </div>
-              <div className="flex justify-end gap-2 mt-4">
+
+              <div className="grid grid-cols-2 gap-3 bg-sky-50/70 rounded-2xl p-3.5 border border-sky-100">
+                <div>
+                  <p className="text-[10px] text-slate-500 font-bold uppercase">Waktu Check-in</p>
+                  <p className="text-xs font-black text-slate-900 mt-0.5">{formatTime(selectedRecord.checkIn)} WIB</p>
+                </div>
+                <div>
+                  <p className="text-[10px] text-slate-500 font-bold uppercase">Status Saat Ini</p>
+                  <p className="text-xs font-black text-slate-900 mt-0.5">{selectedRecord.status}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] text-slate-500 font-bold uppercase">Jarak Radar GPS</p>
+                  <p className="text-xs font-black text-slate-900 mt-0.5">{selectedRecord.distance ?? 14}m dari Ruang 207</p>
+                </div>
+                <div>
+                  <p className="text-[10px] text-slate-500 font-bold uppercase">Verifikasi Perimeter</p>
+                  <p className="text-xs font-black text-emerald-700 mt-0.5">Valid (Dalam Radius)</p>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
                 <button
                   onClick={() => setSelectedRecord(null)}
-                  className="px-4 py-2 text-sm border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50 transition-all"
+                  className="px-4 py-2 text-xs border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50 font-semibold"
                 >
                   Tutup
                 </button>
-                <button className="px-4 py-2 text-sm bg-sky-500 text-white rounded-xl hover:bg-sky-600 transition-all font-semibold flex items-center gap-2">
-                  <ChevronRight className="w-4 h-4" />
-                  Ubah Status
+                <button
+                  onClick={() => {
+                    triggerToast(`Status presensi ${selectedRecord.name} berhasil diperbarui!`);
+                    setSelectedRecord(null);
+                  }}
+                  className="px-4 py-2 text-xs bg-sky-500 text-white rounded-xl hover:bg-sky-600 transition-all font-bold shadow-md flex items-center gap-1.5"
+                >
+                  <CheckCircle2 className="w-4 h-4" />
+                  Konfirmasi Status
                 </button>
               </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Projector Fullscreen Modal */}
+      <AnimatePresence>
+        {showProjectorModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-slate-950/90 backdrop-blur-md"
+            onClick={() => setShowProjectorModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.9 }}
+              className="bg-white rounded-3xl max-w-lg w-full p-8 shadow-2xl flex flex-col items-center gap-4 text-center"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between w-full">
+                <div className="text-left">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-sky-600 bg-sky-50 px-2 py-0.5 rounded-full">
+                    MODE LAYAR PROYEKTOR DOSEN
+                  </span>
+                  <h3 className="text-lg font-black text-slate-900 mt-1">Ruang 207: Pemrograman Mobile A</h3>
+                </div>
+                <button onClick={() => setShowProjectorModal(false)} className="p-2 text-slate-400 hover:text-slate-600 rounded-xl hover:bg-slate-100">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="my-2 p-6 bg-slate-50 rounded-3xl border border-slate-200/80 shadow-inner">
+                <QrCodeDisplay pin="15710" />
+              </div>
+
+              <div className="w-full max-w-xs">
+                <div className="flex justify-between text-xs font-bold text-slate-600 mb-1">
+                  <span>Auto-Refresh Token</span>
+                  <span className="text-sky-600">{qrTimer} detik tersisa</span>
+                </div>
+                <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
+                  <motion.div
+                    className="h-full bg-sky-500 rounded-full"
+                    style={{ width: `${(qrTimer / 15) * 100}%` }}
+                    transition={{ duration: 0.5 }}
+                  />
+                </div>
+              </div>
+
+              <p className="text-xs text-slate-500 leading-relaxed max-w-sm mt-1">
+                Scan menggunakan aplikasi SATPAMO Mahasiswa dalam radius perimeter 50 meter Lab 207 Gedung B.
+              </p>
             </motion.div>
           </motion.div>
         )}
