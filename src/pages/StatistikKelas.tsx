@@ -213,10 +213,15 @@ export function StatistikKelas() {
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 overflow-y-auto px-7 py-5 flex flex-col gap-5">
+      <main className="flex-1 overflow-y-auto no-scrollbar px-7 py-5 flex flex-col gap-5 relative">
+        {/* Ambient light spots for glass refraction */}
+        <div className="absolute -top-24 -left-24 w-96 h-96 bg-cyan-300/35 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-1/3 -right-24 w-96 h-96 bg-sky-200/40 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-24 left-1/3 w-96 h-96 bg-blue-300/30 rounded-full blur-3xl pointer-events-none" />
+
         {/* Top Header Pill & User Avatar */}
-        <div className="flex items-center justify-between">
-          <div className="inline-flex items-center gap-2.5 bg-white/70 backdrop-blur-md rounded-2xl px-4 py-2 border border-white/70 shadow-sm">
+        <div className="flex items-center justify-between relative z-10">
+          <div className="inline-flex items-center gap-2.5 glass-panel rounded-2xl px-4 py-2 shadow-sm">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0 animate-pulse" />
             <span className="text-xs font-semibold text-slate-800">
               Ruang 207: Pemrograman Mobile (Kelas T3A)
@@ -230,7 +235,7 @@ export function StatistikKelas() {
         </div>
 
         {/* Top Info Bar & Filter Controls */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 relative z-10">
           {/* Left Info Badges */}
           <div className="flex items-center flex-wrap gap-2.5">
             <span className="bg-sky-950 text-sky-200 text-[11px] font-bold px-3 py-1 rounded-full shadow-sm">
@@ -248,14 +253,14 @@ export function StatistikKelas() {
             <div className="relative">
               <button
                 onClick={() => setShowFilterDropdown(!showFilterDropdown)}
-                className="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-white/70 hover:bg-white/90 text-slate-800 border border-white/80 shadow-sm transition-all flex items-center gap-1.5"
+                className="px-3.5 py-1.5 rounded-xl text-xs font-bold glass-pill hover:bg-white/60 text-slate-800 hover:text-slate-950 shadow-xs transition-all flex items-center gap-1.5"
               >
                 <span>{selectedFilter}</span>
                 <ChevronDown className="w-3.5 h-3.5 text-slate-600" />
               </button>
 
               {showFilterDropdown && (
-                <div className="absolute right-0 mt-1.5 w-60 bg-white rounded-2xl shadow-xl border border-slate-100 py-1.5 z-40 text-xs">
+                <div className="absolute right-0 mt-1.5 w-60 glass-panel backdrop-blur-2xl rounded-2xl shadow-xl border border-white/60 py-1.5 z-40 text-xs">
                   {[
                     "Sesi 1 s/d 10 (Kumulatif)",
                     "Sesi 1 s/d 5 (Pra-UTS)",
@@ -268,8 +273,8 @@ export function StatistikKelas() {
                         setSelectedFilter(option);
                         setShowFilterDropdown(false);
                       }}
-                      className={`w-full text-left px-3.5 py-2 hover:bg-sky-50 font-medium transition-colors ${
-                        selectedFilter === option ? "text-sky-600 font-bold bg-sky-50/50" : "text-slate-700"
+                      className={`w-full text-left px-3.5 py-2 hover:bg-white/40 font-medium transition-colors ${
+                        selectedFilter === option ? "text-sky-900 font-bold bg-white/30" : "text-slate-700"
                       }`}
                     >
                       {option}
@@ -283,7 +288,7 @@ export function StatistikKelas() {
             <div className="relative">
               <button
                 onClick={() => setShowDownloadDropdown(!showDownloadDropdown)}
-                className="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-white/70 hover:bg-white/90 text-slate-800 border border-white/80 shadow-sm transition-all flex items-center gap-1.5"
+                className="px-3.5 py-1.5 rounded-xl text-xs font-bold glass-pill hover:bg-white/60 text-slate-800 hover:text-slate-950 shadow-xs transition-all flex items-center gap-1.5"
               >
                 <Download className="w-3.5 h-3.5 text-slate-700" />
                 <span>Unduh Laporan</span>
@@ -291,15 +296,15 @@ export function StatistikKelas() {
               </button>
 
               {showDownloadDropdown && (
-                <div className="absolute right-0 mt-1.5 w-52 bg-white rounded-2xl shadow-xl border border-slate-100 py-1.5 z-40 text-xs">
+                <div className="absolute right-0 mt-1.5 w-52 glass-panel backdrop-blur-2xl rounded-2xl shadow-xl border border-white/60 py-1.5 z-40 text-xs">
                   <button
                     onClick={() => {
                       setShowDownloadDropdown(false);
                       triggerToast("Mengunduh Laporan_Statistik_Kelas_PDF.pdf...");
                     }}
-                    className="w-full text-left px-3.5 py-2 hover:bg-sky-50 font-medium text-slate-700 flex items-center gap-2"
+                    className="w-full text-left px-3.5 py-2 hover:bg-white/40 font-medium text-slate-800 flex items-center gap-2"
                   >
-                    <FileText className="w-3.5 h-3.5 text-red-500" />
+                    <FileText className="w-3.5 h-3.5 text-rose-500" />
                     Format PDF (BAAK Ready)
                   </button>
                   <button
@@ -307,7 +312,7 @@ export function StatistikKelas() {
                       setShowDownloadDropdown(false);
                       triggerToast("Mengunduh Rekapitulasi_Presensi_Excel.xlsx...");
                     }}
-                    className="w-full text-left px-3.5 py-2 hover:bg-sky-50 font-medium text-slate-700 flex items-center gap-2"
+                    className="w-full text-left px-3.5 py-2 hover:bg-white/40 font-medium text-slate-800 flex items-center gap-2"
                   >
                     <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
                     Format Excel (.xlsx)
@@ -328,7 +333,7 @@ export function StatistikKelas() {
         </div>
 
         {/* Page Title & Subtitle */}
-        <div>
+        <div className="relative z-10">
           <h2 className="text-2xl font-black text-slate-900 tracking-tight">
             Statistik & Evaluasi Presensi Kelas
           </h2>
@@ -338,16 +343,16 @@ export function StatistikKelas() {
         </div>
 
         {/* 4 Metric Summary Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 relative z-10">
           {/* Card 1: Rata-Rata Kehadiran */}
-          <div className="bg-white/70 backdrop-blur-md rounded-2xl p-4 border border-white/70 shadow-sm flex flex-col justify-between">
+          <div className="glass-panel glass-card-interactive rounded-2xl p-4 shadow-sm flex flex-col justify-between">
             <div>
               <p className="text-[10px] font-bold tracking-wider text-slate-600 uppercase">
                 RATA-RATA KEHADIRAN
               </p>
               <div className="flex items-baseline gap-2 mt-1">
                 <span className="text-3xl font-black text-slate-900 leading-none">92.5%</span>
-                <span className="text-[10px] font-bold text-emerald-600">+2.4%</span>
+                <span className="text-[10px] font-bold text-emerald-700">+2.4%</span>
               </div>
             </div>
             <div className="flex items-center gap-1.5 mt-3 text-[10px] text-slate-600 font-semibold">
@@ -357,14 +362,14 @@ export function StatistikKelas() {
           </div>
 
           {/* Card 2: Kehadiran Tepat Waktu */}
-          <div className="bg-white/70 backdrop-blur-md rounded-2xl p-4 border border-white/70 shadow-sm flex flex-col justify-between">
+          <div className="glass-panel glass-card-interactive rounded-2xl p-4 shadow-sm flex flex-col justify-between">
             <div>
               <p className="text-[10px] font-bold tracking-wider text-slate-600 uppercase">
                 KEHADIRAN TEPAT WAKTU
               </p>
               <div className="flex items-baseline gap-2 mt-1">
                 <span className="text-3xl font-black text-slate-900 leading-none">88.5%</span>
-                <span className="text-xs font-semibold text-slate-500">dari 42 Mahasiswa</span>
+                <span className="text-xs font-semibold text-slate-600">dari 42 Mahasiswa</span>
               </div>
             </div>
             <p className="text-[10px] text-slate-600 mt-3 font-medium">
@@ -373,30 +378,30 @@ export function StatistikKelas() {
           </div>
 
           {/* Card 3: Total Pengajuan Izin */}
-          <div className="bg-white/70 backdrop-blur-md rounded-2xl p-4 border border-white/70 shadow-sm flex flex-col justify-between">
+          <div className="glass-panel glass-card-interactive rounded-2xl p-4 shadow-sm flex flex-col justify-between">
             <div>
               <p className="text-[10px] font-bold tracking-wider text-slate-600 uppercase">
                 TOTAL PENGAJUAN IZIN
               </p>
               <div className="flex items-baseline gap-2 mt-1">
                 <span className="text-3xl font-black text-slate-900 leading-none">14</span>
-                <span className="text-xs font-semibold text-slate-500">Berkas</span>
+                <span className="text-xs font-semibold text-slate-600">Berkas</span>
               </div>
             </div>
             <div className="flex items-center gap-1.5 mt-3 flex-wrap">
-              <span className="bg-sky-100/90 text-sky-800 text-[10px] font-bold px-2 py-0.5 rounded-md">
+              <span className="bg-sky-500/20 text-sky-900 border border-sky-400/30 text-[10px] font-bold px-2 py-0.5 rounded-md">
                 12 Disetujui
               </span>
-              <span className="bg-rose-100/90 text-rose-700 text-[10px] font-bold px-2 py-0.5 rounded-md">
+              <span className="bg-rose-500/15 text-rose-800 border border-rose-300/30 text-[10px] font-bold px-2 py-0.5 rounded-md">
                 2 Perlu Direview
               </span>
             </div>
           </div>
 
           {/* Card 4: Mahasiswa At-Risk */}
-          <div className="bg-white/70 backdrop-blur-md rounded-2xl p-4 border border-white/70 shadow-sm flex flex-col justify-between">
+          <div className="glass-panel glass-card-interactive rounded-2xl p-4 shadow-sm flex flex-col justify-between">
             <div>
-              <p className="text-[10px] font-bold tracking-wider text-rose-600 uppercase">
+              <p className="text-[10px] font-bold tracking-wider text-rose-700 uppercase">
                 MAHASISWA AT-RISK
               </p>
               <div className="flex items-baseline gap-2 mt-1">
@@ -406,15 +411,15 @@ export function StatistikKelas() {
             </div>
             <div className="flex items-center justify-between text-[10px] mt-3">
               <span className="text-slate-600 font-medium">Ambang kuota BAAK &lt;75%</span>
-              <span className="text-rose-600 font-bold">Tindakan Cepat</span>
+              <span className="text-rose-700 font-bold">Tindakan Cepat</span>
             </div>
           </div>
         </div>
 
         {/* Charts & Distribution Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch relative z-10">
           {/* Left: Tren Kehadiran Kumulatif (8 cols) */}
-          <div className="lg:col-span-8 bg-white/80 backdrop-blur-md rounded-3xl p-5 border border-white/85 shadow-md flex flex-col justify-between">
+          <div className="lg:col-span-8 glass-panel rounded-3xl p-5 shadow-lg flex flex-col justify-between">
             <div>
               {/* Header */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
@@ -425,7 +430,7 @@ export function StatistikKelas() {
                       Tren Kehadiran Kumulatif (Sesi 1 s/d 10)
                     </h3>
                   </div>
-                  <p className="text-[11px] text-slate-500 mt-0.5">
+                  <p className="text-[11px] text-slate-600 mt-0.5">
                     Batas minimum syarat mengikuti Ujian Akhir Semester (UAS) adalah 75% Kehadiran
                   </p>
                 </div>
@@ -476,13 +481,13 @@ export function StatistikKelas() {
             </div>
 
             {/* Footer */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-3 mt-2 border-t border-slate-200/60 text-[10px]">
-              <span className="text-slate-500 italic">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-3 mt-2 border-t border-slate-300/40 text-[10px]">
+              <span className="text-slate-600 italic">
                 *S8 adalah Evaluasi Tengah Semester (UTS Praktikum Mandiri)
               </span>
               <button
                 onClick={() => triggerToast("Menampilkan detail rincian log kehadiran...")}
-                className="text-sky-700 hover:text-sky-950 font-bold hover:underline self-start sm:self-auto"
+                className="text-sky-800 hover:text-sky-950 font-bold hover:underline self-start sm:self-auto"
               >
                 Lihat rincian log sesi terpilih &rarr;
               </button>
@@ -490,15 +495,15 @@ export function StatistikKelas() {
           </div>
 
           {/* Right: Distribusi Kehadiran (4 cols) */}
-          <div className="lg:col-span-4 bg-white/80 backdrop-blur-md rounded-3xl p-5 border border-white/85 shadow-md flex flex-col justify-between gap-4">
+          <div className="lg:col-span-4 glass-panel rounded-3xl p-5 shadow-lg flex flex-col justify-between gap-4">
             <div>
               <div className="flex items-center justify-between mb-1">
                 <h3 className="text-sm font-bold text-slate-900">Distribusi Kehadiran</h3>
-                <span className="bg-sky-100 text-sky-800 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                <span className="bg-sky-500/20 text-sky-900 border border-sky-400/30 text-[10px] font-bold px-2 py-0.5 rounded-full">
                   42 Mahasiswa
                 </span>
               </div>
-              <p className="text-[11px] text-slate-500 mb-4">
+              <p className="text-[11px] text-slate-600 mb-4">
                 Akumulasi status validasi presensi otomatis SATPAMO
               </p>
 
@@ -511,9 +516,9 @@ export function StatistikKelas() {
                       <span className="w-2 h-2 rounded-full bg-sky-500" />
                       Hadir Tepat Waktu
                     </span>
-                    <span className="text-slate-900 font-bold">78.0% <span className="text-[10px] text-slate-400 font-normal">(33)</span></span>
+                    <span className="text-slate-900 font-bold">78.0% <span className="text-[10px] text-slate-500 font-normal">(33)</span></span>
                   </div>
-                  <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                  <div className="w-full bg-white/40 rounded-full h-1.5 overflow-hidden">
                     <div className="bg-sky-500 h-1.5 rounded-full" style={{ width: "78%" }} />
                   </div>
                 </div>
@@ -525,9 +530,9 @@ export function StatistikKelas() {
                       <span className="w-2 h-2 rounded-full bg-amber-400" />
                       Terlambat (&lt;15 min)
                     </span>
-                    <span className="text-slate-900 font-bold">14.5% <span className="text-[10px] text-slate-400 font-normal">(6)</span></span>
+                    <span className="text-slate-900 font-bold">14.5% <span className="text-[10px] text-slate-500 font-normal">(6)</span></span>
                   </div>
-                  <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                  <div className="w-full bg-white/40 rounded-full h-1.5 overflow-hidden">
                     <div className="bg-amber-400 h-1.5 rounded-full" style={{ width: "14.5%" }} />
                   </div>
                 </div>
@@ -539,9 +544,9 @@ export function StatistikKelas() {
                       <span className="w-2 h-2 rounded-full bg-sky-950" />
                       Izin/Sakit Terverifikasi
                     </span>
-                    <span className="text-slate-900 font-bold">4.8% <span className="text-[10px] text-slate-400 font-normal">(2)</span></span>
+                    <span className="text-slate-900 font-bold">4.8% <span className="text-[10px] text-slate-500 font-normal">(2)</span></span>
                   </div>
-                  <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                  <div className="w-full bg-white/40 rounded-full h-1.5 overflow-hidden">
                     <div className="bg-sky-950 h-1.5 rounded-full" style={{ width: "4.8%" }} />
                   </div>
                 </div>
@@ -553,9 +558,9 @@ export function StatistikKelas() {
                       <span className="w-2 h-2 rounded-full bg-rose-500" />
                       Tanpa Keterangan
                     </span>
-                    <span className="text-slate-900 font-bold">2.7% <span className="text-[10px] text-slate-400 font-normal">(1)</span></span>
+                    <span className="text-slate-900 font-bold">2.7% <span className="text-[10px] text-slate-500 font-normal">(1)</span></span>
                   </div>
-                  <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                  <div className="w-full bg-white/40 rounded-full h-1.5 overflow-hidden">
                     <div className="bg-rose-500 h-1.5 rounded-full" style={{ width: "2.7%" }} />
                   </div>
                 </div>
@@ -563,15 +568,15 @@ export function StatistikKelas() {
             </div>
 
             {/* Bottom Card: 99.1% Kepatuhan Geolokasi */}
-            <div className="bg-sky-50/80 rounded-2xl p-3 border border-sky-100/80 flex items-center gap-3">
-              <div className="w-8 h-8 rounded-xl bg-sky-200/60 text-sky-700 flex items-center justify-center shrink-0">
+            <div className="glass-inner rounded-2xl p-3 flex items-center gap-3">
+              <div className="w-8 h-8 rounded-xl bg-sky-500/20 text-sky-800 flex items-center justify-center shrink-0">
                 <ShieldCheck className="w-4 h-4" />
               </div>
               <div>
                 <p className="text-xs font-bold text-slate-900 leading-tight">
                   99.1% Kepatuhan Geolokasi
                 </p>
-                <p className="text-[10px] text-slate-500 mt-0.5 leading-tight">
+                <p className="text-[10px] text-slate-600 mt-0.5 leading-tight">
                   Terverifikasi GPS radius 25 meter & beacon ruang 207
                 </p>
               </div>
@@ -580,10 +585,10 @@ export function StatistikKelas() {
         </div>
 
         {/* Deteksi Dini Mahasiswa Beresiko (Early Warning System BAAK) */}
-        <div className="bg-white/80 backdrop-blur-md rounded-3xl p-5 border border-white/85 shadow-md flex flex-col gap-4">
+        <div className="glass-panel rounded-3xl p-5 shadow-lg flex flex-col gap-4 relative z-10">
           {/* Header */}
           <div className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center shrink-0">
+            <div className="w-10 h-10 rounded-2xl bg-rose-500/15 text-rose-700 border border-rose-300/30 flex items-center justify-center shrink-0">
               <AlertTriangle className="w-5 h-5" />
             </div>
             <div>
@@ -597,10 +602,10 @@ export function StatistikKelas() {
           </div>
 
           {/* Table */}
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto no-scrollbar rounded-2xl border border-white/40">
             <table className="w-full text-left text-xs">
-              <thead>
-                <tr className="border-b border-slate-200/80 text-slate-500 font-bold text-[11px]">
+              <thead className="glass-table-head text-slate-700 font-bold text-[11px]">
+                <tr className="border-b border-white/40">
                   <th className="py-2.5 px-3">Mahasiswa</th>
                   <th className="py-2.5 px-3">NIM</th>
                   <th className="py-2.5 px-3">Kehadiran Sesi</th>
@@ -609,9 +614,9 @@ export function StatistikKelas() {
                   <th className="py-2.5 px-3 text-right">Aksi Rekomendasi</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 font-medium">
+              <tbody className="divide-y divide-white/20 font-medium">
                 {mockAtRiskStudents.map((st) => (
-                  <tr key={st.id} className="hover:bg-slate-50/50 transition-colors">
+                  <tr key={st.id} className="hover:bg-white/30 transition-colors">
                     {/* Mahasiswa */}
                     <td className="py-3 px-3 font-bold text-slate-900">
                       {st.name}
@@ -628,10 +633,10 @@ export function StatistikKelas() {
                       <span
                         className={
                           st.riskStatus === "kritis"
-                            ? "text-rose-600 font-bold"
+                            ? "text-rose-700 font-bold"
                             : st.riskStatus === "waspada"
-                            ? "text-amber-600 font-bold"
-                            : "text-slate-500 font-semibold"
+                            ? "text-amber-700 font-bold"
+                            : "text-slate-600 font-semibold"
                         }
                       >
                         ({st.alphaInfo})
@@ -645,7 +650,7 @@ export function StatistikKelas() {
                           st.percentage < 75
                             ? "text-rose-600"
                             : st.percentage === 75
-                            ? "text-amber-500"
+                            ? "text-amber-600"
                             : "text-slate-900"
                         }`}
                       >
@@ -658,10 +663,10 @@ export function StatistikKelas() {
                       <span
                         className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold ${
                           st.riskStatus === "kritis"
-                            ? "bg-rose-100 text-rose-700"
+                            ? "bg-rose-500/15 text-rose-800 border border-rose-300/30"
                             : st.riskStatus === "waspada"
-                            ? "bg-amber-100 text-amber-800"
-                            : "bg-sky-100 text-sky-800"
+                            ? "bg-amber-500/15 text-amber-800 border border-amber-300/30"
+                            : "bg-sky-500/15 text-sky-900 border border-sky-300/30"
                         }`}
                       >
                         <span
@@ -683,7 +688,7 @@ export function StatistikKelas() {
                         <div className="flex items-center justify-end gap-2">
                           <button
                             onClick={() => setShowDispensasiModal(st)}
-                            className="px-2.5 py-1 text-[11px] font-bold bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-lg shadow-sm transition-all"
+                            className="px-2.5 py-1 text-[11px] font-bold glass-pill hover:bg-white/60 text-slate-800 shadow-xs transition-all"
                           >
                             Beri Dispensasi
                           </button>
@@ -700,7 +705,7 @@ export function StatistikKelas() {
                           onClick={() => {
                             triggerToast(`Email peringatan terkirim ke ${st.name} (${st.nim})`);
                           }}
-                          className="px-2.5 py-1 text-[11px] font-bold bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-lg shadow-sm transition-all flex items-center gap-1 ml-auto"
+                          className="px-2.5 py-1 text-[11px] font-bold glass-pill hover:bg-white/60 text-slate-800 shadow-xs transition-all flex items-center gap-1 ml-auto"
                         >
                           <Mail className="w-3 h-3 text-slate-600" />
                           Kirim Peringatan Email
@@ -708,7 +713,7 @@ export function StatistikKelas() {
                       ) : (
                         <button
                           onClick={() => triggerToast("Membuka berkas surat izin resmi...")}
-                          className="text-[11px] font-bold text-sky-800 hover:text-sky-950 hover:underline"
+                          className="text-[11px] font-bold text-sky-900 hover:text-sky-950 hover:underline"
                         >
                           Lihat surat izin &rarr;
                         </button>
@@ -722,15 +727,15 @@ export function StatistikKelas() {
         </div>
 
         {/* Bottom Section: AI Insights & 100% Attendance Club */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch relative z-10">
           {/* Left: BAAK ACADEMIC INTELIGENCE INSIGHTS (8 cols) */}
-          <div className="lg:col-span-8 bg-sky-100/85 backdrop-blur-md rounded-3xl p-5 border border-sky-200/80 shadow-md flex flex-col justify-between gap-4">
+          <div className="lg:col-span-8 glass-panel border-amber-300/40 bg-amber-500/10 rounded-3xl p-5 shadow-lg flex flex-col justify-between gap-4">
             <div>
               <div className="flex items-center gap-2 mb-2">
-                <div className="w-7 h-7 rounded-xl bg-amber-400 text-slate-900 flex items-center justify-center font-bold">
+                <div className="w-7 h-7 rounded-xl bg-amber-400 text-slate-900 flex items-center justify-center font-bold shadow-xs">
                   <Star className="w-4 h-4 fill-current" />
                 </div>
-                <span className="text-xs font-black tracking-wider uppercase text-slate-900">
+                <span className="text-xs font-black tracking-wider uppercase text-amber-950">
                   BAAK ACADEMIC INTELIGENCE INSIGHTS
                 </span>
               </div>
@@ -744,9 +749,9 @@ export function StatistikKelas() {
               </p>
             </div>
 
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-sky-200/60">
-              <div className="flex items-center gap-3 text-[11px] text-slate-600 font-semibold">
-                <span className="flex items-center gap-1 text-emerald-700">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-amber-300/30">
+              <div className="flex items-center gap-3 text-[11px] text-slate-700 font-semibold">
+                <span className="flex items-center gap-1 text-emerald-800">
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                   Dataset 42 Mahasiswa Valid
                 </span>
@@ -756,7 +761,7 @@ export function StatistikKelas() {
 
               <button
                 onClick={() => setShowGuidanceModal(true)}
-                className="px-4 py-2 rounded-xl bg-white hover:bg-slate-50 text-sky-800 font-bold text-xs shadow-sm transition-all self-start sm:self-auto border border-sky-200"
+                className="px-4 py-2 rounded-xl glass-pill hover:bg-white/60 text-sky-950 font-bold text-xs shadow-xs transition-all self-start sm:self-auto"
               >
                 Terapkan Rekomendasi Bimbingan
               </button>
@@ -764,19 +769,19 @@ export function StatistikKelas() {
           </div>
 
           {/* Right: 100% Attendance Club (4 cols) */}
-          <div className="lg:col-span-4 bg-white/80 backdrop-blur-md rounded-3xl p-5 border border-white/85 shadow-md flex flex-col justify-between gap-4">
+          <div className="lg:col-span-4 glass-panel rounded-3xl p-5 shadow-lg flex flex-col justify-between gap-4">
             <div>
               <div className="flex items-center justify-between mb-1">
                 <div className="flex items-center gap-2">
                   <Award className="w-4 h-4 text-emerald-600" />
                   <h3 className="text-sm font-black text-slate-900">100% Attendance Club</h3>
                 </div>
-                <span className="bg-sky-100 text-sky-800 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                <span className="bg-sky-500/20 text-sky-900 border border-sky-400/30 text-[10px] font-bold px-2 py-0.5 rounded-full">
                   18 Mahasiswa
                 </span>
               </div>
 
-              <p className="text-[11px] text-slate-500 mb-3">
+              <p className="text-[11px] text-slate-600 mb-3">
                 18 Mahasiswa tidak pernah terlambat maupun alpha selama 10 sesi berturut-turut.
               </p>
 
@@ -785,39 +790,39 @@ export function StatistikKelas() {
                 {[1, 2, 3, 4].map((i) => (
                   <div
                     key={i}
-                    className="w-8 h-8 rounded-full bg-sky-600 text-white border-2 border-white text-[10px] font-black flex items-center justify-center shadow-sm"
+                    className="w-8 h-8 rounded-full bg-gradient-to-br from-sky-600 to-sky-700 text-white border-2 border-white text-[10px] font-black flex items-center justify-center shadow-xs"
                   >
                     YK
                   </div>
                 ))}
-                <div className="w-8 h-8 rounded-full bg-sky-800 text-white border-2 border-white text-[10px] font-bold flex items-center justify-center shadow-sm">
+                <div className="w-8 h-8 rounded-full bg-sky-800 text-white border-2 border-white text-[10px] font-bold flex items-center justify-center shadow-xs">
                   +14
                 </div>
               </div>
             </div>
 
             {/* Action Links */}
-            <div className="flex flex-col gap-2 pt-2 border-t border-slate-100">
+            <div className="flex flex-col gap-2 pt-2 border-t border-slate-300/40">
               <button
                 onClick={() => setShowBapModal(true)}
-                className="w-full text-left py-1.5 px-2 rounded-xl text-xs font-bold text-sky-800 hover:bg-sky-50 flex items-center justify-between transition-colors"
+                className="w-full text-left py-2 px-3 rounded-xl text-xs font-bold text-sky-950 hover:text-sky-900 glass-inner hover:bg-white/40 flex items-center justify-between transition-all"
               >
                 <span className="flex items-center gap-2">
-                  <FileCheck className="w-4 h-4 text-sky-600" />
+                  <FileCheck className="w-4 h-4 text-sky-700" />
                   Cetak BAP Kuliah Siakad
                 </span>
-                <span className="text-slate-400">&gt;</span>
+                <span className="text-slate-500">&gt;</span>
               </button>
 
               <button
                 onClick={() => setShowSendBaakModal(true)}
-                className="w-full text-left py-1.5 px-2 rounded-xl text-xs font-bold text-sky-800 hover:bg-sky-50 flex items-center justify-between transition-colors"
+                className="w-full text-left py-2 px-3 rounded-xl text-xs font-bold text-sky-950 hover:text-sky-900 glass-inner hover:bg-white/40 flex items-center justify-between transition-all"
               >
                 <span className="flex items-center gap-2">
-                  <Send className="w-4 h-4 text-sky-600" />
+                  <Send className="w-4 h-4 text-sky-700" />
                   Kirim Berita Acara ke BAAK
                 </span>
-                <span className="text-slate-400">&gt;</span>
+                <span className="text-slate-500">&gt;</span>
               </button>
             </div>
           </div>
@@ -831,40 +836,40 @@ export function StatistikKelas() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4"
+            className="fixed inset-0 z-50 bg-slate-950/40 backdrop-blur-md flex items-center justify-center p-4"
           >
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl border border-slate-100 flex flex-col gap-4 text-slate-800"
+              className="glass-panel backdrop-blur-2xl rounded-3xl p-6 w-full max-w-md shadow-2xl border border-white/60 flex flex-col gap-4 text-slate-800"
             >
-              <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-300/40">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-700 flex items-center justify-center">
                     <AlertTriangle className="w-4 h-4" />
                   </div>
                   <div>
                     <h3 className="font-bold text-slate-900 text-sm">Kirim Laporan Peringatan BAAK</h3>
-                    <p className="text-[11px] text-slate-500">Notifikasi Otomatis ke Biro Akademik</p>
+                    <p className="text-[11px] text-slate-600">Notifikasi Otomatis ke Biro Akademik</p>
                   </div>
                 </div>
                 <button
                   onClick={() => setShowWarningBaakModal(false)}
-                  className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100"
+                  className="p-1.5 text-slate-500 hover:text-slate-800 rounded-lg hover:bg-white/40"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
 
-              <div className="text-xs text-slate-600 leading-relaxed">
+              <div className="text-xs text-slate-700 leading-relaxed">
                 Sistem akan mengirimkan daftar mahasiswa dengan kehadiran di bawah ambang batas BAAK (75%) untuk diterbitkan surat teguran akademik resmi melalui portal BAAK.
               </div>
 
-              <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+              <div className="flex justify-end gap-2 pt-2 border-t border-slate-300/40">
                 <button
                   onClick={() => setShowWarningBaakModal(false)}
-                  className="px-4 py-2 text-xs border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50 font-semibold"
+                  className="px-4 py-2 text-xs glass-pill rounded-xl text-slate-700 hover:bg-white/60 font-semibold"
                 >
                   Batal
                 </button>
@@ -890,40 +895,40 @@ export function StatistikKelas() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4"
+            className="fixed inset-0 z-50 bg-slate-950/40 backdrop-blur-md flex items-center justify-center p-4"
           >
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl border border-slate-100 flex flex-col gap-4 text-slate-800"
+              className="glass-panel backdrop-blur-2xl rounded-3xl p-6 w-full max-w-md shadow-2xl border border-white/60 flex flex-col gap-4 text-slate-800"
             >
-              <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-300/40">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-xl bg-rose-500/20 text-rose-700 flex items-center justify-center">
                     <Mail className="w-4 h-4" />
                   </div>
                   <div>
                     <h3 className="font-bold text-slate-900 text-sm">Penerbitan Surat Peringatan (SP-1)</h3>
-                    <p className="text-[11px] text-slate-500">{showSp1Modal.name} - {showSp1Modal.nim}</p>
+                    <p className="text-[11px] text-slate-600">{showSp1Modal.name} - {showSp1Modal.nim}</p>
                   </div>
                 </div>
                 <button
                   onClick={() => setShowSp1Modal(null)}
-                  className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100"
+                  className="p-1.5 text-slate-500 hover:text-slate-800 rounded-lg hover:bg-white/40"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
 
-              <p className="text-xs text-slate-600 leading-relaxed">
+              <p className="text-xs text-slate-700 leading-relaxed">
                 Mahasiswa telah mencapai <strong>3 kali Alpha berturut-turut</strong> (kehadiran 70.0%). SP-1 akan dikirimkan ke email mahasiswa serta Dosen Pembimbing Akademik (DPA).
               </p>
 
-              <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+              <div className="flex justify-end gap-2 pt-2 border-t border-slate-300/40">
                 <button
                   onClick={() => setShowSp1Modal(null)}
-                  className="px-4 py-2 text-xs border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50 font-semibold"
+                  className="px-4 py-2 text-xs glass-pill rounded-xl text-slate-700 hover:bg-white/60 font-semibold"
                 >
                   Batal
                 </button>
@@ -949,22 +954,22 @@ export function StatistikKelas() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4"
+            className="fixed inset-0 z-50 bg-slate-950/40 backdrop-blur-md flex items-center justify-center p-4"
           >
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl border border-slate-100 flex flex-col gap-4 text-slate-800"
+              className="glass-panel backdrop-blur-2xl rounded-3xl p-6 w-full max-w-md shadow-2xl border border-white/60 flex flex-col gap-4 text-slate-800"
             >
-              <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-300/40">
                 <div>
                   <h3 className="font-bold text-slate-900 text-sm">Pemberian Dispensasi / Tugas Tambahan</h3>
-                  <p className="text-[11px] text-slate-500">{showDispensasiModal.name} ({showDispensasiModal.nim})</p>
+                  <p className="text-[11px] text-slate-600">{showDispensasiModal.name} ({showDispensasiModal.nim})</p>
                 </div>
                 <button
                   onClick={() => setShowDispensasiModal(null)}
-                  className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100"
+                  className="p-1.5 text-slate-500 hover:text-slate-800 rounded-lg hover:bg-white/40"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -977,14 +982,14 @@ export function StatistikKelas() {
                 <textarea
                   rows={3}
                   placeholder="Contoh: Mengikuti lomba resmi universitas / penyelesaian modul praktikum ekstra..."
-                  className="w-full text-xs px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  className="w-full text-xs px-3 py-2 bg-white/60 border border-white/70 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500"
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+              <div className="flex justify-end gap-2 pt-2 border-t border-slate-300/40">
                 <button
                   onClick={() => setShowDispensasiModal(null)}
-                  className="px-4 py-2 text-xs border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50 font-semibold"
+                  className="px-4 py-2 text-xs glass-pill rounded-xl text-slate-700 hover:bg-white/60 font-semibold"
                 >
                   Batal
                 </button>
@@ -1010,44 +1015,44 @@ export function StatistikKelas() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4"
+            className="fixed inset-0 z-50 bg-slate-950/40 backdrop-blur-md flex items-center justify-center p-4"
           >
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl border border-slate-100 flex flex-col gap-4 text-slate-800"
+              className="glass-panel backdrop-blur-2xl rounded-3xl p-6 w-full max-w-md shadow-2xl border border-white/60 flex flex-col gap-4 text-slate-800"
             >
-              <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-300/40">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-xl bg-sky-100 text-sky-600 flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-xl bg-sky-500/20 text-sky-800 flex items-center justify-center">
                     <FileCheck className="w-4 h-4" />
                   </div>
                   <div>
                     <h3 className="font-bold text-slate-900 text-sm">Cetak BAP Perkuliahan SIAKAD</h3>
-                    <p className="text-[11px] text-slate-500">10 Sesi Kumulatif Terverifikasi</p>
+                    <p className="text-[11px] text-slate-600">10 Sesi Kumulatif Terverifikasi</p>
                   </div>
                 </div>
                 <button
                   onClick={() => setShowBapModal(false)}
-                  className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100"
+                  className="p-1.5 text-slate-500 hover:text-slate-800 rounded-lg hover:bg-white/40"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
 
-              <div className="text-xs text-slate-600 space-y-2">
+              <div className="text-xs text-slate-700 space-y-2">
                 <p>Dokumen Berita Acara Perkuliahan (BAP) siap dicetak dengan tanda tangan digital dosen pengampu.</p>
-                <div className="p-3 bg-sky-50 rounded-xl border border-sky-100">
-                  <p className="font-bold text-slate-800">Status Verifikasi:</p>
-                  <p className="text-[11px] text-emerald-700 font-semibold mt-0.5">✓ 10/10 Sesi telah divalidasi sistem</p>
+                <div className="p-3 glass-inner rounded-xl">
+                  <p className="font-bold text-slate-900">Status Verifikasi:</p>
+                  <p className="text-[11px] text-emerald-800 font-semibold mt-0.5">✓ 10/10 Sesi telah divalidasi sistem</p>
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+              <div className="flex justify-end gap-2 pt-2 border-t border-slate-300/40">
                 <button
                   onClick={() => setShowBapModal(false)}
-                  className="px-4 py-2 text-xs border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50 font-semibold"
+                  className="px-4 py-2 text-xs glass-pill rounded-xl text-slate-700 hover:bg-white/60 font-semibold"
                 >
                   Tutup
                 </button>
@@ -1073,40 +1078,40 @@ export function StatistikKelas() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4"
+            className="fixed inset-0 z-50 bg-slate-950/40 backdrop-blur-md flex items-center justify-center p-4"
           >
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl border border-slate-100 flex flex-col gap-4 text-slate-800"
+              className="glass-panel backdrop-blur-2xl rounded-3xl p-6 w-full max-w-md shadow-2xl border border-white/60 flex flex-col gap-4 text-slate-800"
             >
-              <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-300/40">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-xl bg-sky-100 text-sky-600 flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-xl bg-sky-500/20 text-sky-800 flex items-center justify-center">
                     <Send className="w-4 h-4" />
                   </div>
                   <div>
                     <h3 className="font-bold text-slate-900 text-sm">Kirim Berita Acara ke BAAK</h3>
-                    <p className="text-[11px] text-slate-500">Transmisi API Portal Akademik</p>
+                    <p className="text-[11px] text-slate-600">Transmisi API Portal Akademik</p>
                   </div>
                 </div>
                 <button
                   onClick={() => setShowSendBaakModal(false)}
-                  className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100"
+                  className="p-1.5 text-slate-500 hover:text-slate-800 rounded-lg hover:bg-white/40"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
 
-              <p className="text-xs text-slate-600 leading-relaxed">
+              <p className="text-xs text-slate-700 leading-relaxed">
                 Kirimkan rekapitulasi presensi 10 sesi ini langsung ke server BAAK Universitas untuk validasi syarat ujian akhir mahasiswa.
               </p>
 
-              <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+              <div className="flex justify-end gap-2 pt-2 border-t border-slate-300/40">
                 <button
                   onClick={() => setShowSendBaakModal(false)}
-                  className="px-4 py-2 text-xs border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50 font-semibold"
+                  className="px-4 py-2 text-xs glass-pill rounded-xl text-slate-700 hover:bg-white/60 font-semibold"
                 >
                   Batal
                 </button>
@@ -1132,39 +1137,39 @@ export function StatistikKelas() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4"
+            className="fixed inset-0 z-50 bg-slate-950/40 backdrop-blur-md flex items-center justify-center p-4"
           >
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl border border-slate-100 flex flex-col gap-4 text-slate-800"
+              className="glass-panel backdrop-blur-2xl rounded-3xl p-6 w-full max-w-md shadow-2xl border border-white/60 flex flex-col gap-4 text-slate-800"
             >
-              <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-300/40">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-700 flex items-center justify-center">
                     <Star className="w-4 h-4 fill-current" />
                   </div>
                   <div>
                     <h3 className="font-bold text-slate-900 text-sm">Rekomendasi Bimbingan Akademik AI</h3>
-                    <p className="text-[11px] text-slate-500">Berdasarkan Korelasi Nilai & Presensi</p>
+                    <p className="text-[11px] text-slate-600">Berdasarkan Korelasi Nilai & Presensi</p>
                   </div>
                 </div>
                 <button
                   onClick={() => setShowGuidanceModal(false)}
-                  className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100"
+                  className="p-1.5 text-slate-500 hover:text-slate-800 rounded-lg hover:bg-white/40"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
 
-              <div className="text-xs text-slate-600 space-y-2.5 leading-relaxed">
+              <div className="text-xs text-slate-700 space-y-2.5 leading-relaxed">
                 <p>1. Jadwalkan sesi asistensi tambahan bagi 2 mahasiswa at-risk sebelum pertemuan ke-12.</p>
                 <p>2. Berikan review kode interaktif pada modul praktikum API agar mahasiswa tertinggal dapat mengejar nilai.</p>
                 <p>3. Monitor kehadiran sesi 11 untuk memastikan tingkat kehadiran kembali &gt;90%.</p>
               </div>
 
-              <div className="flex justify-end pt-2 border-t border-slate-100">
+              <div className="flex justify-end pt-2 border-t border-slate-300/40">
                 <button
                   onClick={() => {
                     setShowGuidanceModal(false);

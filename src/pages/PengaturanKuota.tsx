@@ -189,10 +189,15 @@ export function PengaturanKuota() {
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 overflow-y-auto px-7 py-5 flex flex-col gap-5">
+      <main className="flex-1 overflow-y-auto no-scrollbar px-7 py-5 flex flex-col gap-5 relative">
+        {/* Ambient light spots for glass refraction */}
+        <div className="absolute -top-24 -left-24 w-96 h-96 bg-cyan-300/35 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-1/3 -right-24 w-96 h-96 bg-sky-200/40 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-24 left-1/3 w-96 h-96 bg-blue-300/30 rounded-full blur-3xl pointer-events-none" />
+
         {/* Top Header Pill & User Avatar */}
-        <div className="flex items-center justify-between">
-          <div className="inline-flex items-center gap-2.5 bg-white/70 backdrop-blur-md rounded-2xl px-4 py-2 border border-white/70 shadow-sm">
+        <div className="flex items-center justify-between relative z-10">
+          <div className="inline-flex items-center gap-2.5 glass-panel rounded-2xl px-4 py-2 shadow-sm">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0 animate-pulse" />
             <span className="text-xs font-semibold text-slate-800">
               Ruang 207: Pemrograman Mobile (Kelas T3A)
@@ -206,7 +211,7 @@ export function PengaturanKuota() {
         </div>
 
         {/* Page Title & Top Actions Row */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 relative z-10">
           <div>
             <div className="flex items-center gap-2 mb-1">
               <h2 className="text-2xl font-black text-slate-900 tracking-tight">
@@ -224,7 +229,7 @@ export function PengaturanKuota() {
           <div className="flex items-center gap-2.5 shrink-0">
             <button
               onClick={() => setShowResetModal(true)}
-              className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-white/60 hover:bg-white/80 backdrop-blur-sm text-slate-700 border border-white/70 shadow-sm transition-all flex items-center gap-1.5"
+              className="px-3.5 py-2 rounded-xl text-xs font-bold glass-pill hover:bg-white/60 text-slate-800 hover:text-slate-950 shadow-xs transition-all flex items-center gap-1.5"
             >
               <RotateCcw className="w-3.5 h-3.5 text-slate-600" />
               Reset ke default BAAK
@@ -232,24 +237,24 @@ export function PengaturanKuota() {
 
             <button
               onClick={handleSave}
-              className="px-4 py-2 rounded-xl text-xs font-bold bg-white/80 hover:bg-white text-sky-900 border border-white shadow-md transition-all flex items-center gap-1.5"
+              className="px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white shadow-md transition-all flex items-center gap-1.5"
             >
-              <Check className="w-4 h-4 text-emerald-600" />
+              <Check className="w-4 h-4 text-white" />
               Simpan Perubahan
             </button>
           </div>
         </div>
 
         {/* 4 Metric Summary Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 relative z-10">
           {/* Card 1: AMBANG BATAS UJIAN */}
-          <div className="bg-white/70 backdrop-blur-md rounded-2xl p-4 border border-white/70 shadow-sm flex flex-col justify-between">
+          <div className="glass-panel glass-card-interactive rounded-2xl p-4 shadow-sm flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between text-slate-600">
                 <p className="text-[10px] font-bold tracking-wider uppercase">
                   AMBANG BATAS UJIAN
                 </p>
-                <div className="w-5 h-5 rounded-md bg-sky-100 text-sky-600 flex items-center justify-center">
+                <div className="w-5 h-5 rounded-md bg-sky-500/20 text-sky-800 flex items-center justify-center">
                   <ShieldCheck className="w-3.5 h-3.5" />
                 </div>
               </div>
@@ -257,7 +262,7 @@ export function PengaturanKuota() {
                 <span className="text-3xl font-black text-slate-900 leading-none">
                   {minAttendancePercent.toFixed(1)}%
                 </span>
-                <span className="text-xs font-bold text-sky-800">Regulasi BAAK</span>
+                <span className="text-xs font-bold text-sky-900">Regulasi BAAK</span>
               </div>
             </div>
             <p className="text-[10px] text-slate-600 mt-3 leading-snug">
@@ -266,13 +271,13 @@ export function PengaturanKuota() {
           </div>
 
           {/* Card 2: TOLERANSI KETERLAMBATAN */}
-          <div className="bg-white/70 backdrop-blur-md rounded-2xl p-4 border border-white/70 shadow-sm flex flex-col justify-between">
+          <div className="glass-panel glass-card-interactive rounded-2xl p-4 shadow-sm flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between text-slate-600">
                 <p className="text-[10px] font-bold tracking-wider uppercase">
                   TOLERANSI KETERLAMBATAN
                 </p>
-                <div className="w-5 h-5 rounded-md bg-sky-100 text-sky-600 flex items-center justify-center">
+                <div className="w-5 h-5 rounded-md bg-sky-500/20 text-sky-800 flex items-center justify-center">
                   <Clock className="w-3.5 h-3.5" />
                 </div>
               </div>
@@ -289,13 +294,13 @@ export function PengaturanKuota() {
           </div>
 
           {/* Card 3: RADIUS GEOFENCE VALID */}
-          <div className="bg-white/70 backdrop-blur-md rounded-2xl p-4 border border-white/70 shadow-sm flex flex-col justify-between">
+          <div className="glass-panel glass-card-interactive rounded-2xl p-4 shadow-sm flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between text-slate-600">
                 <p className="text-[10px] font-bold tracking-wider uppercase">
                   RADIUS GEOFENCE VALID
                 </p>
-                <div className="w-5 h-5 rounded-md bg-sky-100 text-sky-600 flex items-center justify-center">
+                <div className="w-5 h-5 rounded-md bg-sky-500/20 text-sky-800 flex items-center justify-center">
                   <MapPin className="w-3.5 h-3.5" />
                 </div>
               </div>
@@ -312,13 +317,13 @@ export function PengaturanKuota() {
           </div>
 
           {/* Card 4: MAKSIMAL ALPHA */}
-          <div className="bg-white/70 backdrop-blur-md rounded-2xl p-4 border border-white/70 shadow-sm flex flex-col justify-between">
+          <div className="glass-panel glass-card-interactive rounded-2xl p-4 shadow-sm flex flex-col justify-between">
             <div>
-              <div className="flex items-center justify-between text-rose-600">
+              <div className="flex items-center justify-between text-rose-700">
                 <p className="text-[10px] font-bold tracking-wider uppercase">
                   MAKSIMAL ALPHA
                 </p>
-                <div className="w-5 h-5 rounded-md bg-rose-100 text-rose-600 flex items-center justify-center">
+                <div className="w-5 h-5 rounded-md bg-rose-500/15 text-rose-700 flex items-center justify-center">
                   <AlertTriangle className="w-3.5 h-3.5" />
                 </div>
               </div>
@@ -327,42 +332,42 @@ export function PengaturanKuota() {
                 <span className="text-xs font-bold text-rose-600">Sesi Perkuliahan</span>
               </div>
             </div>
-            <p className="text-[10px] text-rose-600 font-medium mt-3 leading-snug">
+            <p className="text-[10px] text-rose-700 font-medium mt-3 leading-snug">
               Peringatan : Saat ini terdapat 2 mahasiswa telah mendekati batas kritis ketidakhadiran
             </p>
           </div>
         </div>
 
         {/* 2 Column Main Body */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start relative z-10">
           {/* Left Column (8 cols / 65%) */}
           <div className="lg:col-span-8 flex flex-col gap-5">
             {/* Box 1: Parameter Kuota & Keterlambatan */}
-            <div className="bg-white/80 backdrop-blur-md rounded-3xl p-5 border border-white/85 shadow-md flex flex-col gap-5">
+            <div className="glass-panel rounded-3xl p-5 shadow-lg flex flex-col gap-5">
               {/* Box Header */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center shrink-0">
+                  <div className="w-9 h-9 rounded-xl bg-sky-500/20 text-sky-800 flex items-center justify-center shrink-0">
                     <Sliders className="w-5 h-5" />
                   </div>
                   <div>
                     <h3 className="text-sm font-black text-slate-900 leading-snug">
                       Parameter Kuota & Keterlambatan
                     </h3>
-                    <p className="text-[11px] text-slate-500">
+                    <p className="text-[11px] text-slate-600">
                       Aturan batas minimum kelayakan ujian serta mekanisme akumulasi keterlambatan
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-100/90 text-sky-900 text-[10px] font-bold">
+                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-500/20 text-sky-900 border border-sky-400/30 text-[10px] font-bold">
                   <Lock className="w-3 h-3 text-sky-700" />
                   <span>Sinkronisasi BAAK</span>
                 </div>
               </div>
 
               {/* Slider Box: Batas Minimum Kehadiran Mahasiswa Untuk UAS */}
-              <div className="bg-sky-50/70 rounded-2xl p-4 border border-sky-100/90 flex flex-col gap-3">
+              <div className="glass-inner rounded-2xl p-4 flex flex-col gap-3">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <div className="flex items-center gap-2">
@@ -373,12 +378,12 @@ export function PengaturanKuota() {
                         Standar Akreditasi
                       </span>
                     </div>
-                    <p className="text-[11px] text-slate-500 mt-0.5">
+                    <p className="text-[11px] text-slate-600 mt-0.5">
                       Persentase minimal kehadiran fisik/daring yang diakui dari total 16 sesi perkuliahan
                     </p>
                   </div>
 
-                  <span className="text-2xl font-black text-sky-800 leading-none">
+                  <span className="text-2xl font-black text-sky-900 leading-none">
                     {minAttendancePercent}%
                   </span>
                 </div>
@@ -392,30 +397,30 @@ export function PengaturanKuota() {
                     step="5"
                     value={minAttendancePercent}
                     onChange={(e) => setMinAttendancePercent(Number(e.target.value))}
-                    className="w-full accent-sky-600 h-2 bg-slate-200 rounded-lg cursor-pointer"
+                    className="w-full accent-sky-600 h-2 bg-white/50 rounded-lg cursor-pointer"
                   />
-                  <div className="flex justify-between text-[10px] font-semibold text-slate-500 mt-1">
+                  <div className="flex justify-between text-[10px] font-semibold text-slate-600 mt-1">
                     <span
                       onClick={() => setMinAttendancePercent(60)}
-                      className={`cursor-pointer ${minAttendancePercent === 60 ? "text-sky-800 font-bold" : ""}`}
+                      className={`cursor-pointer ${minAttendancePercent === 60 ? "text-sky-900 font-bold" : ""}`}
                     >
                       60% (Minimal BAAK)
                     </span>
                     <span
                       onClick={() => setMinAttendancePercent(75)}
-                      className={`cursor-pointer ${minAttendancePercent === 75 ? "text-sky-800 font-bold" : ""}`}
+                      className={`cursor-pointer ${minAttendancePercent === 75 ? "text-sky-900 font-bold" : ""}`}
                     >
                       75% (Rekomendasi Prodi)
                     </span>
                     <span
                       onClick={() => setMinAttendancePercent(85)}
-                      className={`cursor-pointer ${minAttendancePercent === 85 ? "text-sky-800 font-bold" : ""}`}
+                      className={`cursor-pointer ${minAttendancePercent === 85 ? "text-sky-900 font-bold" : ""}`}
                     >
                       85% (Kelas Khusus)
                     </span>
                     <span
                       onClick={() => setMinAttendancePercent(90)}
-                      className={`cursor-pointer ${minAttendancePercent === 90 ? "text-sky-800 font-bold" : ""}`}
+                      className={`cursor-pointer ${minAttendancePercent === 90 ? "text-sky-900 font-bold" : ""}`}
                     >
                       90% (Strict)
                     </span>
@@ -434,20 +439,20 @@ export function PengaturanKuota() {
                     onClick={() => setConversionPolicy("2x_alpha")}
                     className={`rounded-2xl p-3.5 border transition-all cursor-pointer flex items-start gap-3 ${
                       conversionPolicy === "2x_alpha"
-                        ? "bg-sky-50/80 border-sky-400 shadow-sm"
-                        : "bg-white/60 border-slate-200/80 hover:bg-slate-50"
+                        ? "glass-inner border-sky-400/60 bg-sky-500/15 shadow-xs"
+                        : "glass-pill hover:bg-white/40 text-slate-700"
                     }`}
                   >
                     <div className="mt-0.5">
                       <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${
-                        conversionPolicy === "2x_alpha" ? "border-sky-600 bg-sky-600" : "border-slate-300"
+                        conversionPolicy === "2x_alpha" ? "border-sky-600 bg-sky-600" : "border-slate-400"
                       }`}>
                         {conversionPolicy === "2x_alpha" && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
                       </div>
                     </div>
                     <div>
                       <p className="text-xs font-bold text-slate-900">2x Terlambat = 1x Alpha</p>
-                      <p className="text-[11px] text-slate-500 mt-1 leading-snug">
+                      <p className="text-[11px] text-slate-600 mt-1 leading-snug">
                         Akumulasi dua kali keterlambatan di atas 15 menit langsung memotong kuota 1 sesi hadir.
                       </p>
                     </div>
@@ -458,20 +463,20 @@ export function PengaturanKuota() {
                     onClick={() => setConversionPolicy("bertahap")}
                     className={`rounded-2xl p-3.5 border transition-all cursor-pointer flex items-start gap-3 ${
                       conversionPolicy === "bertahap"
-                        ? "bg-sky-50/80 border-sky-400 shadow-sm"
-                        : "bg-white/60 border-slate-200/80 hover:bg-slate-50"
+                        ? "glass-inner border-sky-400/60 bg-sky-500/15 shadow-xs"
+                        : "glass-pill hover:bg-white/40 text-slate-700"
                     }`}
                   >
                     <div className="mt-0.5">
                       <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${
-                        conversionPolicy === "bertahap" ? "border-sky-600 bg-sky-600" : "border-slate-300"
+                        conversionPolicy === "bertahap" ? "border-sky-600 bg-sky-600" : "border-slate-400"
                       }`}>
                         {conversionPolicy === "bertahap" && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
                       </div>
                     </div>
                     <div>
                       <p className="text-xs font-bold text-slate-900">Potongan Bertahap (0.5x)</p>
-                      <p className="text-[11px] text-slate-500 mt-1 leading-snug">
+                      <p className="text-[11px] text-slate-600 mt-1 leading-snug">
                         Setiap keterlambatan dihitung 50% poin kehadiran tanpa langsung mengubah status menjadi alpha
                       </p>
                     </div>
@@ -480,7 +485,7 @@ export function PengaturanKuota() {
               </div>
 
               {/* Toleransi Menit Menuju Terlambat Dropdown */}
-              <div className="flex items-center justify-between p-3 rounded-2xl bg-white/60 border border-slate-200/80">
+              <div className="flex items-center justify-between p-3 rounded-2xl glass-inner">
                 <div className="flex items-center gap-2.5">
                   <Clock className="w-4 h-4 text-sky-700" />
                   <span className="text-xs font-bold text-slate-800">
@@ -490,7 +495,7 @@ export function PengaturanKuota() {
                 <select
                   value={toleranceMinutes}
                   onChange={(e) => setToleranceMinutes(Number(e.target.value))}
-                  className="text-xs font-semibold px-3 py-1.5 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-sky-500 text-slate-700 cursor-pointer"
+                  className="text-xs font-semibold px-3 py-1.5 rounded-xl border border-white/80 bg-white/70 focus:outline-none focus:ring-2 focus:ring-sky-500 text-slate-800 cursor-pointer"
                 >
                   <option value={10}>10 Menit</option>
                   <option value={15}>15 Menit (Default)</option>
@@ -509,25 +514,25 @@ export function PengaturanKuota() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div className="bg-sky-50/70 rounded-2xl p-3 border border-sky-100 flex items-start gap-3">
-                    <span className="w-5 h-5 rounded-full bg-sky-200 text-sky-800 text-[10px] font-black flex items-center justify-center shrink-0 mt-0.5">
+                  <div className="glass-inner rounded-2xl p-3 flex items-start gap-3">
+                    <span className="w-5 h-5 rounded-full bg-sky-500/20 text-sky-900 text-[10px] font-black flex items-center justify-center shrink-0 mt-0.5">
                       1
                     </span>
                     <div>
                       <p className="text-xs font-bold text-slate-900">Maksimal Pengajuan H-3</p>
-                      <p className="text-[10px] text-slate-500 mt-0.5 leading-relaxed">
+                      <p className="text-[10px] text-slate-600 mt-0.5 leading-relaxed">
                         Batas akhir upload bukti sakit/izin adalah 72 jam terhitung sejak sesi perkuliahan berakhir.
                       </p>
                     </div>
                   </div>
 
-                  <div className="bg-sky-50/70 rounded-2xl p-3 border border-sky-100 flex items-start gap-3">
-                    <span className="w-5 h-5 rounded-full bg-sky-200 text-sky-800 text-[10px] font-black flex items-center justify-center shrink-0 mt-0.5">
+                  <div className="glass-inner rounded-2xl p-3 flex items-start gap-3">
+                    <span className="w-5 h-5 rounded-full bg-sky-500/20 text-sky-900 text-[10px] font-black flex items-center justify-center shrink-0 mt-0.5">
                       2
                     </span>
                     <div>
                       <p className="text-xs font-bold text-slate-900">Maksimal Pengajuan H-3</p>
-                      <p className="text-[10px] text-slate-500 mt-0.5 leading-relaxed">
+                      <p className="text-[10px] text-slate-600 mt-0.5 leading-relaxed">
                         Batas akhir upload bukti sakit/izin adalah 72 jam terhitung sejak sesi perkuliahan berakhir.
                       </p>
                     </div>
@@ -536,17 +541,17 @@ export function PengaturanKuota() {
               </div>
 
               {/* Sistem Notifikasi Peringatan Dini (Early Warning) */}
-              <div className="flex flex-col gap-3 pt-2 border-t border-slate-200/60">
+              <div className="flex flex-col gap-3 pt-2 border-t border-slate-300/40">
                 <h4 className="text-xs font-bold text-slate-900">
                   Sistem Notifikasi Peringatan Dini (Early Warning)
                 </h4>
 
-                <div className="flex items-center justify-between gap-4 p-3 rounded-2xl bg-white/60 border border-slate-200/80">
+                <div className="flex items-center justify-between gap-4 p-3 rounded-2xl glass-inner">
                   <div>
                     <p className="text-xs font-bold text-slate-900">
                       Peringatan Kritis Mahasiswa (Sisa 1x Alpha)
                     </p>
-                    <p className="text-[11px] text-slate-500 mt-0.5 leading-snug">
+                    <p className="text-[11px] text-slate-600 mt-0.5 leading-snug">
                       Kirim email & whatsApp blast otomatis ke mahasiswa saat absensi tersisa 1 sesi sebelum tidak bisa ikut UAS.
                     </p>
                   </div>
@@ -564,12 +569,12 @@ export function PengaturanKuota() {
                   </button>
                 </div>
 
-                <div className="flex items-center justify-between gap-4 p-3 rounded-2xl bg-white/60 border border-slate-200/80">
+                <div className="flex items-center justify-between gap-4 p-3 rounded-2xl glass-inner">
                   <div>
                     <p className="text-xs font-bold text-slate-900">
                       Tembusan ke Dosen Wali & BAAK
                     </p>
-                    <p className="text-[11px] text-slate-500 mt-0.5 leading-snug">
+                    <p className="text-[11px] text-slate-600 mt-0.5 leading-snug">
                       Jika mahasiswa tidak hadir 3 sesi berturut - turut tanpa surat izin resmi yang valid
                     </p>
                   </div>
@@ -590,23 +595,23 @@ export function PengaturanKuota() {
             </div>
 
             {/* Box 2: Keamanan Geofencing & Anti-Titip Absen */}
-            <div className="bg-white/80 backdrop-blur-md rounded-3xl p-5 border border-white/85 shadow-md flex flex-col gap-5">
+            <div className="glass-panel rounded-3xl p-5 shadow-lg flex flex-col gap-5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center shrink-0">
+                  <div className="w-9 h-9 rounded-xl bg-sky-500/20 text-sky-800 flex items-center justify-center shrink-0">
                     <ShieldCheck className="w-5 h-5" />
                   </div>
                   <div>
                     <h3 className="text-sm font-black text-slate-900 leading-snug">
                       Keamanan Geofencing & Anti-Titip Absen
                     </h3>
-                    <p className="text-[11px] text-slate-500">
+                    <p className="text-[11px] text-slate-600">
                       Verifikasi koordinat presensi dan perlindungan spoofing perangkat
                     </p>
                   </div>
                 </div>
 
-                <span className="bg-amber-300 text-slate-900 text-[10px] font-bold px-2.5 py-1 rounded-full">
+                <span className="bg-amber-300 text-slate-900 text-[10px] font-bold px-2.5 py-1 rounded-full shadow-xs">
                   Shield level 3
                 </span>
               </div>
@@ -614,26 +619,26 @@ export function PengaturanKuota() {
               {/* Sub grid: Titik Koordinat & Radius Scanner */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                 {/* Titik Koordinat */}
-                <div className="bg-sky-50/70 rounded-2xl p-3.5 border border-sky-100 flex flex-col justify-between">
+                <div className="glass-inner rounded-2xl p-3.5 flex flex-col justify-between">
                   <p className="text-[10px] font-bold text-slate-600 tracking-wider uppercase">
                     TITIK KOORDINAT RUANG KELAS
                   </p>
                   <div className="flex items-start gap-2.5 my-2">
-                    <div className="w-7 h-7 rounded-lg bg-sky-200/80 text-sky-700 flex items-center justify-center shrink-0 mt-0.5">
+                    <div className="w-7 h-7 rounded-lg bg-sky-500/20 text-sky-800 flex items-center justify-center shrink-0 mt-0.5">
                       <MapPin className="w-4 h-4" />
                     </div>
                     <div>
                       <p className="text-xs font-bold text-slate-900">
                         Lat -6.89042, Long 107.61031
                       </p>
-                      <p className="text-[10px] text-slate-500">
+                      <p className="text-[10px] text-slate-600">
                         Ruang 207 Gedung B (Lab Mobile)
                       </p>
                     </div>
                   </div>
                   <button
                     onClick={() => setShowCalibrationModal(true)}
-                    className="text-[10px] font-bold text-sky-700 hover:text-sky-950 flex items-center gap-1 self-start hover:underline mt-1"
+                    className="text-[10px] font-bold text-sky-800 hover:text-sky-950 flex items-center gap-1 self-start hover:underline mt-1"
                   >
                     <Compass className="w-3 h-3" />
                     Kalibrasi Ulang GPS
@@ -641,7 +646,7 @@ export function PengaturanKuota() {
                 </div>
 
                 {/* Radius Toleransi Scanner */}
-                <div className="bg-sky-50/70 rounded-2xl p-3.5 border border-sky-100 flex flex-col justify-between">
+                <div className="glass-inner rounded-2xl p-3.5 flex flex-col justify-between">
                   <p className="text-[10px] font-bold text-slate-600 tracking-wider uppercase">
                     RADIUS TOLERANSI SCANNER
                   </p>
@@ -653,7 +658,7 @@ export function PengaturanKuota() {
                         className={`py-1.5 px-2 rounded-xl text-center text-xs font-bold transition-all ${
                           scannerRadius === r
                             ? "bg-sky-500 text-white shadow-sm"
-                            : "bg-white/80 hover:bg-white text-slate-700 border border-slate-200"
+                            : "glass-pill hover:bg-white/60 text-slate-800"
                         }`}
                       >
                         <div>{r} Meter</div>
@@ -665,7 +670,7 @@ export function PengaturanKuota() {
                       </button>
                     ))}
                   </div>
-                  <p className="text-[10px] text-slate-500 leading-snug">
+                  <p className="text-[10px] text-slate-600 leading-snug">
                     Disarankan 50m untuk mencakup seluruh sudut Lab 207 & koridor luar
                   </p>
                 </div>
@@ -674,7 +679,7 @@ export function PengaturanKuota() {
               {/* Rotasi Token QR & Device Fingerprinting */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 pt-1">
                 {/* Rotasi Token QR */}
-                <div className="p-3.5 rounded-2xl bg-white/60 border border-slate-200/80 flex flex-col justify-between">
+                <div className="p-3.5 rounded-2xl glass-inner flex flex-col justify-between">
                   <p className="text-[11px] font-bold text-slate-900 mb-2">
                     Rotasi Token QR Dinamis
                   </p>
@@ -690,11 +695,11 @@ export function PengaturanKuota() {
                         className={`py-1.5 px-2 rounded-xl text-center transition-all ${
                           qrInterval === item.sec
                             ? "bg-sky-500 text-white shadow-sm"
-                            : "bg-white hover:bg-slate-50 text-slate-700 border border-slate-200"
+                            : "glass-pill hover:bg-white/60 text-slate-800"
                         }`}
                       >
                         <p className="text-xs font-bold leading-tight">{item.sec} Detik</p>
-                        <p className={`text-[8px] leading-tight ${qrInterval === item.sec ? "opacity-90" : "text-slate-400"}`}>
+                        <p className={`text-[8px] leading-tight ${qrInterval === item.sec ? "opacity-90" : "text-slate-500"}`}>
                           {item.label}
                         </p>
                       </button>
@@ -703,12 +708,12 @@ export function PengaturanKuota() {
                 </div>
 
                 {/* Device Fingerprinting */}
-                <div className="p-3.5 rounded-2xl bg-white/60 border border-slate-200/80 flex items-center justify-between gap-3">
+                <div className="p-3.5 rounded-2xl glass-inner flex items-center justify-between gap-3">
                   <div>
                     <p className="text-xs font-bold text-slate-900">
                       Device Fingerprinting
                     </p>
-                    <p className="text-[10px] text-slate-500 mt-0.5 leading-snug">
+                    <p className="text-[10px] text-slate-600 mt-0.5 leading-snug">
                       Blokir 1 smartphone melakukan scan untuk &gt;1 mahasiswa dalam sesi yang sama
                     </p>
                   </div>
@@ -732,13 +737,13 @@ export function PengaturanKuota() {
           {/* Right Column (4 cols / 35%) */}
           <div className="lg:col-span-4 flex flex-col gap-4">
             {/* Box 1: Simulasi Dampak Regulasi */}
-            <div className="bg-white/80 backdrop-blur-md rounded-3xl p-5 border border-white/85 shadow-md flex flex-col gap-4">
+            <div className="glass-panel rounded-3xl p-5 shadow-lg flex flex-col gap-4">
               <h3 className="text-sm font-black text-slate-900">
                 Simulasi Dampak Regulasi
               </h3>
 
               {/* Skenario Batas Saat Ini */}
-              <div className="bg-sky-50/70 rounded-2xl p-3 border border-sky-100 flex flex-col gap-1.5">
+              <div className="glass-inner rounded-2xl p-3 flex flex-col gap-1.5">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-slate-800">
                     Batas saat ini ({minAttendancePercent}%)
@@ -747,19 +752,19 @@ export function PengaturanKuota() {
                     {atRiskCount} Mahasiswa Terancam
                   </span>
                 </div>
-                <div className="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
+                <div className="w-full bg-white/40 rounded-full h-1.5 overflow-hidden">
                   <div
                     className="bg-rose-500 h-1.5 rounded-full"
                     style={{ width: `${(atRiskCount / 42) * 100}%` }}
                   />
                 </div>
-                <p className="text-[10px] text-slate-500 mt-0.5">
+                <p className="text-[10px] text-slate-600 mt-0.5">
                   Mahasiswa: Yurii Kharlistov (73.3%), Yurii Kharlistov (71.0%)
                 </p>
               </div>
 
               {/* Skenario Jika Dinaikkan 80% */}
-              <div className="bg-rose-50/60 rounded-2xl p-3 border border-rose-100 flex flex-col gap-1.5">
+              <div className="glass-panel border-rose-300/40 bg-rose-500/10 rounded-2xl p-3 flex flex-col gap-1.5">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-slate-800">
                     Jika dinaikkan 80%
@@ -768,20 +773,20 @@ export function PengaturanKuota() {
                     5 Mahasiswa
                   </span>
                 </div>
-                <p className="text-[10px] text-slate-600 leading-snug">
+                <p className="text-[10px] text-slate-700 leading-snug">
                   Tambahan 3 mahasiswa akan gugur syarat keikutsertaan Ujian Akhir Semester
                 </p>
               </div>
 
               {/* Info rekomendasi */}
-              <div className="flex items-center gap-2 text-[11px] text-slate-600 font-semibold pt-1">
-                <CheckCircle2 className="w-4 h-4 text-sky-600 shrink-0" />
+              <div className="flex items-center gap-2 text-[11px] text-slate-700 font-semibold pt-1">
+                <CheckCircle2 className="w-4 h-4 text-sky-700 shrink-0" />
                 <span>Rekomendasi BAAK: Pertahankan 75.0%</span>
               </div>
             </div>
 
             {/* Box 2: Audit Trail Terakhir */}
-            <div className="bg-white/80 backdrop-blur-md rounded-3xl p-5 border border-white/85 shadow-md flex flex-col gap-3.5">
+            <div className="glass-panel rounded-3xl p-5 shadow-lg flex flex-col gap-3.5">
               <div className="flex items-center gap-2">
                 <History className="w-4 h-4 text-slate-700" />
                 <h3 className="text-sm font-black text-slate-900">
@@ -792,14 +797,14 @@ export function PengaturanKuota() {
               <div className="flex flex-col gap-3">
                 {/* Audit Item 1 */}
                 <div className="flex items-start gap-3">
-                  <div className="w-7 h-7 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center shrink-0 mt-0.5">
+                  <div className="w-7 h-7 rounded-xl bg-sky-500/20 text-sky-800 flex items-center justify-center shrink-0 mt-0.5">
                     <Clock className="w-3.5 h-3.5" />
                   </div>
                   <div>
                     <p className="text-xs font-bold text-slate-900 leading-tight">
                       Ubah Toleransi: 10m &gt; 15m
                     </p>
-                    <p className="text-[10px] text-slate-500 mt-0.5 leading-tight">
+                    <p className="text-[10px] text-slate-600 mt-0.5 leading-tight">
                       Dr. Ir Yurii Kharlistov, M.T. • 12 Mei 2026 • 09:14 WIB
                     </p>
                   </div>
@@ -807,14 +812,14 @@ export function PengaturanKuota() {
 
                 {/* Audit Item 2 */}
                 <div className="flex items-start gap-3">
-                  <div className="w-7 h-7 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center shrink-0 mt-0.5">
+                  <div className="w-7 h-7 rounded-xl bg-sky-500/20 text-sky-800 flex items-center justify-center shrink-0 mt-0.5">
                     <RotateCcw className="w-3.5 h-3.5" />
                   </div>
                   <div>
                     <p className="text-xs font-bold text-slate-900 leading-tight">
                       Sinkronisasi Jadwal BAAK
                     </p>
-                    <p className="text-[10px] text-slate-500 mt-0.5 leading-tight">
+                    <p className="text-[10px] text-slate-600 mt-0.5 leading-tight">
                       Dr. Ir Yurii Kharlistov, M.T. • 12 Mei 2026 • 09:14 WIB
                     </p>
                   </div>
@@ -822,14 +827,14 @@ export function PengaturanKuota() {
 
                 {/* Audit Item 3 */}
                 <div className="flex items-start gap-3">
-                  <div className="w-7 h-7 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center shrink-0 mt-0.5">
+                  <div className="w-7 h-7 rounded-xl bg-sky-500/20 text-sky-800 flex items-center justify-center shrink-0 mt-0.5">
                     <Smartphone className="w-3.5 h-3.5" />
                   </div>
                   <div>
                     <p className="text-xs font-bold text-slate-900 leading-tight">
                       Aktivasi Multi-Device Fingerprint
                     </p>
-                    <p className="text-[10px] text-slate-500 mt-0.5 leading-tight">
+                    <p className="text-[10px] text-slate-600 mt-0.5 leading-tight">
                       12 Mei 2026 • 09:14 WIB
                     </p>
                   </div>
@@ -838,7 +843,7 @@ export function PengaturanKuota() {
             </div>
 
             {/* Box 3: Regulasi Akademik */}
-            <div className="bg-white/80 backdrop-blur-md rounded-3xl p-5 border border-white/85 shadow-md flex flex-col gap-3">
+            <div className="glass-panel rounded-3xl p-5 shadow-lg flex flex-col gap-3">
               <div className="flex items-center gap-2">
                 <FileCheck className="w-4 h-4 text-slate-700" />
                 <h3 className="text-sm font-black text-slate-900">
@@ -857,22 +862,22 @@ export function PengaturanKuota() {
                   e.preventDefault();
                   triggerToast("Mengunduh Pedoman_Presensi_2024.pdf (2.4 MB)...");
                 }}
-                className="bg-sky-50 hover:bg-sky-100 rounded-xl p-2.5 border border-sky-100 flex items-center gap-2.5 transition-all text-xs font-bold text-slate-800"
+                className="glass-inner hover:bg-white/40 rounded-xl p-2.5 flex items-center gap-2.5 transition-all text-xs font-bold text-slate-800"
               >
-                <div className="w-6 h-6 rounded bg-rose-500 text-white flex items-center justify-center text-[9px] font-black shrink-0">
+                <div className="w-6 h-6 rounded bg-rose-500 text-white flex items-center justify-center text-[9px] font-black shrink-0 shadow-xs">
                   PDF
                 </div>
                 <div className="min-w-0 flex-1 truncate">
                   <p className="truncate text-xs">Pedoman_Presensi_2024.pdf</p>
-                  <p className="text-[10px] text-slate-400 font-normal">PDF 2.4 MB</p>
+                  <p className="text-[10px] text-slate-500 font-normal">PDF 2.4 MB</p>
                 </div>
               </a>
 
               <button
                 onClick={() => setShowHelpdeskModal(true)}
-                className="w-full py-2 px-3 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-xs font-bold text-slate-700 flex items-center justify-center gap-1.5 transition-colors shadow-sm"
+                className="glass-pill hover:bg-white/60 w-full py-2 px-3 rounded-xl text-xs font-bold text-slate-800 flex items-center justify-center gap-1.5 transition-all shadow-xs"
               >
-                <HelpCircle className="w-3.5 h-3.5" />
+                <HelpCircle className="w-3.5 h-3.5 text-slate-700" />
                 Hubungi Helpdesk Akademik
               </button>
             </div>
@@ -887,27 +892,27 @@ export function PengaturanKuota() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4"
+            className="fixed inset-0 z-50 bg-slate-950/40 backdrop-blur-md flex items-center justify-center p-4"
           >
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl border border-slate-100 flex flex-col gap-4 text-slate-800"
+              className="glass-panel backdrop-blur-2xl rounded-3xl p-6 w-full max-w-sm shadow-2xl border border-white/60 flex flex-col gap-4 text-slate-800"
             >
-              <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center mx-auto">
+              <div className="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-700 flex items-center justify-center mx-auto border border-amber-300/30">
                 <RotateCcw className="w-6 h-6" />
               </div>
               <div className="text-center">
                 <h3 className="font-bold text-slate-900 text-base">Reset Pengaturan ke Default?</h3>
-                <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                <p className="text-xs text-slate-600 mt-1 leading-relaxed">
                   Semua konfigurasi kuota, radius geofence, dan toleransi keterlambatan akan dikembalikan ke standar baku BAAK (75% kuota, 15m toleransi, 50m radius).
                 </p>
               </div>
               <div className="flex gap-2">
                 <button
                   onClick={() => setShowResetModal(false)}
-                  className="flex-1 py-2 text-xs border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50 font-semibold"
+                  className="flex-1 py-2 text-xs glass-pill rounded-xl text-slate-700 hover:bg-white/60 font-semibold"
                 >
                   Batal
                 </button>
@@ -930,47 +935,47 @@ export function PengaturanKuota() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4"
+            className="fixed inset-0 z-50 bg-slate-950/40 backdrop-blur-md flex items-center justify-center p-4"
           >
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl border border-slate-100 flex flex-col gap-4 text-slate-800"
+              className="glass-panel backdrop-blur-2xl rounded-3xl p-6 w-full max-w-md shadow-2xl border border-white/60 flex flex-col gap-4 text-slate-800"
             >
-              <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-300/40">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-xl bg-sky-100 text-sky-600 flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-xl bg-sky-500/20 text-sky-800 flex items-center justify-center">
                     <Compass className="w-4 h-4" />
                   </div>
                   <div>
                     <h3 className="font-bold text-slate-900 text-sm">Kalibrasi Titik Koordinat GPS</h3>
-                    <p className="text-[11px] text-slate-500">Ruang 207 Gedung B (Lab Mobile)</p>
+                    <p className="text-[11px] text-slate-600">Ruang 207 Gedung B (Lab Mobile)</p>
                   </div>
                 </div>
                 <button
                   onClick={() => setShowCalibrationModal(false)}
-                  className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100"
+                  className="p-1.5 text-slate-500 hover:text-slate-800 rounded-lg hover:bg-white/40"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
 
-              <div className="p-4 bg-sky-50 rounded-2xl border border-sky-100 text-xs flex flex-col gap-2">
-                <p className="font-bold text-slate-800">Koordinat Saat Ini:</p>
-                <div className="flex items-center justify-between bg-white p-2.5 rounded-xl border border-sky-200 font-mono text-[11px]">
+              <div className="p-4 glass-inner rounded-2xl text-xs flex flex-col gap-2">
+                <p className="font-bold text-slate-900">Koordinat Saat Ini:</p>
+                <div className="flex items-center justify-between bg-white/60 p-2.5 rounded-xl border border-white/80 font-mono text-[11px] text-slate-800">
                   <span>Latitude: -6.89042</span>
                   <span>Longitude: 107.61031</span>
                 </div>
-                <p className="text-[10px] text-slate-500">
+                <p className="text-[10px] text-slate-600">
                   Pastikan perangkat Anda berada di tengah ruangan laboratorium saat menekan kalibrasi untuk akurasi tertinggi.
                 </p>
               </div>
 
-              <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+              <div className="flex justify-end gap-2 pt-2 border-t border-slate-300/40">
                 <button
                   onClick={() => setShowCalibrationModal(false)}
-                  className="px-4 py-2 text-xs border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50 font-semibold"
+                  className="px-4 py-2 text-xs glass-pill rounded-xl text-slate-700 hover:bg-white/60 font-semibold"
                 >
                   Batal
                 </button>
@@ -995,44 +1000,44 @@ export function PengaturanKuota() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4"
+            className="fixed inset-0 z-50 bg-slate-950/40 backdrop-blur-md flex items-center justify-center p-4"
           >
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl border border-slate-100 flex flex-col gap-4 text-slate-800"
+              className="glass-panel backdrop-blur-2xl rounded-3xl p-6 w-full max-w-md shadow-2xl border border-white/60 flex flex-col gap-4 text-slate-800"
             >
-              <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-300/40">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-xl bg-sky-100 text-sky-600 flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-xl bg-sky-500/20 text-sky-800 flex items-center justify-center">
                     <PhoneCall className="w-4 h-4" />
                   </div>
                   <div>
                     <h3 className="font-bold text-slate-900 text-sm">Helpdesk Akademik & BAAK</h3>
-                    <p className="text-[11px] text-slate-500">Layanan Bantuan Khusus Dosen</p>
+                    <p className="text-[11px] text-slate-600">Layanan Bantuan Khusus Dosen</p>
                   </div>
                 </div>
                 <button
                   onClick={() => setShowHelpdeskModal(false)}
-                  className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100"
+                  className="p-1.5 text-slate-500 hover:text-slate-800 rounded-lg hover:bg-white/40"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
 
-              <div className="text-xs text-slate-600 space-y-2.5">
+              <div className="text-xs text-slate-700 space-y-2.5">
                 <p>
                   Untuk permohonan perubahan kuota khusus di luar kewenangan fakultas atau pembatalan status alpha mahasiswa yang keliru, hubungi:
                 </p>
-                <div className="p-3 bg-slate-50 rounded-xl space-y-1 text-slate-800 font-medium">
+                <div className="p-3 glass-inner rounded-xl space-y-1 text-slate-800 font-medium">
                   <p>📞 Hotline BAAK: (0341) 551-611 ext 204</p>
                   <p>✉️ Email: baak-presensi@ub.ac.id</p>
                   <p>🏢 Lokasi: Gedung Rektorat Lt. 2 Sayap Timur</p>
                 </div>
               </div>
 
-              <div className="flex justify-end pt-2 border-t border-slate-100">
+              <div className="flex justify-end pt-2 border-t border-slate-300/40">
                 <button
                   onClick={() => setShowHelpdeskModal(false)}
                   className="px-4 py-2 text-xs bg-sky-500 text-white rounded-xl hover:bg-sky-600 font-bold transition-all shadow-md"

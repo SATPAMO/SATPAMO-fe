@@ -106,16 +106,16 @@ function ActivityItem({ name, nim, time, accuracy }: {
   name: string; nim: string; time: string; accuracy: string;
 }) {
   return (
-    <div className="flex items-center gap-3 py-2 border-b border-slate-100 last:border-0">
-      <div className="w-8 h-8 rounded-full bg-sky-600 text-white text-[10px] font-black flex items-center justify-center shrink-0">
+    <div className="flex items-center gap-3 py-2 border-b border-white/20 last:border-0 hover:bg-white/20 px-2 rounded-xl transition-colors">
+      <div className="w-8 h-8 rounded-full bg-sky-700 text-white text-[10px] font-black flex items-center justify-center shrink-0 shadow-sm">
         {getInitials(name)}
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-xs font-bold text-slate-900 truncate">{name}</p>
-        <p className="text-[10px] text-slate-500 truncate">{nim}</p>
-        <p className="text-[10px] text-sky-700 font-semibold">{accuracy}</p>
+        <p className="text-[10px] text-slate-700 truncate font-semibold">{nim}</p>
+        <p className="text-[10px] text-sky-950 font-bold">{accuracy}</p>
       </div>
-      <span className="text-[10px] text-slate-500 font-medium shrink-0">{time}</span>
+      <span className="text-[10px] text-slate-700 font-bold shrink-0">{time}</span>
     </div>
   );
 }
@@ -220,12 +220,16 @@ export function AttendanceDashboard() {
 
   return (
     <div
-      className="min-h-screen flex text-slate-800"
+      className="min-h-screen flex text-slate-800 relative overflow-hidden"
       style={{
-        background: "linear-gradient(135deg, #38bdf8 0%, #0ea5e9 30%, #0284c7 60%, #60d8f7 100%)",
+        background: "linear-gradient(135deg, #38bdf8 0%, #0ea5e9 30%, #0284c7 60%, #38bdf8 100%)",
         fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
       }}
     >
+      {/* Decorative ambient blurred spots for deep glassmorphism light refraction */}
+      <div className="pointer-events-none absolute -top-24 -right-24 w-96 h-96 bg-cyan-200/35 rounded-full blur-3xl" />
+      <div className="pointer-events-none absolute top-1/3 left-1/4 w-80 h-80 bg-blue-300/30 rounded-full blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-24 right-1/3 w-96 h-96 bg-sky-200/30 rounded-full blur-3xl" />
       {/* Toast Notification */}
       <AnimatePresence>
         {toastMessage && (
@@ -308,25 +312,25 @@ export function AttendanceDashboard() {
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 overflow-y-auto px-7 py-5 flex flex-col gap-5">
+      <main className="flex-1 overflow-y-auto no-scrollbar px-7 py-5 flex flex-col gap-5">
         {/* Top Header Pill & User Avatar */}
         <div className="flex items-center justify-between">
-          <div className="inline-flex items-center gap-2.5 bg-white/70 backdrop-blur-md rounded-2xl px-4 py-2 border border-white/70 shadow-sm">
+          <div className="inline-flex items-center gap-2.5 glass-pill rounded-2xl px-4 py-2 shadow-sm">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0 animate-pulse" />
-            <span className="text-xs font-semibold text-slate-800">
+            <span className="text-xs font-bold text-slate-900">
               Ruang 207: Pemrograman Mobile (Kelas T3A)
             </span>
-            <DoorOpen className="w-3.5 h-3.5 text-slate-700 ml-1" />
+            <DoorOpen className="w-3.5 h-3.5 text-slate-800 ml-1" />
           </div>
 
           <div className="flex items-center gap-2.5">
             <button
               onClick={() => setRefreshKey((k) => k + 1)}
               disabled={loadingData}
-              className="p-2 rounded-xl bg-white/70 hover:bg-white text-slate-700 border border-white/80 shadow-sm transition-all"
+              className="p-2 rounded-xl glass-pill hover:bg-white/45 text-slate-800 shadow-sm transition-all"
               title="Refresh Data Presensi"
             >
-              <RefreshCw className={`w-4 h-4 ${loadingData ? "animate-spin text-sky-600" : ""}`} />
+              <RefreshCw className={`w-4 h-4 ${loadingData ? "animate-spin text-sky-800" : ""}`} />
             </button>
 
             <div className="w-9 h-9 rounded-full bg-sky-600 border border-sky-300 flex items-center justify-center text-white text-xs font-black shadow-sm">
@@ -358,9 +362,9 @@ export function AttendanceDashboard() {
           <div className="flex items-center flex-wrap gap-2.5">
             <button
               onClick={() => setShowProjectorModal(true)}
-              className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-white/60 hover:bg-white/80 backdrop-blur-sm text-sky-800 border border-white/70 shadow-sm transition-all flex items-center gap-2"
+              className="px-3.5 py-2 rounded-xl text-xs font-bold glass-pill hover:bg-white/45 text-sky-950 shadow-sm transition-all flex items-center gap-2"
             >
-              <Projector className="w-3.5 h-3.5 text-sky-700" />
+              <Projector className="w-3.5 h-3.5 text-sky-800" />
               Mode Proyektor Layar Dosen
             </button>
 
@@ -377,11 +381,11 @@ export function AttendanceDashboard() {
         {/* 5 Metric Summary Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
           {/* Card 1: Total Terdaftar */}
-          <div className="bg-white/70 backdrop-blur-md rounded-2xl p-4 border border-white/70 shadow-sm flex flex-col justify-between">
+          <div className="glass-panel glass-card-interactive rounded-2xl p-4 flex flex-col justify-between">
             <div>
-              <div className="flex items-center justify-between text-slate-600 mb-1">
-                <p className="text-[10px] font-bold tracking-wider uppercase">TOTAL TERDAFTAR</p>
-                <div className="w-6 h-6 rounded-lg bg-sky-100 text-sky-700 flex items-center justify-center">
+              <div className="flex items-center justify-between text-slate-700 mb-1">
+                <p className="text-[10px] font-extrabold tracking-wider uppercase text-slate-700">TOTAL TERDAFTAR</p>
+                <div className="w-6 h-6 rounded-lg glass-inner text-sky-800 flex items-center justify-center">
                   <Users className="w-3.5 h-3.5" />
                 </div>
               </div>
@@ -389,18 +393,18 @@ export function AttendanceDashboard() {
                 <span className="text-3xl font-black text-slate-900 leading-none">
                   {loadingData ? "—" : totalEnrolled}
                 </span>
-                <span className="text-xs font-semibold text-slate-600">Mahasiswa</span>
+                <span className="text-xs font-bold text-slate-700">Mahasiswa</span>
               </div>
             </div>
-            <p className="text-[10px] text-slate-500 mt-3 font-medium">100% Terverifikasi KRS</p>
+            <p className="text-[10px] text-slate-600 mt-3 font-semibold">100% Terverifikasi KRS</p>
           </div>
 
           {/* Card 2: Sudah Hadir */}
-          <div className="bg-white/70 backdrop-blur-md rounded-2xl p-4 border border-white/70 shadow-sm flex flex-col justify-between">
+          <div className="glass-panel glass-card-interactive rounded-2xl p-4 flex flex-col justify-between">
             <div>
-              <div className="flex items-center justify-between text-slate-600 mb-1">
-                <p className="text-[10px] font-bold tracking-wider uppercase">SUDAH HADIR</p>
-                <div className="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center">
+              <div className="flex items-center justify-between text-slate-700 mb-1">
+                <p className="text-[10px] font-extrabold tracking-wider uppercase text-slate-700">SUDAH HADIR</p>
+                <div className="w-6 h-6 rounded-lg glass-inner text-emerald-800 flex items-center justify-center">
                   <CheckCircle2 className="w-3.5 h-3.5" />
                 </div>
               </div>
@@ -408,20 +412,20 @@ export function AttendanceDashboard() {
                 <span className="text-3xl font-black text-slate-900 leading-none">
                   {loadingData ? "—" : hadirCount}
                 </span>
-                <span className="text-[10px] font-bold text-emerald-600">
+                <span className="text-[11px] font-extrabold text-emerald-800">
                   ({hadirPct}%)
                 </span>
               </div>
             </div>
-            <p className="text-[10px] text-slate-500 mt-3 font-medium">Terakhir masuk: 2 menit yang lalu</p>
+            <p className="text-[10px] text-slate-600 mt-3 font-semibold">Terakhir masuk: 2 menit yang lalu</p>
           </div>
 
           {/* Card 3: Izin / Sakit */}
-          <div className="bg-white/70 backdrop-blur-md rounded-2xl p-4 border border-white/70 shadow-sm flex flex-col justify-between">
+          <div className="glass-panel glass-card-interactive rounded-2xl p-4 flex flex-col justify-between">
             <div>
-              <div className="flex items-center justify-between text-slate-600 mb-1">
-                <p className="text-[10px] font-bold tracking-wider uppercase">IZIN / SAKIT</p>
-                <div className="w-6 h-6 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center">
+              <div className="flex items-center justify-between text-slate-700 mb-1">
+                <p className="text-[10px] font-extrabold tracking-wider uppercase text-slate-700">IZIN / SAKIT</p>
+                <div className="w-6 h-6 rounded-lg glass-inner text-amber-800 flex items-center justify-center">
                   <Clock3 className="w-3.5 h-3.5" />
                 </div>
               </div>
@@ -429,55 +433,55 @@ export function AttendanceDashboard() {
                 <span className="text-3xl font-black text-slate-900 leading-none">
                   {loadingData ? "—" : izinCount}
                 </span>
-                <span className="text-xs font-semibold text-slate-600">Berkas</span>
+                <span className="text-xs font-bold text-slate-700">Berkas</span>
               </div>
             </div>
-            <p className="text-[10px] text-slate-500 mt-3 font-medium">Memerlukan verifikasi dosen</p>
+            <p className="text-[10px] text-slate-600 mt-3 font-semibold">Memerlukan verifikasi dosen</p>
           </div>
 
           {/* Card 4: Belum Presensi */}
-          <div className="bg-white/70 backdrop-blur-md rounded-2xl p-4 border border-white/70 shadow-sm flex flex-col justify-between">
+          <div className="glass-panel glass-card-interactive rounded-2xl p-4 flex flex-col justify-between border-rose-300/40">
             <div>
-              <div className="flex items-center justify-between text-rose-600 mb-1">
-                <p className="text-[10px] font-bold tracking-wider uppercase">BELUM PRESENSI</p>
-                <div className="w-6 h-6 rounded-lg bg-rose-100 text-rose-600 flex items-center justify-center">
+              <div className="flex items-center justify-between text-rose-700 mb-1">
+                <p className="text-[10px] font-extrabold tracking-wider uppercase text-rose-800">BELUM PRESENSI</p>
+                <div className="w-6 h-6 rounded-lg bg-rose-500/20 border border-rose-400/40 text-rose-800 flex items-center justify-center">
                   <AlertTriangle className="w-3.5 h-3.5" />
                 </div>
               </div>
               <div className="flex items-baseline gap-1.5">
-                <span className="text-3xl font-black text-rose-600 leading-none">
+                <span className="text-3xl font-black text-rose-700 leading-none">
                   {loadingData ? "—" : belumCount}
                 </span>
-                <span className="text-xs font-bold text-rose-600">Mahasiswa</span>
+                <span className="text-xs font-bold text-rose-800">Mahasiswa</span>
               </div>
             </div>
-            <p className="text-[10px] text-rose-600 font-medium mt-3 leading-snug">
+            <p className="text-[10px] text-rose-800 font-semibold mt-3 leading-snug">
               Batas sesi tersisa 43 menit
             </p>
           </div>
 
           {/* Card 5: Kumulatif SMT */}
-          <div className="bg-white/70 backdrop-blur-md rounded-2xl p-4 border border-white/70 shadow-sm flex flex-col justify-between">
+          <div className="glass-panel glass-card-interactive rounded-2xl p-4 flex flex-col justify-between">
             <div>
-              <div className="flex items-center justify-between text-slate-600 mb-1">
-                <p className="text-[10px] font-bold tracking-wider uppercase">KUMULATIF SMT</p>
-                <div className="w-6 h-6 rounded-lg bg-sky-100 text-sky-700 flex items-center justify-center">
+              <div className="flex items-center justify-between text-slate-700 mb-1">
+                <p className="text-[10px] font-extrabold tracking-wider uppercase text-slate-700">KUMULATIF SMT</p>
+                <div className="w-6 h-6 rounded-lg glass-inner text-sky-800 flex items-center justify-center">
                   <TrendingUp className="w-3.5 h-3.5" />
                 </div>
               </div>
               <div className="flex items-baseline gap-1.5">
                 <span className="text-3xl font-black text-slate-900 leading-none">{kumulatif}%</span>
-                <span className="text-[10px] font-bold text-emerald-600">Aman</span>
+                <span className="text-[11px] font-extrabold text-emerald-800">Aman</span>
               </div>
             </div>
-            <p className="text-[10px] text-slate-500 mt-3 font-medium">Target min. 75% BAAK Terpenuhi</p>
+            <p className="text-[10px] text-slate-600 mt-3 font-semibold">Target min. 75% BAAK Terpenuhi</p>
           </div>
         </div>
 
         {/* Middle Section: QR Code & Radar + Warning & Activity Feed */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
           {/* Left: Dynamic QR & Radar Geofence (7 cols) */}
-          <div className="lg:col-span-7 bg-white/80 backdrop-blur-md rounded-3xl p-5 border border-white/85 shadow-md flex flex-col justify-between">
+          <div className="lg:col-span-7 glass-panel rounded-3xl p-6 flex flex-col justify-between">
             <div className="flex flex-col sm:flex-row gap-6 items-start">
               {/* QR Code Container */}
               <div className="flex flex-col items-center gap-2.5 shrink-0 self-center sm:self-start">
@@ -485,11 +489,11 @@ export function AttendanceDashboard() {
 
                 {/* Progress bar */}
                 <div className="w-36 mt-0.5">
-                  <div className="flex justify-between text-[10px] text-slate-500 font-semibold mb-1">
+                  <div className="flex justify-between text-[10px] text-slate-700 font-bold mb-1">
                     <span>Auto-Refresh</span>
-                    <span className="text-sky-700 font-bold">{qrTimer}s</span>
+                    <span className="text-sky-950 font-black">{qrTimer}s</span>
                   </div>
-                  <div className="h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                  <div className="h-1.5 bg-black/15 rounded-full overflow-hidden border border-white/30">
                     <motion.div
                       className="h-full bg-gradient-to-r from-sky-400 to-sky-600 rounded-full"
                       style={{ width: `${(qrTimer / 15) * 100}%` }}
@@ -504,14 +508,14 @@ export function AttendanceDashboard() {
                       setQrTimer(15);
                       triggerToast("Token QR sesi berhasil di-generate ulang!");
                     }}
-                    className="flex items-center gap-1.5 text-[10px] font-bold border border-slate-200 text-slate-600 px-2.5 py-1.5 rounded-xl hover:bg-slate-50 transition-all shadow-sm"
+                    className="flex items-center gap-1.5 text-[10px] font-bold glass-pill text-slate-800 px-2.5 py-1.5 rounded-xl hover:bg-white/45 transition-all shadow-sm"
                   >
                     <RotateCcw className="w-3 h-3" />
                     Reset Token
                   </button>
                   <button
                     onClick={() => setShowProjectorModal(true)}
-                    className="flex items-center gap-1.5 text-[10px] font-bold bg-sky-500 text-white px-2.5 py-1.5 rounded-xl hover:bg-sky-600 transition-all shadow-sm"
+                    className="flex items-center gap-1.5 text-[10px] font-bold bg-sky-600 hover:bg-sky-700 text-white px-2.5 py-1.5 rounded-xl transition-all shadow-md"
                   >
                     <Maximize2 className="w-3 h-3" />
                     Layar Penuh
@@ -525,31 +529,31 @@ export function AttendanceDashboard() {
                   <h3 className="text-lg font-black text-slate-900 leading-tight">
                     QR-Code Dinamis &amp; Radar Perimeter
                   </h3>
-                  <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                  <p className="text-xs text-slate-700 mt-2 leading-relaxed font-medium">
                     Setiap QR berganti otomatis setiap 15 detik dan dienkripsi dengan koordinat GPS satelit ruang 207 Gedung B. Mahasiswa yang berada di luar radius 50 meter tidak dapat melakukan validasi presensi.
                   </p>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
-                  <div className="bg-sky-50/80 rounded-2xl p-3 border border-sky-100">
-                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wide">
+                  <div className="glass-inner rounded-2xl p-3.5 hover:bg-white/30 transition-all">
+                    <p className="text-[10px] text-slate-700 font-extrabold uppercase tracking-wide">
                       Kode Pin Darurat
                     </p>
-                    <p className="text-2xl font-black text-sky-800 tracking-widest mt-0.5">15710</p>
-                    <p className="text-[10px] text-slate-500 mt-0.5">
+                    <p className="text-xl font-black text-sky-950 tracking-wider mt-0.5">15710</p>
+                    <p className="text-[10px] text-slate-700 mt-0.5 font-medium">
                       Gunakan ketika kamera ponsel mahasiswa bermasalah
                     </p>
                   </div>
 
-                  <div className="bg-emerald-50/80 rounded-2xl p-3 border border-emerald-100">
-                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wide">
+                  <div className="glass-inner rounded-2xl p-3.5 hover:bg-white/30 transition-all border-emerald-300/40">
+                    <p className="text-[10px] text-emerald-950 font-extrabold uppercase tracking-wide">
                       Area Geofence Valid
                     </p>
                     <div className="flex items-center gap-1.5 mt-1">
-                      <MapPin className="w-4 h-4 text-emerald-600" />
-                      <p className="text-sm font-black text-emerald-800">Radius 50m</p>
+                      <MapPin className="w-4 h-4 text-emerald-700" />
+                      <p className="text-sm font-black text-emerald-950">Radius 50m</p>
                     </div>
-                    <p className="text-[10px] text-slate-600 mt-0.5 font-mono">
+                    <p className="text-[10px] text-slate-700 mt-0.5 font-mono font-semibold">
                       -6.89042, 107.61031 (Ruang 207)
                     </p>
                   </div>
@@ -561,30 +565,30 @@ export function AttendanceDashboard() {
           {/* Right: Warning Card & Live Activity Feed (5 cols) */}
           <div className="lg:col-span-5 flex flex-col gap-4">
             {/* Warning Card */}
-            <div className="bg-rose-50/90 backdrop-blur-md rounded-2xl p-4 border border-rose-200/80 shadow-sm flex items-start gap-3">
-              <div className="w-8 h-8 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center shrink-0 mt-0.5">
+            <div className="glass-warning rounded-2xl p-4 flex items-start gap-3">
+              <div className="w-8 h-8 rounded-xl bg-rose-500/20 border border-rose-400/40 text-rose-700 flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
                 <AlertTriangle className="w-4 h-4" />
               </div>
               <div>
-                <p className="text-xs font-black text-rose-700">Peringatan Kuota Kehadiran</p>
-                <p className="text-[11px] text-rose-600 mt-0.5 leading-relaxed font-medium">
+                <p className="text-xs font-black text-rose-950">Peringatan Kuota Kehadiran</p>
+                <p className="text-[11px] text-rose-900 mt-0.5 leading-relaxed font-semibold">
                   1 Mahasiswa (Y. Kharlistov) dalam pantauan kritis ambang batas absensi (&lt;75%). Terancam tidak dapat mengikuti Ujian Akhir Semester.
                 </p>
               </div>
             </div>
 
             {/* Live Activity Feed */}
-            <div className="flex-1 bg-white/80 backdrop-blur-md rounded-2xl p-4 border border-white/85 shadow-sm flex flex-col justify-between">
+            <div className="flex-1 glass-panel rounded-2xl p-4 flex flex-col justify-between">
               <div>
-                <div className="flex items-center justify-between mb-2 pb-2 border-b border-slate-100">
+                <div className="flex items-center justify-between mb-2 pb-2 border-b border-white/25">
                   <div className="flex items-center gap-2">
                     <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
                     <h4 className="text-xs font-black text-slate-900">Live Activity Feed</h4>
                   </div>
-                  <span className="text-[10px] font-semibold text-slate-400">Real-time update</span>
+                  <span className="text-[10px] font-bold text-slate-600">Real-time update</span>
                 </div>
 
-                <div className="overflow-y-auto max-h-48 pr-1">
+                <div className="overflow-y-auto no-scrollbar max-h-48 pr-1">
                   {records.slice(0, 5).length > 0 ? (
                     records.slice(0, 5).map((r, i) => (
                       <ActivityItem
@@ -612,7 +616,7 @@ export function AttendanceDashboard() {
               <div className="pt-2 text-right">
                 <button
                   onClick={() => navigate("/statistik-kelas")}
-                  className="text-[10px] font-bold text-sky-700 hover:text-sky-950 hover:underline"
+                  className="text-[10px] font-bold text-sky-950 hover:text-black hover:underline"
                 >
                   Lihat Analisis Statistik Lengkap &rarr;
                 </button>
@@ -620,12 +624,11 @@ export function AttendanceDashboard() {
             </div>
           </div>
         </div>
-
         {/* Attendance Table */}
-        <div className="bg-white/80 backdrop-blur-md rounded-3xl border border-white/85 shadow-md overflow-hidden flex flex-col">
+        <div className="glass-panel rounded-3xl overflow-hidden flex flex-col">
           {/* Table Header Filter & Search */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-4 border-b border-slate-100">
-            <div className="flex items-center flex-wrap gap-1.5 bg-white/40 p-1 rounded-2xl backdrop-blur-sm border border-white/50">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-4 border-b border-white/25">
+            <div className="flex items-center flex-wrap gap-1.5 bg-black/10 p-1 rounded-2xl backdrop-blur-md border border-white/30">
               {(
                 [
                   { key: "semua", label: "Semua Mahasiswa", count: totalEnrolled },
@@ -639,14 +642,14 @@ export function AttendanceDashboard() {
                   onClick={() => setActiveTab(tab.key)}
                   className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
                     activeTab === tab.key
-                      ? "bg-sky-800 text-white shadow-sm"
-                      : "text-slate-700 hover:bg-white/30"
+                      ? "bg-sky-900/90 text-white shadow-md border border-sky-400/40"
+                      : "text-slate-800 hover:bg-white/25 font-bold"
                   }`}
                 >
                   <span>{tab.label}</span>
                   <span
                     className={`px-1.5 py-0.2 rounded-md text-[10px] font-bold ${
-                      activeTab === tab.key ? "bg-sky-950 text-white" : "bg-white/60 text-slate-700"
+                      activeTab === tab.key ? "bg-sky-950 text-white" : "bg-white/50 text-slate-800"
                     }`}
                   >
                     {tab.count}
@@ -656,53 +659,53 @@ export function AttendanceDashboard() {
             </div>
 
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-600" />
               <input
                 type="text"
                 placeholder="Cari NIM atau nama mahasiswa..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full sm:w-64 text-xs pl-9 pr-4 py-2 rounded-xl border border-slate-200 bg-white/90 focus:outline-none focus:ring-2 focus:ring-sky-500 shadow-sm"
+                className="w-full sm:w-64 text-xs pl-9 pr-4 py-2 rounded-xl border border-white/50 bg-white/40 focus:bg-white/70 focus:outline-none focus:ring-2 focus:ring-sky-600 placeholder:text-slate-600 text-slate-900 font-medium shadow-sm backdrop-blur-md transition-all"
               />
             </div>
           </div>
 
           {/* Table Columns */}
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto no-scrollbar">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="border-b border-slate-200/80 bg-slate-50/50 text-slate-500 font-bold text-[11px]">
-                  <th className="py-3 px-4">Mahasiswa</th>
-                  <th className="py-3 px-4">NIM</th>
-                  <th className="py-3 px-4">Waktu Presensi</th>
-                  <th className="py-3 px-4">Metode & Akurasi GPS</th>
-                  <th className="py-3 px-4">Status Kehadiran</th>
-                  <th className="py-3 px-4">Bukti/Lampiran</th>
-                  <th className="py-3 px-4 text-right">Aksi</th>
+                <tr className="border-b border-white/30 glass-table-head text-slate-800 font-extrabold text-[11px]">
+                  <th className="py-3.5 px-4">Mahasiswa</th>
+                  <th className="py-3.5 px-4">NIM</th>
+                  <th className="py-3.5 px-4">Waktu Presensi</th>
+                  <th className="py-3.5 px-4">Metode & Akurasi GPS</th>
+                  <th className="py-3.5 px-4">Status Kehadiran</th>
+                  <th className="py-3.5 px-4">Bukti/Lampiran</th>
+                  <th className="py-3.5 px-4 text-right">Aksi</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 font-medium">
+              <tbody className="divide-y divide-white/15 font-medium">
                 <AnimatePresence>
                   {loadingData ? (
                     [...Array(5)].map((_, i) => (
                       <tr key={i} className="animate-pulse">
-                        <td colSpan={7} className="py-3 px-4">
-                          <div className="h-4 bg-slate-100 rounded w-full" />
+                        <td colSpan={7} className="py-3.5 px-4">
+                          <div className="h-4 bg-white/30 rounded w-full" />
                         </td>
                       </tr>
                     ))
                   ) : filtered.length > 0 ? (
                     filtered.map((row) => (
-                      <tr key={row.id} className="hover:bg-sky-50/40 transition-colors">
+                      <tr key={row.id} className="hover:bg-white/25 transition-colors">
                         {/* Mahasiswa */}
                         <td className="py-3 px-4">
                           <div className="flex items-center gap-2.5">
-                            <div className="w-8 h-8 rounded-full bg-sky-600 text-white text-xs font-black flex items-center justify-center shrink-0">
+                            <div className="w-8 h-8 rounded-full bg-sky-700 text-white text-xs font-black flex items-center justify-center shrink-0 shadow-sm">
                               {getInitials(row.name)}
                             </div>
                             <div>
-                              <p className="text-xs font-bold text-slate-900">{row.name}</p>
-                              <p className="text-[10px] text-sky-700 font-medium">
+                              <p className="text-xs font-bold text-slate-950">{row.name}</p>
+                              <p className="text-[10px] text-sky-950 font-bold">
                                 Kehadiran {hadirPct}% (10 sesi)
                               </p>
                             </div>
@@ -710,29 +713,29 @@ export function AttendanceDashboard() {
                         </td>
 
                         {/* NIM */}
-                        <td className="py-3 px-4 text-slate-600 font-mono text-[11px]">
+                        <td className="py-3 px-4 text-slate-800 font-mono text-[11px] font-semibold">
                           {row.nim}
                         </td>
 
                         {/* Waktu Presensi */}
-                        <td className="py-3 px-4 text-slate-800 font-bold text-xs">
+                        <td className="py-3 px-4 text-slate-950 font-black text-xs">
                           {formatTime(row.checkIn)} WIB
                         </td>
 
                         {/* Metode & Akurasi GPS */}
                         <td className="py-3 px-4">
                           <div className="flex items-start gap-1.5">
-                            <MapPin className="w-3.5 h-3.5 text-sky-600 shrink-0 mt-0.5" />
+                            <MapPin className="w-3.5 h-3.5 text-sky-700 shrink-0 mt-0.5" />
                             <div>
                               {row.status === "IZIN" ? (
                                 <>
-                                  <p className="text-[11px] font-semibold text-slate-700">Portal Mandiri Mahasiswa</p>
-                                  <p className="text-[10px] text-slate-400">Klinik Kampus Medika</p>
+                                  <p className="text-[11px] font-bold text-slate-900">Portal Mandiri Mahasiswa</p>
+                                  <p className="text-[10px] text-slate-700 font-semibold">Klinik Kampus Medika</p>
                                 </>
                               ) : (
                                 <>
-                                  <p className="text-[11px] font-semibold text-slate-700">QR+ Geolocation</p>
-                                  <p className="text-[10px] text-slate-500 font-mono">Radius {row.distance ?? 14}m dari Lab 207</p>
+                                  <p className="text-[11px] font-bold text-slate-900">QR+ Geolocation</p>
+                                  <p className="text-[10px] text-slate-700 font-mono font-semibold">Radius {row.distance ?? 14}m dari Lab 207</p>
                                 </>
                               )}
                             </div>
@@ -742,18 +745,18 @@ export function AttendanceDashboard() {
                         {/* Status Kehadiran */}
                         <td className="py-3 px-4">
                           {row.status === "PRESENT" || row.status === "LATE" ? (
-                            <span className="inline-flex items-center gap-1 text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2.5 py-1 rounded-full">
-                              <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                            <span className="inline-flex items-center gap-1 text-[10px] bg-emerald-500/20 text-emerald-950 border border-emerald-400/50 font-extrabold px-2.5 py-1 rounded-full backdrop-blur-sm">
+                              <CheckCircle2 className="w-3 h-3 text-emerald-700" />
                               Hadir tepat waktu
                             </span>
                           ) : row.status === "IZIN" ? (
-                            <span className="inline-flex items-center gap-1 text-[10px] bg-amber-100 text-amber-800 font-bold px-2.5 py-1 rounded-full">
-                              <Clock3 className="w-3 h-3 text-amber-600" />
+                            <span className="inline-flex items-center gap-1 text-[10px] bg-amber-500/20 text-amber-950 border border-amber-400/50 font-extrabold px-2.5 py-1 rounded-full backdrop-blur-sm">
+                              <Clock3 className="w-3 h-3 text-amber-700" />
                               Sakit (Menunggu Validasi)
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 text-[10px] bg-rose-100 text-rose-700 font-bold px-2.5 py-1 rounded-full">
-                              <X className="w-3 h-3 text-rose-600" />
+                            <span className="inline-flex items-center gap-1 text-[10px] bg-rose-500/20 text-rose-950 border border-rose-400/50 font-extrabold px-2.5 py-1 rounded-full backdrop-blur-sm">
+                              <X className="w-3 h-3 text-rose-700" />
                               Belum Hadir
                             </span>
                           )}
@@ -764,13 +767,13 @@ export function AttendanceDashboard() {
                           {row.status === "IZIN" ? (
                             <button
                               onClick={() => triggerToast("Membuka surat_sakit.pdf...")}
-                              className="flex items-center gap-1 text-[11px] text-sky-800 hover:text-sky-950 font-bold hover:underline"
+                              className="flex items-center gap-1 text-[11px] text-sky-950 hover:text-black font-extrabold hover:underline"
                             >
-                              <FileText className="w-3.5 h-3.5 text-sky-600" />
+                              <FileText className="w-3.5 h-3.5 text-sky-700" />
                               surat_sakit.pdf
                             </button>
                           ) : (
-                            <span className="text-[11px] text-slate-300 font-mono">—</span>
+                            <span className="text-[11px] text-slate-500 font-mono font-bold">—</span>
                           )}
                         </td>
 
@@ -778,7 +781,7 @@ export function AttendanceDashboard() {
                         <td className="py-3 px-4 text-right">
                           <button
                             onClick={() => setSelectedRecord(row)}
-                            className="px-3 py-1 text-[11px] font-bold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 rounded-lg border border-slate-200 shadow-sm transition-all"
+                            className="px-3 py-1 text-[11px] font-bold text-slate-900 hover:text-white bg-white/40 hover:bg-sky-900 rounded-lg border border-white/60 shadow-sm backdrop-blur-md transition-all"
                           >
                             Ubah Status
                           </button>
@@ -787,9 +790,9 @@ export function AttendanceDashboard() {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={7} className="py-12 text-center text-slate-400">
-                        <Users className="w-10 h-10 mx-auto mb-2 opacity-30" />
-                        <p className="text-xs font-bold text-slate-500">
+                      <td colSpan={7} className="py-12 text-center text-slate-700 font-bold">
+                        <Users className="w-10 h-10 mx-auto mb-2 opacity-40 text-slate-700" />
+                        <p className="text-xs font-bold text-slate-800">
                           {searchTerm ? `Tidak ada mahasiswa "${searchTerm}"` : "Belum ada rekaman presensi"}
                         </p>
                       </td>
@@ -809,57 +812,57 @@ export function AttendanceDashboard() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-md"
             onClick={() => setSelectedRecord(null)}
           >
             <motion.div
               initial={{ scale: 0.95, y: 15 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.95 }}
-              className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 flex flex-col gap-4 text-slate-800"
+              className="glass-panel backdrop-blur-2xl rounded-3xl max-w-md w-full p-6 shadow-2xl border border-white/60 flex flex-col gap-4 text-slate-900"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <div className="flex items-center justify-between pb-2 border-b border-white/30">
                 <h3 className="font-bold text-slate-900 text-sm">Detail &amp; Verifikasi Presensi</h3>
-                <button onClick={() => setSelectedRecord(null)} className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100">
+                <button onClick={() => setSelectedRecord(null)} className="p-1.5 text-slate-600 hover:text-slate-900 rounded-lg hover:bg-white/30">
                   <X className="w-4 h-4" />
                 </button>
               </div>
 
               <div className="flex items-center gap-3">
-                <div className="w-11 h-11 rounded-2xl bg-sky-600 text-white font-black text-sm flex items-center justify-center shadow-sm">
+                <div className="w-11 h-11 rounded-2xl bg-sky-700 text-white font-black text-sm flex items-center justify-center shadow-md">
                   {getInitials(selectedRecord.name)}
                 </div>
                 <div>
-                  <p className="font-bold text-slate-900 text-sm">{selectedRecord.name}</p>
-                  <p className="text-xs text-slate-500 font-mono">{selectedRecord.nim}</p>
-                  <p className="text-[11px] text-sky-700 font-semibold">{selectedRecord.jurusan || "Teknik Informatika"}</p>
+                  <p className="font-bold text-slate-950 text-sm">{selectedRecord.name}</p>
+                  <p className="text-xs text-slate-700 font-mono font-semibold">{selectedRecord.nim}</p>
+                  <p className="text-[11px] text-sky-950 font-bold">{selectedRecord.jurusan || "Teknik Informatika"}</p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 bg-sky-50/70 rounded-2xl p-3.5 border border-sky-100">
+              <div className="grid grid-cols-2 gap-3 glass-inner rounded-2xl p-3.5">
                 <div>
-                  <p className="text-[10px] text-slate-500 font-bold uppercase">Waktu Check-in</p>
-                  <p className="text-xs font-black text-slate-900 mt-0.5">{formatTime(selectedRecord.checkIn)} WIB</p>
+                  <p className="text-[10px] text-slate-700 font-extrabold uppercase">Waktu Check-in</p>
+                  <p className="text-xs font-black text-slate-950 mt-0.5">{formatTime(selectedRecord.checkIn)} WIB</p>
                 </div>
                 <div>
-                  <p className="text-[10px] text-slate-500 font-bold uppercase">Status Saat Ini</p>
-                  <p className="text-xs font-black text-slate-900 mt-0.5">{selectedRecord.status}</p>
+                  <p className="text-[10px] text-slate-700 font-extrabold uppercase">Status Saat Ini</p>
+                  <p className="text-xs font-black text-slate-950 mt-0.5">{selectedRecord.status}</p>
                 </div>
                 <div>
-                  <p className="text-[10px] text-slate-500 font-bold uppercase">Jarak Radar GPS</p>
-                  <p className="text-xs font-black text-slate-900 mt-0.5">{selectedRecord.distance ?? 14}m dari Ruang 207</p>
+                  <p className="text-[10px] text-slate-700 font-extrabold uppercase">Jarak Radar GPS</p>
+                  <p className="text-xs font-black text-slate-950 mt-0.5">{selectedRecord.distance ?? 14}m dari Ruang 207</p>
                 </div>
                 <div>
-                  <p className="text-[10px] text-slate-500 font-bold uppercase">Verifikasi Perimeter</p>
-                  <p className="text-xs font-black text-emerald-700 mt-0.5">Valid (Dalam Radius)</p>
+                  <p className="text-[10px] text-slate-700 font-extrabold uppercase">Verifikasi Perimeter</p>
+                  <p className="text-xs font-black text-emerald-800 mt-0.5">Valid (Dalam Radius)</p>
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+              <div className="flex justify-end gap-2 pt-2 border-t border-white/30">
                 <button
                   onClick={() => setSelectedRecord(null)}
-                  className="px-4 py-2 text-xs border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50 font-semibold"
+                  className="px-4 py-2 text-xs border border-white/50 rounded-xl text-slate-800 hover:bg-white/30 font-bold"
                 >
                   Tutup
                 </button>
@@ -868,7 +871,7 @@ export function AttendanceDashboard() {
                     triggerToast(`Status presensi ${selectedRecord.name} berhasil diperbarui!`);
                     setSelectedRecord(null);
                   }}
-                  className="px-4 py-2 text-xs bg-sky-500 text-white rounded-xl hover:bg-sky-600 transition-all font-bold shadow-md flex items-center gap-1.5"
+                  className="px-4 py-2 text-xs bg-sky-600 text-white rounded-xl hover:bg-sky-700 transition-all font-bold shadow-md flex items-center gap-1.5"
                 >
                   <CheckCircle2 className="w-4 h-4" />
                   Konfirmasi Status
@@ -886,47 +889,47 @@ export function AttendanceDashboard() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-slate-950/90 backdrop-blur-md"
+            className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-slate-950/80 backdrop-blur-xl"
             onClick={() => setShowProjectorModal(false)}
           >
             <motion.div
               initial={{ scale: 0.9 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0.9 }}
-              className="bg-white rounded-3xl max-w-lg w-full p-8 shadow-2xl flex flex-col items-center gap-4 text-center"
+              className="glass-panel backdrop-blur-2xl rounded-3xl max-w-lg w-full p-8 shadow-2xl flex flex-col items-center gap-4 text-center border border-white/60"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between w-full">
                 <div className="text-left">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-sky-600 bg-sky-50 px-2 py-0.5 rounded-full">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-sky-800 bg-sky-100/60 px-2 py-0.5 rounded-full border border-sky-300/40">
                     MODE LAYAR PROYEKTOR DOSEN
                   </span>
                   <h3 className="text-lg font-black text-slate-900 mt-1">Ruang 207: Pemrograman Mobile A</h3>
                 </div>
-                <button onClick={() => setShowProjectorModal(false)} className="p-2 text-slate-400 hover:text-slate-600 rounded-xl hover:bg-slate-100">
+                <button onClick={() => setShowProjectorModal(false)} className="p-2 text-slate-500 hover:text-slate-800 rounded-xl hover:bg-white/30">
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
-              <div className="my-2 p-6 bg-slate-50 rounded-3xl border border-slate-200/80 shadow-inner">
+              <div className="my-2 p-6 glass-inner rounded-3xl shadow-inner">
                 <QrCodeDisplay pin="15710" />
               </div>
 
               <div className="w-full max-w-xs">
-                <div className="flex justify-between text-xs font-bold text-slate-600 mb-1">
+                <div className="flex justify-between text-xs font-bold text-slate-700 mb-1">
                   <span>Auto-Refresh Token</span>
-                  <span className="text-sky-600">{qrTimer} detik tersisa</span>
+                  <span className="text-sky-900 font-extrabold">{qrTimer} detik tersisa</span>
                 </div>
-                <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
+                <div className="h-2 bg-black/15 rounded-full overflow-hidden border border-white/30">
                   <motion.div
-                    className="h-full bg-sky-500 rounded-full"
+                    className="h-full bg-sky-600 rounded-full"
                     style={{ width: `${(qrTimer / 15) * 100}%` }}
                     transition={{ duration: 0.5 }}
                   />
                 </div>
               </div>
 
-              <p className="text-xs text-slate-500 leading-relaxed max-w-sm mt-1">
+              <p className="text-xs text-slate-600 font-medium leading-relaxed max-w-sm mt-1">
                 Scan menggunakan aplikasi SATPAMO Mahasiswa dalam radius perimeter 50 meter Lab 207 Gedung B.
               </p>
             </motion.div>

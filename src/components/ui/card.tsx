@@ -13,7 +13,7 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: "easeOut" }}
         className={cn(
-          "rounded-xl border border-gray-200 bg-card text-card-foreground shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-sm bg-white/50",
+          "rounded-2xl glass-panel text-card-foreground shadow-[0_10px_32px_0_rgba(15,23,42,0.08)]",
           className
         )}
         {...props}

@@ -206,12 +206,16 @@ export function JadwalSesi() {
 
   return (
     <div
-      className="min-h-screen flex text-slate-800"
+      className="min-h-screen flex text-slate-800 relative overflow-hidden"
       style={{
-        background: "linear-gradient(135deg, #38bdf8 0%, #0ea5e9 30%, #0284c7 60%, #60d8f7 100%)",
+        background: "linear-gradient(135deg, #38bdf8 0%, #0ea5e9 30%, #0284c7 60%, #38bdf8 100%)",
         fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
       }}
     >
+      {/* Decorative ambient blurred spots for deep glassmorphism light refraction */}
+      <div className="pointer-events-none absolute -top-24 -right-24 w-96 h-96 bg-cyan-200/35 rounded-full blur-3xl" />
+      <div className="pointer-events-none absolute top-1/3 left-1/4 w-80 h-80 bg-blue-300/30 rounded-full blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-24 right-1/3 w-96 h-96 bg-sky-200/30 rounded-full blur-3xl" />
       {/* Toast Notification */}
       <AnimatePresence>
         {syncToast && (
@@ -297,15 +301,15 @@ export function JadwalSesi() {
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 overflow-y-auto px-7 py-5 flex flex-col gap-5">
+      <main className="flex-1 overflow-y-auto no-scrollbar px-7 py-5 flex flex-col gap-5">
         {/* Top Header Pill & User Avatar */}
         <div className="flex items-center justify-between">
-          <div className="inline-flex items-center gap-2.5 bg-white/70 backdrop-blur-md rounded-2xl px-4 py-2 border border-white/70 shadow-sm">
+          <div className="inline-flex items-center gap-2.5 glass-pill rounded-2xl px-4 py-2 shadow-sm">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0 animate-pulse" />
-            <span className="text-xs font-semibold text-slate-800">
+            <span className="text-xs font-bold text-slate-900">
               Ruang 207: Pemrograman Mobile (Kelas T3A)
             </span>
-            <DoorOpen className="w-3.5 h-3.5 text-slate-700 ml-1" />
+            <DoorOpen className="w-3.5 h-3.5 text-slate-800 ml-1" />
           </div>
 
           <div className="w-9 h-9 rounded-full bg-sky-600 border border-sky-300 flex items-center justify-center text-white text-xs font-black shadow-sm">
@@ -316,14 +320,14 @@ export function JadwalSesi() {
         {/* Breadcrumb, Title & Top Action Buttons */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <p className="text-[11px] font-semibold text-slate-700 mb-1 flex items-center gap-1.5 opacity-90">
+            <p className="text-[11px] font-semibold text-slate-800 mb-1 flex items-center gap-1.5 opacity-90">
               <span>Beranda</span>
               <span>&gt;</span>
               <span>Teknik Informatika</span>
               <span>&gt;</span>
               <span>Pemrograman Mobile A</span>
               <span>&gt;</span>
-              <span className="text-sky-900 font-bold">Jadwal Sesi</span>
+              <span className="text-sky-950 font-bold">Jadwal Sesi</span>
             </p>
             <h2 className="text-2xl font-black text-slate-900 tracking-tight">
               Jadwal Sesi Perkuliahan
@@ -338,17 +342,17 @@ export function JadwalSesi() {
             <button
               onClick={handleSyncSiakad}
               disabled={isSyncing}
-              className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-white/60 hover:bg-white/80 backdrop-blur-sm text-sky-800 border border-white/70 shadow-sm transition-all flex items-center gap-2"
+              className="px-3.5 py-2 rounded-xl text-xs font-bold glass-pill hover:bg-white/45 text-sky-950 shadow-sm transition-all flex items-center gap-2"
             >
-              <RefreshCw className={`w-3.5 h-3.5 text-sky-700 ${isSyncing ? "animate-spin" : ""}`} />
+              <RefreshCw className={`w-3.5 h-3.5 text-sky-800 ${isSyncing ? "animate-spin" : ""}`} />
               Sinkronisasi SIAKAD
             </button>
 
             <button
               onClick={handleDownloadRps}
-              className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-white/60 hover:bg-white/80 backdrop-blur-sm text-sky-800 border border-white/70 shadow-sm transition-all flex items-center gap-2"
+              className="px-3.5 py-2 rounded-xl text-xs font-bold glass-pill hover:bg-white/45 text-sky-950 shadow-sm transition-all flex items-center gap-2"
             >
-              <Download className="w-3.5 h-3.5 text-sky-700" />
+              <Download className="w-3.5 h-3.5 text-sky-800" />
               Unduh Silabus & RPS
             </button>
 
@@ -365,42 +369,42 @@ export function JadwalSesi() {
         {/* 4 Metric Summary Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
           {/* Card 1: Pertemuan Semester */}
-          <div className="bg-white/70 backdrop-blur-md rounded-2xl p-4 border border-white/70 shadow-sm flex flex-col justify-between">
+          <div className="glass-panel glass-card-interactive rounded-2xl p-4 flex flex-col justify-between">
             <div>
-              <p className="text-[10px] font-bold tracking-wider text-slate-600 uppercase">
+              <p className="text-[10px] font-extrabold tracking-wider text-slate-700 uppercase">
                 PERTEMUAN SEMESTER
               </p>
               <div className="flex items-baseline gap-2 mt-1">
                 <span className="text-3xl font-black text-slate-900 leading-none">16</span>
-                <span className="text-xs font-semibold text-slate-600">Sesi Total</span>
+                <span className="text-xs font-bold text-slate-700">Sesi Total</span>
               </div>
             </div>
             <div className="flex items-center gap-1.5 mt-3 flex-wrap">
-              <span className="bg-sky-100/90 text-sky-700 text-[10px] font-bold px-2 py-0.5 rounded-md">
+              <span className="bg-sky-950 text-sky-200 text-[10px] font-bold px-2 py-0.5 rounded-md">
                 10 Selesai
               </span>
-              <span className="bg-emerald-100/90 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-md">
+              <span className="bg-emerald-500/25 border border-emerald-400/40 text-emerald-950 text-[10px] font-extrabold px-2 py-0.5 rounded-md">
                 1 Hari ini
               </span>
-              <span className="bg-sky-100/90 text-sky-700 text-[10px] font-bold px-2 py-0.5 rounded-md">
+              <span className="glass-inner text-slate-800 text-[10px] font-bold px-2 py-0.5 rounded-md">
                 5 Sisa sesi
               </span>
             </div>
           </div>
 
           {/* Card 2: Progress RPS & Materi */}
-          <div className="bg-white/70 backdrop-blur-md rounded-2xl p-4 border border-white/70 shadow-sm flex flex-col justify-between">
+          <div className="glass-panel glass-card-interactive rounded-2xl p-4 flex flex-col justify-between">
             <div>
-              <p className="text-[10px] font-bold tracking-wider text-slate-600 uppercase">
+              <p className="text-[10px] font-extrabold tracking-wider text-slate-700 uppercase">
                 PROGRESS RPS & MATERI
               </p>
               <div className="flex items-baseline gap-2 mt-1">
                 <span className="text-3xl font-black text-slate-900 leading-none">62.5%</span>
-                <span className="text-[10px] font-bold text-emerald-600">+6.2%</span>
+                <span className="text-[10px] font-extrabold text-emerald-800">+6.2%</span>
               </div>
             </div>
             <div className="mt-3">
-              <div className="w-full bg-slate-200/80 rounded-full h-1.5 overflow-hidden">
+              <div className="w-full bg-black/15 rounded-full h-1.5 overflow-hidden border border-white/30">
                 <div
                   className="bg-gradient-to-r from-sky-400 to-sky-600 h-1.5 rounded-full"
                   style={{ width: "62.5%" }}
@@ -410,33 +414,33 @@ export function JadwalSesi() {
           </div>
 
           {/* Card 3: Rata-Rata Kehadiran */}
-          <div className="bg-white/70 backdrop-blur-md rounded-2xl p-4 border border-white/70 shadow-sm flex flex-col justify-between">
+          <div className="glass-panel glass-card-interactive rounded-2xl p-4 flex flex-col justify-between">
             <div>
-              <p className="text-[10px] font-bold tracking-wider text-slate-600 uppercase">
+              <p className="text-[10px] font-extrabold tracking-wider text-slate-700 uppercase">
                 RATA-RATA KEHADIRAN
               </p>
               <div className="flex items-baseline gap-2 mt-1">
                 <span className="text-3xl font-black text-slate-900 leading-none">92.5%</span>
-                <span className="text-[10px] font-bold text-slate-500">Target &gt;80%</span>
+                <span className="text-[10px] font-bold text-slate-700">Target &gt;80%</span>
               </div>
             </div>
-            <p className="text-[10px] text-slate-600 mt-3 truncate font-medium">
+            <p className="text-[10px] text-slate-700 mt-3 truncate font-semibold">
               Memenuhi batas akreditasi prodi
             </p>
           </div>
 
           {/* Card 4: Minggu Perkuliahan */}
-          <div className="bg-white/70 backdrop-blur-md rounded-2xl p-4 border border-white/70 shadow-sm flex flex-col justify-between">
+          <div className="glass-panel glass-card-interactive rounded-2xl p-4 flex flex-col justify-between">
             <div>
-              <p className="text-[10px] font-bold tracking-wider text-slate-600 uppercase">
+              <p className="text-[10px] font-extrabold tracking-wider text-slate-700 uppercase">
                 MINGGU PERKULIAHAN
               </p>
               <div className="flex items-baseline gap-2 mt-1">
                 <span className="text-3xl font-black text-slate-900 leading-none">M-10</span>
-                <span className="text-[10px] font-semibold text-slate-600">Periode Pra-UAS</span>
+                <span className="text-[10px] font-bold text-slate-700">Periode Pra-UAS</span>
               </div>
             </div>
-            <p className="text-[10px] text-slate-600 mt-3 truncate font-medium">
+            <p className="text-[10px] text-slate-700 mt-3 truncate font-semibold">
               Sisa 6 pekan sebelum evaluasi akhir
             </p>
           </div>
@@ -444,18 +448,18 @@ export function JadwalSesi() {
 
         {/* Filter Pills & View Mode Bar */}
         <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-1.5 bg-white/40 p-1 rounded-2xl backdrop-blur-sm border border-white/50">
+          <div className="flex items-center gap-1.5 bg-black/10 p-1 rounded-2xl backdrop-blur-md border border-white/30">
             <button
               onClick={() => setFilterTab("semua")}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
                 filterTab === "semua"
-                  ? "bg-sky-800 text-white shadow-sm"
-                  : "text-slate-700 hover:bg-white/30"
+                  ? "bg-sky-900/90 text-white shadow-md border border-sky-400/40"
+                  : "text-slate-800 hover:bg-white/25 font-bold"
               }`}
             >
               <span>Semua sesi</span>
               <span className={`px-1.5 py-0.2 rounded-md text-[10px] font-bold ${
-                filterTab === "semua" ? "bg-sky-950 text-white" : "bg-white/60 text-slate-700"
+                filterTab === "semua" ? "bg-sky-950 text-white" : "bg-white/50 text-slate-800"
               }`}>
                 16
               </span>
@@ -465,13 +469,13 @@ export function JadwalSesi() {
               onClick={() => setFilterTab("hariIni")}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
                 filterTab === "hariIni"
-                  ? "bg-sky-800 text-white shadow-sm"
-                  : "text-slate-700 hover:bg-white/30"
+                  ? "bg-sky-900/90 text-white shadow-md border border-sky-400/40"
+                  : "text-slate-800 hover:bg-white/25 font-bold"
               }`}
             >
               <span>Hari ini</span>
               <span className={`px-1.5 py-0.2 rounded-md text-[10px] font-bold ${
-                filterTab === "hariIni" ? "bg-sky-950 text-white" : "bg-white/60 text-slate-700"
+                filterTab === "hariIni" ? "bg-sky-950 text-white" : "bg-white/50 text-slate-800"
               }`}>
                 1
               </span>
@@ -481,13 +485,13 @@ export function JadwalSesi() {
               onClick={() => setFilterTab("akanDatang")}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
                 filterTab === "akanDatang"
-                  ? "bg-sky-800 text-white shadow-sm"
-                  : "text-slate-700 hover:bg-white/30"
+                  ? "bg-sky-900/90 text-white shadow-md border border-sky-400/40"
+                  : "text-slate-800 hover:bg-white/25 font-bold"
               }`}
             >
               <span>Akan datang</span>
               <span className={`px-1.5 py-0.2 rounded-md text-[10px] font-bold ${
-                filterTab === "akanDatang" ? "bg-sky-950 text-white" : "bg-white/60 text-slate-700"
+                filterTab === "akanDatang" ? "bg-sky-950 text-white" : "bg-white/50 text-slate-800"
               }`}>
                 5
               </span>
@@ -495,11 +499,11 @@ export function JadwalSesi() {
           </div>
 
           {/* View mode toggle */}
-          <div className="flex items-center gap-1 bg-white/40 p-1 rounded-xl backdrop-blur-sm border border-white/50">
+          <div className="flex items-center gap-1 bg-black/10 p-1 rounded-xl backdrop-blur-md border border-white/30">
             <button
               onClick={() => setViewMode("list")}
-              className={`p-1.5 rounded-lg text-slate-700 transition-all ${
-                viewMode === "list" ? "bg-white/80 shadow-sm text-sky-800" : "hover:bg-white/30"
+              className={`p-1.5 rounded-lg transition-all ${
+                viewMode === "list" ? "bg-white/50 shadow-sm text-sky-950" : "text-slate-800 hover:bg-white/25"
               }`}
               title="Tampilan List"
             >
@@ -507,8 +511,8 @@ export function JadwalSesi() {
             </button>
             <button
               onClick={() => setViewMode("grid")}
-              className={`p-1.5 rounded-lg text-slate-700 transition-all ${
-                viewMode === "grid" ? "bg-white/80 shadow-sm text-sky-800" : "hover:bg-white/30"
+              className={`p-1.5 rounded-lg transition-all ${
+                viewMode === "grid" ? "bg-white/50 shadow-sm text-sky-950" : "text-slate-800 hover:bg-white/25"
               }`}
               title="Tampilan Grid"
             >
@@ -523,10 +527,10 @@ export function JadwalSesi() {
           <div className="lg:col-span-8 flex flex-col gap-5">
             {/* Active Session Card (Sesi 10) - hidden if filter is akanDatang */}
             {filterTab !== "akanDatang" && (
-              <div className="bg-white/80 backdrop-blur-md rounded-3xl p-5 border border-white/85 shadow-md flex flex-col gap-4">
+              <div className="glass-panel rounded-3xl p-5 shadow-lg flex flex-col gap-4">
                 {/* Header row with Badge Sesi 10 & Session status info */}
                 <div className="flex items-start gap-4">
-                  <div className="w-13 h-13 rounded-2xl bg-sky-600 text-white flex flex-col items-center justify-center shrink-0 shadow-md">
+                  <div className="w-13 h-13 rounded-2xl bg-gradient-to-br from-sky-600 to-sky-700 text-white flex flex-col items-center justify-center shrink-0 shadow-md">
                     <span className="text-[10px] font-semibold tracking-wider uppercase leading-none opacity-90">
                       Sesi
                     </span>
@@ -535,7 +539,7 @@ export function JadwalSesi() {
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center flex-wrap gap-2 text-[11px] text-slate-600 mb-1">
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-200">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-800 font-bold border border-emerald-400/30">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
                         {activeSessionEnded ? "Sesi Selesai" : "Sedang Berlangsung"}
                       </span>
@@ -553,27 +557,27 @@ export function JadwalSesi() {
                 </div>
 
                 {/* Sub sections: Presensi Masuk & Materi / Starter Kode */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1 border-t border-slate-200/60">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1 border-t border-slate-300/40">
                   {/* Presensi Masuk */}
-                  <div className="bg-sky-50/70 rounded-2xl p-3 border border-sky-100 flex flex-col justify-between">
-                    <p className="text-[11px] font-bold text-slate-600">Presensi Masuk</p>
+                  <div className="glass-inner rounded-2xl p-3.5 flex flex-col justify-between">
+                    <p className="text-[11px] font-bold text-slate-700">Presensi Masuk</p>
                     <div className="flex items-baseline gap-2 my-1">
                       <span className="text-2xl font-black text-slate-900">38</span>
-                      <span className="text-xs font-semibold text-slate-500">/ 42 Mahasiswa</span>
+                      <span className="text-xs font-semibold text-slate-600">/ 42 Mahasiswa</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="bg-emerald-100 text-emerald-800 font-black text-[10px] px-2 py-0.5 rounded-full">
+                      <span className="bg-emerald-500/20 text-emerald-900 font-black text-[10px] px-2 py-0.5 rounded-full border border-emerald-400/30">
                         90.5%
                       </span>
-                      <span className="text-[11px] text-slate-500 font-medium">
+                      <span className="text-[11px] text-slate-600 font-medium">
                         4 Belum Absen
                       </span>
                     </div>
                   </div>
 
                   {/* Materi & Starter Kode Perkuliahan */}
-                  <div className="bg-sky-50/70 rounded-2xl p-3 border border-sky-100 flex flex-col justify-between">
-                    <p className="text-[11px] font-bold text-slate-600">
+                  <div className="glass-inner rounded-2xl p-3.5 flex flex-col justify-between">
+                    <p className="text-[11px] font-bold text-slate-700">
                       Materi & Starter Kode Perkuliahan :
                     </p>
                     <div className="flex flex-col gap-1.5 mt-1.5">
@@ -583,9 +587,9 @@ export function JadwalSesi() {
                           e.preventDefault();
                           setSyncToast("Mengunduh PPT_Modul_10_REST_API.pdf...");
                         }}
-                        className="flex items-center gap-2 text-xs text-sky-800 hover:text-sky-950 font-semibold truncate hover:underline"
+                        className="flex items-center gap-2 text-xs text-sky-900 hover:text-sky-950 font-semibold truncate hover:underline"
                       >
-                        <span className="bg-red-500 text-white text-[9px] font-black px-1 py-0.2 rounded">
+                        <span className="bg-rose-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded shadow-xs">
                           PPT
                         </span>
                         <span className="truncate">PPT_Modul_10_REST_API.pdf</span>
@@ -596,9 +600,9 @@ export function JadwalSesi() {
                           e.preventDefault();
                           setSyncToast("Mengunduh Starter_Code_Repo.zip...");
                         }}
-                        className="flex items-center gap-2 text-xs text-sky-800 hover:text-sky-950 font-semibold truncate hover:underline"
+                        className="flex items-center gap-2 text-xs text-sky-900 hover:text-sky-950 font-semibold truncate hover:underline"
                       >
-                        <span className="bg-amber-500 text-white text-[9px] font-black px-1 py-0.2 rounded">
+                        <span className="bg-amber-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded shadow-xs">
                           ZIP
                         </span>
                         <span className="truncate">Starter_Code_Repo.zip</span>
@@ -611,7 +615,7 @@ export function JadwalSesi() {
                 <div className="flex items-center flex-wrap gap-2.5 pt-2">
                   <button
                     onClick={() => navigate("/")}
-                    className="px-4 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-600 text-white font-bold text-xs shadow-md transition-all flex items-center gap-2"
+                    className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white font-bold text-xs shadow-md transition-all flex items-center gap-2"
                   >
                     <Radio className="w-3.5 h-3.5" />
                     Masuk live monitoring presensi
@@ -619,15 +623,15 @@ export function JadwalSesi() {
 
                   <button
                     onClick={() => setShowUploadModal(true)}
-                    className="px-4 py-2.5 rounded-xl bg-white/70 hover:bg-white text-sky-800 border border-sky-200 font-bold text-xs shadow-sm transition-all flex items-center gap-2"
+                    className="px-4 py-2.5 rounded-xl glass-pill hover:bg-white/60 text-sky-950 font-bold text-xs shadow-xs transition-all flex items-center gap-2"
                   >
-                    <Upload className="w-3.5 h-3.5 text-sky-600" />
+                    <Upload className="w-3.5 h-3.5 text-sky-700" />
                     Unggah Materi / Tugas
                   </button>
 
                   <button
                     onClick={() => setShowCloseSessionModal(true)}
-                    className="px-3.5 py-2.5 rounded-xl bg-red-100 hover:bg-red-200 text-red-700 font-bold text-xs transition-all flex items-center gap-1.5 ml-auto"
+                    className="px-3.5 py-2.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-800 border border-rose-300/40 font-bold text-xs transition-all flex items-center gap-1.5 ml-auto"
                   >
                     <Square className="w-3 h-3 fill-current" />
                     Tutup sesi kuliah
@@ -655,10 +659,10 @@ export function JadwalSesi() {
                 {displayedUpcoming.map((item) => (
                   <div
                     key={item.id}
-                    className="bg-white/75 hover:bg-white/90 backdrop-blur-md rounded-2xl p-4 border border-white/75 shadow-sm transition-all flex flex-col md:flex-row md:items-center justify-between gap-3"
+                    className="glass-panel glass-card-interactive rounded-2xl p-4 shadow-sm transition-all flex flex-col md:flex-row md:items-center justify-between gap-3"
                   >
                     <div className="flex items-start gap-3.5">
-                      <div className="w-11 h-11 rounded-xl bg-sky-700 text-white flex flex-col items-center justify-center shrink-0 shadow-sm">
+                      <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-sky-700 to-sky-800 text-white flex flex-col items-center justify-center shrink-0 shadow-xs">
                         <span className="text-[9px] font-semibold tracking-wider uppercase leading-none opacity-90">
                           Sesi
                         </span>
@@ -669,7 +673,7 @@ export function JadwalSesi() {
 
                       <div className="min-w-0">
                         <div className="flex items-center flex-wrap gap-2 text-[11px] mb-1">
-                          <span className="bg-sky-100/90 text-sky-800 font-bold px-2 py-0.5 rounded-full text-[10px]">
+                          <span className="bg-sky-500/15 text-sky-900 font-bold px-2 py-0.5 rounded-full text-[10px] border border-sky-400/20">
                             {item.relativeTime}
                           </span>
                           <span className="text-slate-600 font-medium">
@@ -687,7 +691,7 @@ export function JadwalSesi() {
 
                     <button
                       onClick={() => setShowDetailModal(item)}
-                      className="px-3.5 py-1.5 rounded-xl bg-white/70 hover:bg-white text-slate-700 hover:text-slate-900 border border-slate-200/80 text-xs font-bold transition-all shrink-0 self-end md:self-center"
+                      className="px-3.5 py-1.5 rounded-xl glass-pill hover:bg-white/60 text-slate-800 hover:text-slate-950 text-xs font-bold transition-all shrink-0 self-end md:self-center"
                     >
                       Lihat Detail
                     </button>
@@ -700,7 +704,7 @@ export function JadwalSesi() {
           {/* Right Column (approx 4 cols / 35-40%) */}
           <div className="lg:col-span-4 flex flex-col gap-4">
             {/* Calendar Card Widget */}
-            <div className="bg-white/80 backdrop-blur-md rounded-3xl p-4 border border-white/85 shadow-md">
+            <div className="glass-panel rounded-3xl p-5 shadow-lg">
               {/* Calendar Header */}
               <div className="flex items-center justify-between mb-3 px-1">
                 <div className="flex items-center gap-2">
@@ -710,10 +714,10 @@ export function JadwalSesi() {
                   </span>
                 </div>
                 <div className="flex items-center gap-1 text-slate-600">
-                  <button className="p-1 hover:bg-slate-100 rounded-lg transition-all">
+                  <button className="p-1 hover:bg-white/40 rounded-lg transition-all">
                     <ChevronLeft className="w-4 h-4" />
                   </button>
-                  <button className="p-1 hover:bg-slate-100 rounded-lg transition-all">
+                  <button className="p-1 hover:bg-white/40 rounded-lg transition-all">
                     <ChevronRight className="w-4 h-4" />
                   </button>
                 </div>
@@ -751,7 +755,7 @@ export function JadwalSesi() {
                 <span className="py-1">14</span>
                 {/* 15: Hari ini (Blue pill) */}
                 <span className="py-1">
-                  <span className="inline-flex w-7 h-7 rounded-lg bg-sky-500 text-white font-bold items-center justify-center shadow-sm">
+                  <span className="inline-flex w-7 h-7 rounded-lg bg-sky-500 text-white font-bold items-center justify-center shadow-xs">
                     15
                   </span>
                 </span>
@@ -759,7 +763,7 @@ export function JadwalSesi() {
                 <span className="py-1">17</span>
                 {/* 18: Kelas Pengganti (Yellow pill) */}
                 <span className="py-1">
-                  <span className="inline-flex w-7 h-7 rounded-lg bg-amber-400 text-slate-900 font-bold items-center justify-center shadow-sm">
+                  <span className="inline-flex w-7 h-7 rounded-lg bg-amber-400 text-slate-900 font-bold items-center justify-center shadow-xs">
                     18
                   </span>
                 </span>
@@ -784,7 +788,7 @@ export function JadwalSesi() {
               </div>
 
               {/* Calendar Legend */}
-              <div className="flex items-center justify-center gap-4 mt-3 pt-2.5 border-t border-slate-200/60 text-[10px] font-semibold text-slate-600">
+              <div className="flex items-center justify-center gap-4 mt-3 pt-2.5 border-t border-slate-300/40 text-[10px] font-semibold text-slate-600">
                 <div className="flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-sky-500" />
                   <span>Hari ini</span>
@@ -797,21 +801,21 @@ export function JadwalSesi() {
             </div>
 
             {/* Pengingat Regulasi BAAK Card */}
-            <div className="bg-sky-100/85 backdrop-blur-md rounded-2xl p-3.5 border border-sky-200/80 shadow-sm flex flex-col gap-2">
-              <div className="flex items-center gap-2 text-sky-950 font-black text-xs tracking-wider uppercase">
-                <Bell className="w-3.5 h-3.5 text-sky-700" />
+            <div className="glass-panel border-amber-300/40 bg-amber-500/10 rounded-2xl p-4 shadow-sm flex flex-col gap-2">
+              <div className="flex items-center gap-2 text-amber-950 font-black text-xs tracking-wider uppercase">
+                <Bell className="w-3.5 h-3.5 text-amber-600" />
                 <span>PENGINGAT REGULASI BAAK</span>
               </div>
               <p className="text-[11px] text-slate-700 leading-relaxed font-medium">
                 Pengisian <strong className="text-slate-900 font-bold">Berita Acara Perkuliahan (BAP)</strong> wajib ditandatangani digital paling lambat H+1 (24 Jam) setelah sesi berakhir agar hak presensi mahasiswa terverifikasi di portal SIM-Akademik.
               </p>
-              <div className="flex items-center justify-between text-[10px] pt-1 border-t border-sky-200/60">
+              <div className="flex items-center justify-between text-[10px] pt-1.5 border-t border-amber-300/30">
                 <span className="text-slate-600 font-semibold">
                   Batas Sesi 10 : Besok, 10:30 WIB
                 </span>
                 <button
                   onClick={() => setShowBapModal(true)}
-                  className="text-sky-800 hover:text-sky-950 font-bold flex items-center gap-1 hover:underline"
+                  className="text-sky-900 hover:text-sky-950 font-bold flex items-center gap-1 hover:underline"
                 >
                   Panduan BAP <ArrowRight className="w-3 h-3" />
                 </button>
@@ -819,17 +823,17 @@ export function JadwalSesi() {
             </div>
 
             {/* Detail Kelas Hari Ini Card */}
-            <div className="bg-white/80 backdrop-blur-md rounded-2xl p-4 border border-white/85 shadow-sm flex flex-col gap-3">
+            <div className="glass-panel rounded-2xl p-4 shadow-sm flex flex-col gap-3">
               <div className="flex items-center justify-between">
                 <h4 className="text-xs font-black text-slate-900">Detail Kelas Hari Ini</h4>
-                <span className="text-[10px] font-semibold text-slate-500">
+                <span className="text-[10px] font-semibold text-slate-600">
                   Senin, 15 September 2026
                 </span>
               </div>
 
               <div className="flex flex-col gap-2">
                 {/* Item 1: Kelas T3B */}
-                <div className="bg-sky-50/70 hover:bg-sky-50 rounded-xl p-2.5 border border-sky-100/80 flex items-center gap-3 transition-all">
+                <div className="glass-inner hover:bg-white/40 rounded-xl p-2.5 flex items-center gap-3 transition-all">
                   <div className="w-8 h-8 rounded-lg bg-sky-600 text-white flex flex-col items-center justify-center shrink-0">
                     <span className="text-[7px] font-bold uppercase leading-none opacity-90">Sesi</span>
                     <span className="text-xs font-black leading-none mt-0.5">10</span>
@@ -837,14 +841,14 @@ export function JadwalSesi() {
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between">
                       <p className="text-xs font-bold text-slate-900">Kelas T3B</p>
-                      <span className="text-[10px] font-semibold text-slate-500">10.20 - 12.00</span>
+                      <span className="text-[10px] font-semibold text-slate-600">10.20 - 12.00</span>
                     </div>
-                    <p className="text-[10px] text-slate-500 mt-0.5">Ruang 305 • 3 SKS • Gedung A</p>
+                    <p className="text-[10px] text-slate-600 mt-0.5">Ruang 305 • 3 SKS • Gedung A</p>
                   </div>
                 </div>
 
                 {/* Item 2: Kelas T3C */}
-                <div className="bg-sky-50/70 hover:bg-sky-50 rounded-xl p-2.5 border border-sky-100/80 flex items-center gap-3 transition-all">
+                <div className="glass-inner hover:bg-white/40 rounded-xl p-2.5 flex items-center gap-3 transition-all">
                   <div className="w-8 h-8 rounded-lg bg-sky-600 text-white flex flex-col items-center justify-center shrink-0">
                     <span className="text-[7px] font-bold uppercase leading-none opacity-90">Sesi</span>
                     <span className="text-xs font-black leading-none mt-0.5">10</span>
@@ -852,14 +856,14 @@ export function JadwalSesi() {
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between">
                       <p className="text-xs font-bold text-slate-900">Kelas T3C</p>
-                      <span className="text-[10px] font-semibold text-slate-500">13.00 - 15.30</span>
+                      <span className="text-[10px] font-semibold text-slate-600">13.00 - 15.30</span>
                     </div>
-                    <p className="text-[10px] text-slate-500 mt-0.5">Ruang 101 • 3 SKS • Gedung A</p>
+                    <p className="text-[10px] text-slate-600 mt-0.5">Ruang 101 • 3 SKS • Gedung A</p>
                   </div>
                 </div>
 
                 {/* Item 3: Kelas T3D */}
-                <div className="bg-sky-50/70 hover:bg-sky-50 rounded-xl p-2.5 border border-sky-100/80 flex items-center gap-3 transition-all">
+                <div className="glass-inner hover:bg-white/40 rounded-xl p-2.5 flex items-center gap-3 transition-all">
                   <div className="w-8 h-8 rounded-lg bg-sky-600 text-white flex flex-col items-center justify-center shrink-0">
                     <span className="text-[7px] font-bold uppercase leading-none opacity-90">Sesi</span>
                     <span className="text-xs font-black leading-none mt-0.5">10</span>
@@ -867,28 +871,28 @@ export function JadwalSesi() {
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between">
                       <p className="text-xs font-bold text-slate-900">Kelas T3D</p>
-                      <span className="text-[10px] font-semibold text-slate-500">15.30 - 16.50</span>
+                      <span className="text-[10px] font-semibold text-slate-600">15.30 - 16.50</span>
                     </div>
-                    <p className="text-[10px] text-slate-500 mt-0.5">Ruang 701 • 3 SKS • Gedung A</p>
+                    <p className="text-[10px] text-slate-600 mt-0.5">Ruang 701 • 3 SKS • Gedung A</p>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Asisten Dosen (TA) Card */}
-            <div className="bg-white/75 backdrop-blur-md rounded-2xl p-3 border border-white/80 shadow-sm flex items-center justify-between">
+            <div className="glass-panel rounded-2xl p-3.5 shadow-sm flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-full bg-sky-600 text-white text-xs font-black flex items-center justify-center shrink-0">
                   {dosen ? getInitials(dosen.username) : "YK"}
                 </div>
                 <div>
-                  <p className="text-[10px] font-semibold text-slate-500 leading-tight">
+                  <p className="text-[10px] font-semibold text-slate-600 leading-tight">
                     Asisten Dosen (TA)
                   </p>
                   <p className="text-xs font-bold text-slate-900 leading-tight mt-0.5">
                     {dosen?.username ?? "Yurii Kharlistov, M.T."}
                   </p>
-                  <p className="text-[10px] text-slate-500 leading-tight">
+                  <p className="text-[10px] text-slate-600 leading-tight">
                     NIP: 123456789098761
                   </p>
                 </div>
@@ -896,7 +900,7 @@ export function JadwalSesi() {
 
               <button
                 onClick={() => setSyncToast("Menghubungkan pesan dengan Asisten Dosen...")}
-                className="w-8 h-8 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 flex items-center justify-center shadow-sm transition-all"
+                className="w-8 h-8 rounded-xl glass-pill hover:bg-white/60 text-slate-700 flex items-center justify-center shadow-xs transition-all"
                 title="Kirim pesan ke Asisten Dosen"
               >
                 <MessageSquare className="w-4 h-4" />
@@ -913,27 +917,27 @@ export function JadwalSesi() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4"
+            className="fixed inset-0 z-50 bg-slate-950/40 backdrop-blur-md flex items-center justify-center p-4"
           >
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl border border-slate-100 flex flex-col gap-4 text-slate-800"
+              className="glass-panel backdrop-blur-2xl rounded-3xl p-6 w-full max-w-md shadow-2xl border border-white/60 flex flex-col gap-4 text-slate-800"
             >
-              <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-300/40">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-xl bg-sky-100 text-sky-600 flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-xl bg-sky-500/20 text-sky-800 flex items-center justify-center">
                     <Plus className="w-4 h-4" />
                   </div>
                   <div>
                     <h3 className="font-bold text-slate-900 text-sm">Jadwalkan Sesi / Kelas Pengganti</h3>
-                    <p className="text-[11px] text-slate-500">Mata Kuliah Pemrograman Mobile A</p>
+                    <p className="text-[11px] text-slate-600">Mata Kuliah Pemrograman Mobile A</p>
                   </div>
                 </div>
                 <button
                   onClick={() => setShowScheduleModal(false)}
-                  className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100"
+                  className="p-1.5 text-slate-500 hover:text-slate-800 rounded-lg hover:bg-white/40"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -949,7 +953,7 @@ export function JadwalSesi() {
                       type="text"
                       value={newSesi.sessionNumber}
                       onChange={(e) => setNewSesi({ ...newSesi, sessionNumber: e.target.value })}
-                      className="w-full text-xs px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500"
+                      className="w-full text-xs px-3 py-2 bg-white/60 border border-white/70 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500"
                       required
                     />
                   </div>
@@ -962,7 +966,7 @@ export function JadwalSesi() {
                       onChange={(e) =>
                         setNewSesi({ ...newSesi, isReplacement: e.target.value === "pengganti" })
                       }
-                      className="w-full text-xs px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500"
+                      className="w-full text-xs px-3 py-2 bg-white/60 border border-white/70 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500"
                     >
                       <option value="reguler">Sesi Reguler</option>
                       <option value="pengganti">Kelas Pengganti</option>
@@ -979,7 +983,7 @@ export function JadwalSesi() {
                     placeholder="Contoh: Testing & Deployment Flutter App"
                     value={newSesi.title}
                     onChange={(e) => setNewSesi({ ...newSesi, title: e.target.value })}
-                    className="w-full text-xs px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500"
+                    className="w-full text-xs px-3 py-2 bg-white/60 border border-white/70 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500"
                     required
                   />
                 </div>
@@ -993,7 +997,7 @@ export function JadwalSesi() {
                       type="date"
                       value={newSesi.dateStr}
                       onChange={(e) => setNewSesi({ ...newSesi, dateStr: e.target.value })}
-                      className="w-full text-xs px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500"
+                      className="w-full text-xs px-3 py-2 bg-white/60 border border-white/70 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500"
                       required
                     />
                   </div>
@@ -1005,7 +1009,7 @@ export function JadwalSesi() {
                       type="text"
                       value={newSesi.timeRange}
                       onChange={(e) => setNewSesi({ ...newSesi, timeRange: e.target.value })}
-                      className="w-full text-xs px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500"
+                      className="w-full text-xs px-3 py-2 bg-white/60 border border-white/70 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500"
                       required
                     />
                   </div>
@@ -1019,15 +1023,15 @@ export function JadwalSesi() {
                     type="text"
                     value={newSesi.room}
                     onChange={(e) => setNewSesi({ ...newSesi, room: e.target.value })}
-                    className="w-full text-xs px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500"
+                    className="w-full text-xs px-3 py-2 bg-white/60 border border-white/70 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500"
                   />
                 </div>
 
-                <div className="flex justify-end gap-2 mt-2 pt-2 border-t border-slate-100">
+                <div className="flex justify-end gap-2 mt-2 pt-2 border-t border-slate-300/40">
                   <button
                     type="button"
                     onClick={() => setShowScheduleModal(false)}
-                    className="px-4 py-2 text-xs border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50 font-semibold"
+                    className="px-4 py-2 text-xs glass-pill rounded-xl text-slate-700 hover:bg-white/60 font-semibold"
                   >
                     Batal
                   </button>
@@ -1051,47 +1055,47 @@ export function JadwalSesi() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4"
+            className="fixed inset-0 z-50 bg-slate-950/40 backdrop-blur-md flex items-center justify-center p-4"
           >
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl border border-slate-100 flex flex-col gap-4 text-slate-800"
+              className="glass-panel backdrop-blur-2xl rounded-3xl p-6 w-full max-w-md shadow-2xl border border-white/60 flex flex-col gap-4 text-slate-800"
             >
-              <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-300/40">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-xl bg-sky-100 text-sky-600 flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-xl bg-sky-500/20 text-sky-800 flex items-center justify-center">
                     <Upload className="w-4 h-4" />
                   </div>
                   <div>
                     <h3 className="font-bold text-slate-900 text-sm">Unggah Materi / Starter Code</h3>
-                    <p className="text-[11px] text-slate-500">Sesi 10: Integrasi REST API</p>
+                    <p className="text-[11px] text-slate-600">Sesi 10: Integrasi REST API</p>
                   </div>
                 </div>
                 <button
                   onClick={() => setShowUploadModal(false)}
-                  className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100"
+                  className="p-1.5 text-slate-500 hover:text-slate-800 rounded-lg hover:bg-white/40"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
 
-              <div className="border-2 border-dashed border-sky-200 rounded-2xl p-6 text-center hover:bg-sky-50/50 transition-all cursor-pointer">
-                <Upload className="w-8 h-8 text-sky-400 mx-auto mb-2" />
+              <div className="border-2 border-dashed border-sky-300/60 bg-sky-50/40 rounded-2xl p-6 text-center hover:bg-sky-50/60 transition-all cursor-pointer">
+                <Upload className="w-8 h-8 text-sky-600 mx-auto mb-2" />
                 <p className="text-xs font-bold text-slate-800">
-                  Tarik file ke sini atau <span className="text-sky-600 underline">pilih dari komputer</span>
+                  Tarik file ke sini atau <span className="text-sky-700 underline font-semibold">pilih dari komputer</span>
                 </p>
-                <p className="text-[10px] text-slate-400 mt-1">
+                <p className="text-[10px] text-slate-500 mt-1">
                   Mendukung file PDF, PPTX, ZIP, RAR hingga 50 MB
                 </p>
               </div>
 
-              <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+              <div className="flex justify-end gap-2 pt-2 border-t border-slate-300/40">
                 <button
                   type="button"
                   onClick={() => setShowUploadModal(false)}
-                  className="px-4 py-2 text-xs border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50 font-semibold"
+                  className="px-4 py-2 text-xs glass-pill rounded-xl text-slate-700 hover:bg-white/60 font-semibold"
                 >
                   Tutup
                 </button>
@@ -1118,28 +1122,28 @@ export function JadwalSesi() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4"
+            className="fixed inset-0 z-50 bg-slate-950/40 backdrop-blur-md flex items-center justify-center p-4"
           >
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl border border-slate-100 flex flex-col gap-4 text-slate-800"
+              className="glass-panel backdrop-blur-2xl rounded-3xl p-6 w-full max-w-md shadow-2xl border border-white/60 flex flex-col gap-4 text-slate-800"
             >
-              <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-300/40">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-sky-600 text-white flex flex-col items-center justify-center font-black">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-600 to-sky-700 text-white flex flex-col items-center justify-center font-black">
                     <span className="text-[9px] uppercase leading-none opacity-90">Sesi</span>
                     <span className="text-sm">{showDetailModal.sessionNumber}</span>
                   </div>
                   <div>
                     <h3 className="font-bold text-slate-900 text-sm">{showDetailModal.title}</h3>
-                    <p className="text-[11px] text-slate-500">{showDetailModal.relativeTime}</p>
+                    <p className="text-[11px] text-slate-600">{showDetailModal.relativeTime}</p>
                   </div>
                 </div>
                 <button
                   onClick={() => setShowDetailModal(null)}
-                  className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100"
+                  className="p-1.5 text-slate-500 hover:text-slate-800 rounded-lg hover:bg-white/40"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -1147,29 +1151,29 @@ export function JadwalSesi() {
 
               <div className="flex flex-col gap-3 text-xs">
                 <div className="flex items-center gap-2 text-slate-700">
-                  <CalendarIcon className="w-4 h-4 text-sky-600 shrink-0" />
+                  <CalendarIcon className="w-4 h-4 text-sky-700 shrink-0" />
                   <span>{showDetailModal.dateStr}</span>
                 </div>
                 <div className="flex items-center gap-2 text-slate-700">
-                  <Clock className="w-4 h-4 text-sky-600 shrink-0" />
+                  <Clock className="w-4 h-4 text-sky-700 shrink-0" />
                   <span>{showDetailModal.timeRange ?? "08.00 - 11.30 WIB"}</span>
                 </div>
                 <div className="flex items-center gap-2 text-slate-700">
-                  <MapPin className="w-4 h-4 text-sky-600 shrink-0" />
+                  <MapPin className="w-4 h-4 text-sky-700 shrink-0" />
                   <span>{showDetailModal.room ?? "Ruang 207, Gedung B"}</span>
                 </div>
-                <div className="bg-sky-50 p-3 rounded-2xl border border-sky-100">
-                  <p className="text-[11px] font-bold text-sky-900 mb-1">Capaian Pembelajaran (RPS):</p>
-                  <p className="text-[11px] text-slate-600 leading-relaxed">
+                <div className="glass-inner p-3.5 rounded-2xl">
+                  <p className="text-[11px] font-bold text-sky-950 mb-1">Capaian Pembelajaran (RPS):</p>
+                  <p className="text-[11px] text-slate-700 leading-relaxed">
                     Mahasiswa mampu memahami konsep arsitektur state management dan integrasi modul RESTful API secara modular dan asynchronous.
                   </p>
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+              <div className="flex justify-end gap-2 pt-2 border-t border-slate-300/40">
                 <button
                   onClick={() => setShowDetailModal(null)}
-                  className="px-4 py-2 text-xs border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50 font-semibold"
+                  className="px-4 py-2 text-xs glass-pill rounded-xl text-slate-700 hover:bg-white/60 font-semibold"
                 >
                   Tutup
                 </button>
@@ -1195,27 +1199,27 @@ export function JadwalSesi() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4"
+            className="fixed inset-0 z-50 bg-slate-950/40 backdrop-blur-md flex items-center justify-center p-4"
           >
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl border border-slate-100 flex flex-col gap-4 text-slate-800"
+              className="glass-panel backdrop-blur-2xl rounded-3xl p-6 w-full max-w-sm shadow-2xl border border-white/60 flex flex-col gap-4 text-slate-800"
             >
-              <div className="w-12 h-12 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center mx-auto">
+              <div className="w-12 h-12 rounded-2xl bg-rose-500/15 text-rose-700 flex items-center justify-center mx-auto border border-rose-300/30">
                 <Square className="w-6 h-6 fill-current" />
               </div>
               <div className="text-center">
                 <h3 className="font-bold text-slate-900 text-base">Tutup Sesi Perkuliahan?</h3>
-                <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                <p className="text-xs text-slate-600 mt-1 leading-relaxed">
                   Presensi Sesi 10 akan difinalisasi. Mahasiswa yang belum presensi akan ditandai Alpha dan Berita Acara (BAP) siap ditandatangani.
                 </p>
               </div>
               <div className="flex gap-2">
                 <button
                   onClick={() => setShowCloseSessionModal(false)}
-                  className="flex-1 py-2.5 text-xs border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50 font-semibold"
+                  className="flex-1 py-2.5 text-xs glass-pill rounded-xl text-slate-700 hover:bg-white/60 font-semibold"
                 >
                   Batal
                 </button>
@@ -1226,7 +1230,7 @@ export function JadwalSesi() {
                     setSyncToast("Sesi 10 berhasil ditutup. Silakan tandatangani BAP.");
                     setTimeout(() => setSyncToast(null), 3500);
                   }}
-                  className="flex-1 py-2.5 text-xs bg-red-600 text-white rounded-xl hover:bg-red-700 font-bold transition-all shadow-md"
+                  className="flex-1 py-2.5 text-xs bg-rose-600 text-white rounded-xl hover:bg-rose-700 font-bold transition-all shadow-md"
                 >
                   Ya, Tutup Sesi
                 </button>
@@ -1243,33 +1247,33 @@ export function JadwalSesi() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4"
+            className="fixed inset-0 z-50 bg-slate-950/40 backdrop-blur-md flex items-center justify-center p-4"
           >
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl border border-slate-100 flex flex-col gap-4 text-slate-800"
+              className="glass-panel backdrop-blur-2xl rounded-3xl p-6 w-full max-w-md shadow-2xl border border-white/60 flex flex-col gap-4 text-slate-800"
             >
-              <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-300/40">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-xl bg-sky-100 text-sky-600 flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-xl bg-sky-500/20 text-sky-800 flex items-center justify-center">
                     <FileCheck className="w-4 h-4" />
                   </div>
                   <div>
                     <h3 className="font-bold text-slate-900 text-sm">Panduan Regulasi BAP BAAK</h3>
-                    <p className="text-[11px] text-slate-500">Standar Operasional Presensi Dosen</p>
+                    <p className="text-[11px] text-slate-600">Standar Operasional Presensi Dosen</p>
                   </div>
                 </div>
                 <button
                   onClick={() => setShowBapModal(false)}
-                  className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100"
+                  className="p-1.5 text-slate-500 hover:text-slate-800 rounded-lg hover:bg-white/40"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
 
-              <div className="text-xs text-slate-600 space-y-2.5 leading-relaxed">
+              <div className="text-xs text-slate-700 space-y-2.5 leading-relaxed">
                 <p>
                   1. Setiap dosen pengampu diwajibkan menutup sesi presensi maksimal 30 menit setelah jam perkuliahan selesai.
                 </p>
@@ -1281,7 +1285,7 @@ export function JadwalSesi() {
                 </p>
               </div>
 
-              <div className="flex justify-end pt-2 border-t border-slate-100">
+              <div className="flex justify-end pt-2 border-t border-slate-300/40">
                 <button
                   onClick={() => setShowBapModal(false)}
                   className="px-4 py-2 text-xs bg-sky-500 text-white rounded-xl hover:bg-sky-600 font-bold transition-all"
