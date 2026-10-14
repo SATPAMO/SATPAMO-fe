@@ -23,7 +23,8 @@ import {
   Smartphone,
   PhoneCall,
   History,
-  FileCheck
+  FileCheck,
+  RefreshCw
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
@@ -51,7 +52,7 @@ export function PengaturanKuota() {
   const getInitials = (name?: string) => {
     if (!name) return "YK";
     const parts = name.trim().split(" ");
-    if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+    if (parts.length === 1) return parts[0][0].toUpperCase();
     return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
   };
 
@@ -205,8 +206,18 @@ export function PengaturanKuota() {
             <DoorOpen className="w-3.5 h-3.5 text-slate-700 ml-1" />
           </div>
 
-          <div className="w-9 h-9 rounded-full bg-sky-600 border border-sky-300 flex items-center justify-center text-white text-xs font-black shadow-sm">
-            {dosen ? getInitials(dosen.username) : "YK"}
+          <div className="flex items-center gap-2.5">
+            <button
+              onClick={() => setToastMessage("Menyegarkan data pengaturan kuota...")}
+              className="p-2 rounded-xl bg-white/70 hover:bg-white text-slate-700 border border-white/80 shadow-sm transition-all"
+              title="Refresh Data Pengaturan"
+            >
+              <RefreshCw className="w-4 h-4" />
+            </button>
+
+            <div className="w-9 h-9 rounded-full bg-sky-600 border border-sky-300 flex items-center justify-center text-white text-xs font-black shadow-sm">
+              {dosen ? getInitials(dosen.username) : "YK"}
+            </div>
           </div>
         </div>
 
