@@ -10,6 +10,7 @@ import {
   X,
   Radio,
   Calendar,
+  CalendarDays,
   BarChart2,
   Settings,
   HelpCircle,
@@ -214,6 +215,7 @@ export function AttendanceDashboard() {
   const navItems = [
     { icon: <Radio className="w-4 h-4" />, label: "Live Monitoring", active: true, path: "/" },
     { icon: <Calendar className="w-4 h-4" />, label: "Jadwal Sesi", active: false, path: "/jadwal-sesi" },
+    { icon: <CalendarDays className="w-4 h-4" />, label: "Manajemen Jadwal", active: false, path: "/manajemen-jadwal" },
     { icon: <BarChart2 className="w-4 h-4" />, label: "Statistik Kelas", active: false, path: "/statistik-kelas" },
     { icon: <Settings className="w-4 h-4" />, label: "Pengaturan Kuota", active: false, path: "/pengaturan-kuota" },
   ];
@@ -222,14 +224,14 @@ export function AttendanceDashboard() {
     <div
       className="min-h-screen flex text-slate-800 relative overflow-hidden"
       style={{
-        background: "linear-gradient(135deg, #38bdf8 0%, #0ea5e9 30%, #0284c7 60%, #38bdf8 100%)",
+        background: "linear-gradient(145deg, #def0fb 0%, #c8e6f8 35%, #b3d7f4 65%, #cce8fb 100%)",
         fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
       }}
     >
-      {/* Decorative ambient blurred spots for deep glassmorphism light refraction */}
-      <div className="pointer-events-none absolute -top-24 -right-24 w-96 h-96 bg-cyan-200/35 rounded-full blur-3xl" />
-      <div className="pointer-events-none absolute top-1/3 left-1/4 w-80 h-80 bg-blue-300/30 rounded-full blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-24 right-1/3 w-96 h-96 bg-sky-200/30 rounded-full blur-3xl" />
+      {/* Decorative ambient blobs */}
+      <div className="pointer-events-none absolute -top-32 -right-32 w-96 h-96 bg-sky-200/40 rounded-full blur-3xl" />
+      <div className="pointer-events-none absolute top-1/2 left-1/3 w-72 h-72 bg-blue-100/50 rounded-full blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-24 right-1/4 w-96 h-96 bg-cyan-100/40 rounded-full blur-3xl" />
       {/* Toast Notification */}
       <AnimatePresence>
         {toastMessage && (
@@ -237,9 +239,9 @@ export function AttendanceDashboard() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed top-5 right-5 z-50 bg-sky-900/90 backdrop-blur-md text-white text-sm font-semibold px-4 py-3 rounded-2xl shadow-xl border border-sky-400/40 flex items-center gap-2"
+            className="fixed top-5 right-5 z-50 bg-white/95 backdrop-blur-md text-slate-800 text-sm font-semibold px-4 py-3 rounded-2xl shadow-xl border border-sky-200 flex items-center gap-2"
           >
-            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+            <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
             <span>{toastMessage}</span>
           </motion.div>
         )}
@@ -247,27 +249,23 @@ export function AttendanceDashboard() {
 
       {/* Sidebar */}
       <aside
-        className="w-60 shrink-0 flex flex-col py-6 px-4 gap-4"
-        style={{
-          background: "linear-gradient(180deg, #1e6fa8 0%, #155e86 60%, #0c4a6e 100%)",
-          boxShadow: "4px 0 24px rgba(0,0,0,0.18)",
-        }}
+        className="w-60 shrink-0 flex flex-col py-6 px-4 gap-4 sidebar-glass z-10"
       >
         <div className="mb-2">
-          <h1 className="text-3xl font-black text-yellow-400 tracking-tight leading-none">SATPAMO</h1>
-          <p className="text-sky-300 text-xs font-semibold tracking-widest mt-0.5">ADMIN</p>
+          <h1 className="text-3xl font-black text-sky-600 tracking-tight leading-none">SATPAMO</h1>
+          <p className="text-sky-400 text-xs font-semibold tracking-widest mt-0.5">ADMIN</p>
         </div>
 
         {/* Profile Card */}
-        <div className="flex items-center gap-3 bg-white/10 rounded-2xl px-3 py-2.5">
-          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-sky-300 to-blue-500 flex items-center justify-center text-white text-sm font-black shrink-0">
+        <div className="flex items-center gap-3 bg-sky-50/80 border border-sky-100 rounded-2xl px-3 py-2.5">
+          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-sky-400 to-blue-500 flex items-center justify-center text-white text-sm font-black shrink-0">
             {dosen ? getInitials(dosen.username) : "YK"}
           </div>
           <div className="min-w-0">
-            <p className="text-white text-xs font-bold leading-tight truncate">
+            <p className="text-slate-800 text-xs font-bold leading-tight truncate">
               {dosen?.username ?? "Dr. Yurii Kharlistov, M.T."}
             </p>
-            <p className="text-sky-300 text-[10px] truncate">NIP: 123456789098761</p>
+            <p className="text-sky-500 text-[10px] truncate">NIP: 123456789098761</p>
           </div>
         </div>
 
@@ -279,31 +277,31 @@ export function AttendanceDashboard() {
               onClick={() => navigate(item.path)}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all text-left ${
                 item.active
-                  ? "bg-sky-400/35 text-white shadow-sm border border-sky-300/40"
-                  : "text-sky-100 hover:bg-white/10 hover:text-white"
+                  ? "nav-active"
+                  : "text-slate-500 hover:bg-sky-50 hover:text-slate-800"
               }`}
             >
               {item.icon}
               <span className="flex-1">{item.label}</span>
               {item.active && (
-                <span className="w-2.5 h-2.5 rounded-full bg-sky-950 ring-2 ring-sky-300 shrink-0" />
+                <span className="w-2.5 h-2.5 rounded-full bg-sky-500 ring-2 ring-sky-200 shrink-0" />
               )}
             </button>
           ))}
         </nav>
 
         {/* Sidebar Footer */}
-        <div className="flex flex-col gap-1 border-t border-white/10 pt-3">
+        <div className="flex flex-col gap-1 border-t border-sky-100 pt-3">
           <button
             onClick={() => triggerToast("Pusat Bantuan SATPAMO: satpamo-support@ac.id")}
-            className="flex items-center gap-2 text-sky-200 hover:text-white text-xs px-2 py-2 rounded-lg hover:bg-white/10 transition-all font-medium"
+            className="flex items-center gap-2 text-slate-500 hover:text-slate-800 text-xs px-2 py-2 rounded-lg hover:bg-sky-50 transition-all font-medium"
           >
             <HelpCircle className="w-4 h-4" />
             Bantuan SATPAMO
           </button>
           <button
             onClick={handleLogout}
-            className="flex items-center gap-2 text-red-300 hover:text-red-200 text-xs px-2 py-2 rounded-lg hover:bg-red-500/10 transition-all font-semibold"
+            className="flex items-center gap-2 text-red-400 hover:text-red-600 text-xs px-2 py-2 rounded-lg hover:bg-red-50 transition-all font-semibold"
           >
             <LogOut className="w-4 h-4" />
             Keluar
@@ -343,7 +341,7 @@ export function AttendanceDashboard() {
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div>
             <div className="flex items-center flex-wrap gap-2.5 mb-1">
-              <span className="bg-sky-950 text-sky-200 text-[11px] font-bold px-3 py-1 rounded-full shadow-sm">
+              <span className="bg-sky-500 text-white text-[11px] font-bold px-3 py-1 rounded-full shadow-sm">
                 SEMESTER GANJIL 2026/2027
               </span>
               <span className="text-slate-800 text-[11px] font-semibold flex items-center gap-1.5">
@@ -493,7 +491,7 @@ export function AttendanceDashboard() {
                     <span>Auto-Refresh</span>
                     <span className="text-sky-950 font-black">{qrTimer}s</span>
                   </div>
-                  <div className="h-1.5 bg-black/15 rounded-full overflow-hidden border border-white/30">
+                  <div className="h-1.5 bg-sky-100 rounded-full overflow-hidden border border-sky-200/60">
                     <motion.div
                       className="h-full bg-gradient-to-r from-sky-400 to-sky-600 rounded-full"
                       style={{ width: `${(qrTimer / 15) * 100}%` }}
@@ -628,7 +626,7 @@ export function AttendanceDashboard() {
         <div className="glass-panel rounded-3xl overflow-hidden flex flex-col">
           {/* Table Header Filter & Search */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-4 border-b border-white/25">
-            <div className="flex items-center flex-wrap gap-1.5 bg-black/10 p-1 rounded-2xl backdrop-blur-md border border-white/30">
+            <div className="flex items-center flex-wrap gap-1.5 bg-white/60 p-1 rounded-2xl backdrop-blur-sm border border-sky-100">
               {(
                 [
                   { key: "semua", label: "Semua Mahasiswa", count: totalEnrolled },
@@ -642,14 +640,14 @@ export function AttendanceDashboard() {
                   onClick={() => setActiveTab(tab.key)}
                   className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
                     activeTab === tab.key
-                      ? "bg-sky-900/90 text-white shadow-md border border-sky-400/40"
+                      ? "bg-sky-500 text-white shadow-sm"
                       : "text-slate-800 hover:bg-white/25 font-bold"
                   }`}
                 >
                   <span>{tab.label}</span>
                   <span
                     className={`px-1.5 py-0.2 rounded-md text-[10px] font-bold ${
-                      activeTab === tab.key ? "bg-sky-950 text-white" : "bg-white/50 text-slate-800"
+                      activeTab === tab.key ? "bg-sky-600/20 text-white" : "bg-sky-50/80 text-slate-600"
                     }`}
                   >
                     {tab.count}
@@ -920,7 +918,7 @@ export function AttendanceDashboard() {
                   <span>Auto-Refresh Token</span>
                   <span className="text-sky-900 font-extrabold">{qrTimer} detik tersisa</span>
                 </div>
-                <div className="h-2 bg-black/15 rounded-full overflow-hidden border border-white/30">
+                <div className="h-2 bg-sky-100 rounded-full overflow-hidden border border-sky-200/60">
                   <motion.div
                     className="h-full bg-sky-600 rounded-full"
                     style={{ width: `${(qrTimer / 15) * 100}%` }}

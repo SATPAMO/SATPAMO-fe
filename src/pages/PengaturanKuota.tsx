@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Radio,
   Calendar,
+  CalendarDays,
   BarChart2,
   Settings,
   HelpCircle,
@@ -59,6 +60,7 @@ export function PengaturanKuota() {
   const navItems = [
     { icon: <Radio className="w-4 h-4" />, label: "Live Monitoring", active: false, path: "/" },
     { icon: <Calendar className="w-4 h-4" />, label: "Jadwal Sesi", active: false, path: "/jadwal-sesi" },
+    { icon: <CalendarDays className="w-4 h-4" />, label: "Manajemen Jadwal", active: false, path: "/manajemen-jadwal" },
     { icon: <BarChart2 className="w-4 h-4" />, label: "Statistik Kelas", active: false, path: "/statistik-kelas" },
     { icon: <Settings className="w-4 h-4" />, label: "Pengaturan Kuota", active: true, path: "/pengaturan-kuota" },
   ];
@@ -101,7 +103,7 @@ export function PengaturanKuota() {
     <div
       className="min-h-screen flex text-slate-800"
       style={{
-        background: "linear-gradient(135deg, #38bdf8 0%, #0ea5e9 30%, #0284c7 60%, #60d8f7 100%)",
+        background: "linear-gradient(145deg, #def0fb 0%, #c8e6f8 35%, #b3d7f4 65%, #cce8fb 100%)",
         fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
       }}
     >
@@ -112,7 +114,7 @@ export function PengaturanKuota() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed top-5 right-5 z-50 bg-sky-900/90 backdrop-blur-md text-white text-sm font-semibold px-4 py-3 rounded-2xl shadow-xl border border-sky-400/40 flex items-center gap-2"
+            className="fixed top-5 right-5 z-50 bg-white/95 backdrop-blur-md text-slate-800 text-sm font-semibold px-4 py-3 rounded-2xl shadow-xl border border-sky-200 flex items-center gap-2"
           >
             <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
             <span>{toastMessage}</span>
@@ -122,27 +124,23 @@ export function PengaturanKuota() {
 
       {/* Sidebar */}
       <aside
-        className="w-60 shrink-0 flex flex-col py-6 px-4 gap-4"
-        style={{
-          background: "linear-gradient(180deg, #1e6fa8 0%, #155e86 60%, #0c4a6e 100%)",
-          boxShadow: "4px 0 24px rgba(0,0,0,0.18)",
-        }}
+        className="w-60 shrink-0 flex flex-col py-6 px-4 gap-4 sidebar-glass z-10"
       >
         <div className="mb-2">
-          <h1 className="text-3xl font-black text-yellow-400 tracking-tight leading-none">SATPAMO</h1>
-          <p className="text-sky-300 text-xs font-semibold tracking-widest mt-0.5">ADMIN</p>
+          <h1 className="text-3xl font-black text-sky-600 tracking-tight leading-none">SATPAMO</h1>
+          <p className="text-sky-400 text-xs font-semibold tracking-widest mt-0.5">ADMIN</p>
         </div>
 
         {/* Profile Card */}
-        <div className="flex items-center gap-3 bg-white/10 rounded-2xl px-3 py-2.5">
-          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-sky-300 to-blue-500 flex items-center justify-center text-white text-sm font-black shrink-0">
+        <div className="flex items-center gap-3 bg-sky-50/80 border border-sky-100 rounded-2xl px-3 py-2.5">
+          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-sky-400 to-blue-500 flex items-center justify-center text-white text-sm font-black shrink-0">
             {dosen ? getInitials(dosen.username) : "YK"}
           </div>
           <div className="min-w-0">
-            <p className="text-white text-xs font-bold leading-tight truncate">
+            <p className="text-slate-800 text-xs font-bold leading-tight truncate">
               {dosen?.username ?? "Dr. Yurii Kharlistov, M.T."}
             </p>
-            <p className="text-sky-300 text-[10px] truncate">NIP: 123456789098761</p>
+            <p className="text-sky-500 text-[10px] truncate">NIP: 123456789098761</p>
           </div>
         </div>
 
@@ -152,26 +150,25 @@ export function PengaturanKuota() {
             <button
               key={item.label}
               onClick={() => navigate(item.path)}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all text-left ${
-                item.active
-                  ? "bg-sky-400/35 text-white shadow-sm border border-sky-300/40"
-                  : "text-sky-100 hover:bg-white/10 hover:text-white"
-              }`}
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all text-left ${item.active
+                  ? "nav-active"
+                  : "text-slate-500 hover:bg-sky-50 hover:text-slate-800"
+                }`}
             >
               {item.icon}
               <span className="flex-1">{item.label}</span>
               {item.active && (
-                <span className="w-2.5 h-2.5 rounded-full bg-sky-950 ring-2 ring-sky-300 shrink-0" />
+                <span className="w-2.5 h-2.5 rounded-full bg-sky-500 ring-2 ring-sky-200 shrink-0" />
               )}
             </button>
           ))}
         </nav>
 
         {/* Sidebar Footer */}
-        <div className="flex flex-col gap-1 border-t border-white/10 pt-3">
+        <div className="flex flex-col gap-1 border-t border-sky-100 pt-3">
           <button
             onClick={() => setShowHelpdeskModal(true)}
-            className="flex items-center gap-2 text-sky-200 hover:text-white text-xs px-2 py-2 rounded-lg hover:bg-white/10 transition-all font-medium"
+            className="flex items-center gap-2 text-slate-500 hover:text-slate-800 text-xs px-2 py-2 rounded-lg hover:bg-sky-50 transition-all font-medium"
           >
             <HelpCircle className="w-4 h-4" />
             Bantuan SATPAMO
@@ -181,7 +178,7 @@ export function PengaturanKuota() {
               logout();
               navigate("/login");
             }}
-            className="flex items-center gap-2 text-red-300 hover:text-red-200 text-xs px-2 py-2 rounded-lg hover:bg-red-500/10 transition-all font-semibold"
+            className="flex items-center gap-2 text-red-400 hover:text-red-600 text-xs px-2 py-2 rounded-lg hover:bg-red-50 transition-all font-semibold"
           >
             <LogOut className="w-4 h-4" />
             Keluar
@@ -448,16 +445,14 @@ export function PengaturanKuota() {
                   {/* Option 1 */}
                   <label
                     onClick={() => setConversionPolicy("2x_alpha")}
-                    className={`rounded-2xl p-3.5 border transition-all cursor-pointer flex items-start gap-3 ${
-                      conversionPolicy === "2x_alpha"
+                    className={`rounded-2xl p-3.5 border transition-all cursor-pointer flex items-start gap-3 ${conversionPolicy === "2x_alpha"
                         ? "glass-inner border-sky-400/60 bg-sky-500/15 shadow-xs"
                         : "glass-pill hover:bg-white/40 text-slate-700"
-                    }`}
+                      }`}
                   >
                     <div className="mt-0.5">
-                      <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${
-                        conversionPolicy === "2x_alpha" ? "border-sky-600 bg-sky-600" : "border-slate-400"
-                      }`}>
+                      <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${conversionPolicy === "2x_alpha" ? "border-sky-600 bg-sky-600" : "border-slate-400"
+                        }`}>
                         {conversionPolicy === "2x_alpha" && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
                       </div>
                     </div>
@@ -472,16 +467,14 @@ export function PengaturanKuota() {
                   {/* Option 2 */}
                   <label
                     onClick={() => setConversionPolicy("bertahap")}
-                    className={`rounded-2xl p-3.5 border transition-all cursor-pointer flex items-start gap-3 ${
-                      conversionPolicy === "bertahap"
+                    className={`rounded-2xl p-3.5 border transition-all cursor-pointer flex items-start gap-3 ${conversionPolicy === "bertahap"
                         ? "glass-inner border-sky-400/60 bg-sky-500/15 shadow-xs"
                         : "glass-pill hover:bg-white/40 text-slate-700"
-                    }`}
+                      }`}
                   >
                     <div className="mt-0.5">
-                      <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${
-                        conversionPolicy === "bertahap" ? "border-sky-600 bg-sky-600" : "border-slate-400"
-                      }`}>
+                      <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${conversionPolicy === "bertahap" ? "border-sky-600 bg-sky-600" : "border-slate-400"
+                        }`}>
                         {conversionPolicy === "bertahap" && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
                       </div>
                     </div>
@@ -568,14 +561,12 @@ export function PengaturanKuota() {
                   </div>
                   <button
                     onClick={() => setNotifyCritical(!notifyCritical)}
-                    className={`w-11 h-6 rounded-full transition-colors relative shrink-0 ${
-                      notifyCritical ? "bg-sky-600" : "bg-slate-300"
-                    }`}
+                    className={`w-11 h-6 rounded-full transition-colors relative shrink-0 ${notifyCritical ? "bg-sky-600" : "bg-slate-300"
+                      }`}
                   >
                     <span
-                      className={`block w-4 h-4 rounded-full bg-white transition-transform absolute top-1 ${
-                        notifyCritical ? "right-1" : "left-1"
-                      }`}
+                      className={`block w-4 h-4 rounded-full bg-white transition-transform absolute top-1 ${notifyCritical ? "right-1" : "left-1"
+                        }`}
                     />
                   </button>
                 </div>
@@ -591,14 +582,12 @@ export function PengaturanKuota() {
                   </div>
                   <button
                     onClick={() => setNotifyWaliBaak(!notifyWaliBaak)}
-                    className={`w-11 h-6 rounded-full transition-colors relative shrink-0 ${
-                      notifyWaliBaak ? "bg-sky-600" : "bg-slate-300"
-                    }`}
+                    className={`w-11 h-6 rounded-full transition-colors relative shrink-0 ${notifyWaliBaak ? "bg-sky-600" : "bg-slate-300"
+                      }`}
                   >
                     <span
-                      className={`block w-4 h-4 rounded-full bg-white transition-transform absolute top-1 ${
-                        notifyWaliBaak ? "right-1" : "left-1"
-                      }`}
+                      className={`block w-4 h-4 rounded-full bg-white transition-transform absolute top-1 ${notifyWaliBaak ? "right-1" : "left-1"
+                        }`}
                     />
                   </button>
                 </div>
@@ -666,11 +655,10 @@ export function PengaturanKuota() {
                       <button
                         key={r}
                         onClick={() => setScannerRadius(r)}
-                        className={`py-1.5 px-2 rounded-xl text-center text-xs font-bold transition-all ${
-                          scannerRadius === r
+                        className={`py-1.5 px-2 rounded-xl text-center text-xs font-bold transition-all ${scannerRadius === r
                             ? "bg-sky-500 text-white shadow-sm"
                             : "glass-pill hover:bg-white/60 text-slate-800"
-                        }`}
+                          }`}
                       >
                         <div>{r} Meter</div>
                         {scannerRadius === r && (
@@ -703,11 +691,10 @@ export function PengaturanKuota() {
                       <button
                         key={item.sec}
                         onClick={() => setQrInterval(item.sec)}
-                        className={`py-1.5 px-2 rounded-xl text-center transition-all ${
-                          qrInterval === item.sec
+                        className={`py-1.5 px-2 rounded-xl text-center transition-all ${qrInterval === item.sec
                             ? "bg-sky-500 text-white shadow-sm"
                             : "glass-pill hover:bg-white/60 text-slate-800"
-                        }`}
+                          }`}
                       >
                         <p className="text-xs font-bold leading-tight">{item.sec} Detik</p>
                         <p className={`text-[8px] leading-tight ${qrInterval === item.sec ? "opacity-90" : "text-slate-500"}`}>
@@ -730,14 +717,12 @@ export function PengaturanKuota() {
                   </div>
                   <button
                     onClick={() => setDeviceFingerprinting(!deviceFingerprinting)}
-                    className={`w-11 h-6 rounded-full transition-colors relative shrink-0 ${
-                      deviceFingerprinting ? "bg-sky-600" : "bg-slate-300"
-                    }`}
+                    className={`w-11 h-6 rounded-full transition-colors relative shrink-0 ${deviceFingerprinting ? "bg-sky-600" : "bg-slate-300"
+                      }`}
                   >
                     <span
-                      className={`block w-4 h-4 rounded-full bg-white transition-transform absolute top-1 ${
-                        deviceFingerprinting ? "right-1" : "left-1"
-                      }`}
+                      className={`block w-4 h-4 rounded-full bg-white transition-transform absolute top-1 ${deviceFingerprinting ? "right-1" : "left-1"
+                        }`}
                     />
                   </button>
                 </div>
