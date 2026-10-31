@@ -58,7 +58,7 @@ export function Login() {
           <p className="text-sm text-gray-500 mt-1">Masuk ke akun Dosen / Admin</p>
         </div>
 
-        {/* Card */}
+        {/* Card */} 
         <div className="bg-white rounded-2xl border border-gray-200 shadow-[0_8px_30px_rgb(0,0,0,0.06)] p-8">
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-1.5">

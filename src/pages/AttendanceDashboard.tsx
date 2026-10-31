@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
@@ -8,6 +8,7 @@ import {
   AlertTriangle,
   MapPin,
   X,
+  Menu,
   Radio,
   Calendar,
   BarChart2,
@@ -22,7 +23,9 @@ import {
   Projector,
   RotateCcw,
   DoorOpen,
-  Maximize2
+  Maximize2,
+  Shuffle,
+  Copy,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import {
@@ -30,6 +33,7 @@ import {
   type AttendanceRecord,
   type AttendanceStats,
 } from "../lib/api";
+import { DynamicQrDisplay } from "../components/DynamicQrDisplay";
 
 function formatTime(isoStr: string | null): string {
   if (!isoStr) return "--:--";
@@ -48,58 +52,6 @@ function getInitials(name: string): string {
     .map((w) => w[0])
     .join("")
     .toUpperCase();
-}
-
-function QrCodeDisplay({ pin }: { pin: string }) {
-  return (
-    <div className="flex flex-col items-center gap-2.5">
-      <div className="relative bg-white rounded-2xl p-3 shadow-sm border border-sky-200">
-        <svg
-          width="135"
-          height="135"
-          viewBox="0 0 21 21"
-          className="block"
-          style={{ imageRendering: "pixelated" }}
-        >
-          <rect x="0" y="0" width="7" height="7" fill="#0f172a" rx="0.5" />
-          <rect x="1" y="1" width="5" height="5" fill="white" rx="0.3" />
-          <rect x="2" y="2" width="3" height="3" fill="#0f172a" rx="0.2" />
-          <rect x="14" y="0" width="7" height="7" fill="#0f172a" rx="0.5" />
-          <rect x="15" y="1" width="5" height="5" fill="white" rx="0.3" />
-          <rect x="16" y="2" width="3" height="3" fill="#0f172a" rx="0.2" />
-          <rect x="0" y="14" width="7" height="7" fill="#0f172a" rx="0.5" />
-          <rect x="1" y="15" width="5" height="5" fill="white" rx="0.3" />
-          <rect x="2" y="16" width="3" height="3" fill="#0f172a" rx="0.2" />
-          {[
-            [8, 0], [10, 0], [12, 0], [8, 2], [9, 2], [11, 2], [13, 2], [8, 4], [10, 4], [12, 4],
-            [8, 6], [9, 6], [13, 6], [0, 8], [2, 8], [4, 8], [6, 8], [8, 8], [10, 8], [12, 8], [14, 8], [16, 8], [18, 8], [20, 8],
-            [1, 9], [3, 9], [7, 9], [9, 9], [11, 9], [13, 9], [15, 9], [17, 9], [19, 9],
-            [0, 10], [4, 10], [6, 10], [8, 10], [10, 10], [12, 10], [16, 10], [18, 10], [20, 10],
-            [1, 11], [3, 11], [5, 11], [7, 11], [9, 11], [11, 11], [13, 11], [15, 11], [17, 11], [19, 11],
-            [0, 12], [2, 12], [6, 12], [8, 12], [10, 12], [12, 12], [14, 12], [16, 12], [20, 12],
-            [8, 14], [10, 14], [12, 14], [14, 14], [16, 14], [18, 14], [20, 14],
-            [9, 15], [11, 15], [13, 15], [17, 15], [19, 15],
-            [8, 16], [10, 16], [14, 16], [16, 16], [18, 16], [20, 16],
-            [9, 17], [11, 17], [13, 17], [15, 17], [17, 17], [19, 17],
-            [8, 18], [12, 18], [14, 18], [16, 18], [20, 18],
-            [9, 19], [11, 19], [13, 19], [15, 19], [17, 19], [19, 19],
-            [8, 20], [10, 20], [12, 20], [14, 20], [16, 20], [18, 20], [20, 20],
-          ].map(([cx, cy], i) => (
-            <rect key={i} x={cx} y={cy} width="1" height="1" fill="#0f172a" />
-          ))}
-        </svg>
-        <motion.div
-          className="absolute inset-0 rounded-2xl border-2 border-sky-400 pointer-events-none"
-          animate={{ opacity: [0.3, 1, 0.3] }}
-          transition={{ duration: 2, repeat: Infinity }}
-        />
-      </div>
-      <div className="text-center">
-        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">KODE PIN DARURAT</p>
-        <p className="text-xl font-black text-sky-800 tracking-widest">{pin}</p>
-      </div>
-    </div>
-  );
 }
 
 function ActivityItem({ name, nim, time, accuracy }: {
@@ -127,62 +79,155 @@ export function AttendanceDashboard() {
   const [records, setRecords] = useState<AttendanceRecord[]>([]);
   const [stats, setStats] = useState<AttendanceStats | null>(null);
   const [loadingData, setLoadingData] = useState(true);
-  const [refreshKey, setRefreshKey] = useState(0);
   const [activeTab, setActiveTab] = useState<TabFilter>("semua");
   const [qrTimer, setQrTimer] = useState(15);
   const [selectedRecord, setSelectedRecord] = useState<AttendanceRecord | null>(null);
   const [showProjectorModal, setShowProjectorModal] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  const { logout, dosen } = useAuth();
-  const navigate = useNavigate();
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  // --- Geofence State ---
+  const [isGeofenceActive, setIsGeofenceActive] = useState<boolean>(true);
+  const [geofenceRadius, setGeofenceRadius] = useState<number>(50);
 
-  useEffect(() => {
-    timerRef.current = setInterval(() => {
-      setQrTimer((t) => (t <= 1 ? 15 : t - 1));
-    }, 1000);
-    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  // --- Mobile Drawer State ---
+  const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
+
+  // --- PIN Generator State ---
+  const [currentPin, setCurrentPin] = useState<string>("15710");
+
+  // --- QR Generator Helper & State ---
+  const buildPayload = useCallback((pinVal: string, geoActive: boolean, radiusVal = 50) => {
+    return JSON.stringify({
+      app: "SATPAMO",
+      kelas: "Pemrograman Mobile T3A",
+      ruang: "207",
+      pin: pinVal,
+      geofence: geoActive ? "ON" : "OFF",
+      lat: -6.89042,
+      lon: 107.61031,
+      radius: geoActive ? radiusVal : 0,
+      timestamp: Date.now(),
+      nonce: Math.random().toString(36).substring(2, 7).toUpperCase(),
+    });
   }, []);
+
+  const [qrPayload, setQrPayload] = useState<string>(() => buildPayload("15710", true, 50));
 
   const triggerToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3500);
   };
 
+  const handleGenerateNewPin = () => {
+    const nextPin = Math.floor(10000 + Math.random() * 90000).toString();
+    setCurrentPin(nextPin);
+    setQrPayload(buildPayload(nextPin, isGeofenceActive, geofenceRadius));
+    triggerToast(`Kode PIN Darurat baru (${nextPin}) berhasil dibuat!`);
+  };
+
+  const handleRegenerateQr = () => {
+    setQrTimer(15);
+    setQrPayload(buildPayload(currentPin, isGeofenceActive, geofenceRadius));
+    triggerToast("Token QR sesi berhasil di-generate ulang!");
+  };
+
+  const handleToggleGeofence = () => {
+    const nextState = !isGeofenceActive;
+    setIsGeofenceActive(nextState);
+    setQrPayload(buildPayload(currentPin, nextState, geofenceRadius));
+    if (nextState) {
+      triggerToast(`Area Geofence DIAKTIFKAN (Radius ${geofenceRadius}m Ruang 207)`);
+    } else {
+      triggerToast("Area Geofence DINONAKTIFKAN (Mode Bebas Lokasi)");
+    }
+  };
+
+  const handleRadiusChange = (rad: number) => {
+    setGeofenceRadius(rad);
+    setQrPayload(buildPayload(currentPin, isGeofenceActive, rad));
+    triggerToast(`Radius toleransi geofence diatur ke ${rad} meter`);
+  };
+
+  // Auto-refresh countdown for QR
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   useEffect(() => {
-    let isSubscribed = true;
-    const loadData = async () => {
-      try {
-        const [recordsRes, statsRes] = await Promise.all([
-          attendanceApi.getAll(),
-          attendanceApi.getStats(),
-        ]);
-        if (isSubscribed) {
-          if (recordsRes.success) setRecords(recordsRes.data || []);
-          if (statsRes.success) setStats(statsRes.data || null);
+    timerRef.current = setInterval(() => {
+      setQrTimer((t) => {
+        if (t <= 1) {
+          setQrPayload(buildPayload(currentPin, isGeofenceActive, geofenceRadius));
+          return 15;
         }
-      } catch (err) {
-        console.error("Fetch error:", err);
-      } finally {
-        if (isSubscribed) setLoadingData(false);
-      }
-    };
-
-    loadData();
+        return t - 1;
+      });
+    }, 1000);
     return () => {
-      isSubscribed = false;
+      if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [refreshKey]);
+  }, [currentPin, isGeofenceActive, geofenceRadius, buildPayload]);
 
-  useEffect(() => {
-    const interval = setInterval(() => setRefreshKey((k) => k + 1), 20000);
-    const onFocus = () => setRefreshKey((k) => k + 1);
-    window.addEventListener("focus", onFocus);
-    return () => { clearInterval(interval); window.removeEventListener("focus", onFocus); };
+  // --- Real-Time Polling Interval State ---
+  const [pollInterval, setPollInterval] = useState<number>(5); // default 5 seconds
+  const [lastSynced, setLastSynced] = useState<Date>(new Date());
+  const [isSyncing, setIsSyncing] = useState<boolean>(false);
+  const prevCountRef = useRef<number>(0);
+
+  const fetchAttendanceData = useCallback(async (isSilent = false) => {
+    if (!isSilent) setLoadingData(true);
+    setIsSyncing(true);
+    try {
+      const [recordsRes, statsRes] = await Promise.all([
+        attendanceApi.getAll(),
+        attendanceApi.getStats(),
+      ]);
+      if (recordsRes.success && recordsRes.data) {
+        if (prevCountRef.current > 0 && recordsRes.data.length > prevCountRef.current) {
+          const diff = recordsRes.data.length - prevCountRef.current;
+          triggerToast(`${diff} mahasiswa baru berhasil presensi!`);
+        }
+        prevCountRef.current = recordsRes.data.length;
+        setRecords(recordsRes.data);
+      }
+      if (statsRes.success && statsRes.data) {
+        setStats(statsRes.data);
+      }
+      setLastSynced(new Date());
+    } catch (err) {
+      console.error("Interval polling error:", err);
+    } finally {
+      setLoadingData(false);
+      setIsSyncing(false);
+    }
   }, []);
 
-  const handleLogout = () => { logout(); navigate("/login", { replace: true }); };
+  // Initial load
+  useEffect(() => {
+    fetchAttendanceData(false);
+  }, [fetchAttendanceData]);
+
+  // Real-time interval effect
+  useEffect(() => {
+    if (pollInterval <= 0) return;
+
+    const pollTimer = setInterval(() => {
+      fetchAttendanceData(true);
+    }, pollInterval * 1000);
+
+    const onFocus = () => fetchAttendanceData(true);
+    window.addEventListener("focus", onFocus);
+
+    return () => {
+      clearInterval(pollTimer);
+      window.removeEventListener("focus", onFocus);
+    };
+  }, [pollInterval, fetchAttendanceData]);
+
+  const { logout, dosen } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login", { replace: true });
+  };
 
   const totalEnrolled = stats?.total ?? 42;
   const hadirCount = stats?.present ?? 38;
@@ -245,9 +290,9 @@ export function AttendanceDashboard() {
         )}
       </AnimatePresence>
 
-      {/* Sidebar */}
+      {/* Desktop Sidebar (lg screens and up) */}
       <aside
-        className="w-60 shrink-0 flex flex-col py-6 px-4 gap-4"
+        className="hidden lg:flex w-60 shrink-0 flex-col py-6 px-4 gap-4"
         style={{
           background: "linear-gradient(180deg, #1e6fa8 0%, #155e86 60%, #0c4a6e 100%)",
           boxShadow: "4px 0 24px rgba(0,0,0,0.18)",
@@ -311,26 +356,206 @@ export function AttendanceDashboard() {
         </div>
       </aside>
 
+      {/* Mobile Drawer (screens < lg) */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <div className="fixed inset-0 z-50 lg:hidden flex">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm"
+              onClick={() => setMobileMenuOpen(false)}
+            />
+            {/* Drawer Content */}
+            <motion.aside
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              className="relative w-72 max-w-[85vw] h-full flex flex-col py-6 px-4 gap-4 z-10"
+              style={{
+                background: "linear-gradient(180deg, #1e6fa8 0%, #155e86 60%, #0c4a6e 100%)",
+                boxShadow: "4px 0 24px rgba(0,0,0,0.3)",
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between mb-2">
+                <div>
+                  <h1 className="text-2xl font-black text-yellow-400 tracking-tight leading-none">SATPAMO</h1>
+                  <p className="text-sky-300 text-[10px] font-semibold tracking-widest mt-0.5">ADMIN DOSEN</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="p-2 text-sky-100 hover:text-white rounded-xl hover:bg-white/10"
+                  aria-label="Tutup Menu"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Profile Card */}
+              <div className="flex items-center gap-3 bg-white/10 rounded-2xl px-3 py-2.5">
+                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-sky-300 to-blue-500 flex items-center justify-center text-white text-sm font-black shrink-0">
+                  {dosen ? getInitials(dosen.username) : "YK"}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-white text-xs font-bold leading-tight truncate">
+                    {dosen?.username ?? "Dr. Yurii Kharlistov, M.T."}
+                  </p>
+                  <p className="text-sky-300 text-[10px] truncate">NIP: 123456789098761</p>
+                </div>
+              </div>
+
+              {/* Navigation */}
+              <nav className="flex flex-col gap-1.5 flex-1 mt-2 overflow-y-auto">
+                {navItems.map((item) => (
+                  <button
+                    key={item.label}
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      navigate(item.path);
+                    }}
+                    className={`flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold transition-all text-left ${
+                      item.active
+                        ? "bg-sky-400/35 text-white shadow-sm border border-sky-300/40"
+                        : "text-sky-100 hover:bg-white/10 hover:text-white"
+                    }`}
+                  >
+                    {item.icon}
+                    <span className="flex-1">{item.label}</span>
+                    {item.active && (
+                      <span className="w-2.5 h-2.5 rounded-full bg-sky-950 ring-2 ring-sky-300 shrink-0" />
+                    )}
+                  </button>
+                ))}
+              </nav>
+
+              {/* Sidebar Footer */}
+              <div className="flex flex-col gap-1 border-t border-white/10 pt-3">
+                <button
+                  onClick={() => triggerToast("Pusat Bantuan SATPAMO: satpamo-support@ac.id")}
+                  className="flex items-center gap-2 text-sky-200 hover:text-white text-xs px-2 py-2.5 rounded-lg hover:bg-white/10 transition-all font-medium"
+                >
+                  <HelpCircle className="w-4 h-4" />
+                  Bantuan SATPAMO
+                </button>
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-2 text-red-300 hover:text-red-200 text-xs px-2 py-2.5 rounded-lg hover:bg-red-500/10 transition-all font-semibold"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Keluar
+                </button>
+              </div>
+            </motion.aside>
+          </div>
+        )}
+      </AnimatePresence>
+
       {/* Main Content Area */}
-      <main className="flex-1 overflow-y-auto no-scrollbar px-7 py-5 flex flex-col gap-5">
-        {/* Top Header Pill & User Avatar */}
-        <div className="flex items-center justify-between">
-          <div className="inline-flex items-center gap-2.5 glass-pill rounded-2xl px-4 py-2 shadow-sm">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0 animate-pulse" />
-            <span className="text-xs font-bold text-slate-900">
-              Ruang 207: Pemrograman Mobile (Kelas T3A)
-            </span>
-            <DoorOpen className="w-3.5 h-3.5 text-slate-800 ml-1" />
+      <main className="flex-1 overflow-y-auto no-scrollbar px-3.5 py-4 sm:px-6 sm:py-5 lg:px-7 flex flex-col gap-4 sm:gap-5 w-full min-w-0">
+        {/* Mobile Top App Bar (Screens < lg) */}
+        <div className="flex items-center justify-between lg:hidden glass-pill px-3.5 py-2 rounded-2xl shadow-sm border border-white/40">
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(true)}
+              className="p-1.5 text-slate-800 hover:text-black rounded-xl hover:bg-white/40 transition-colors"
+              aria-label="Buka Menu"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+            <div>
+              <span className="text-xs font-black text-slate-900 tracking-tight leading-none block">SATPAMO</span>
+              <p className="text-[10px] text-slate-700 font-semibold leading-none mt-0.5">Live Monitoring</p>
+            </div>
           </div>
 
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2">
             <button
-              onClick={() => setRefreshKey((k) => k + 1)}
-              disabled={loadingData}
-              className="p-2 rounded-xl glass-pill hover:bg-white/45 text-slate-800 shadow-sm transition-all"
-              title="Refresh Data Presensi"
+              type="button"
+              onClick={() => fetchAttendanceData(false)}
+              disabled={isSyncing}
+              className="p-1.5 rounded-xl glass-pill text-slate-800 hover:bg-white/40 transition-all"
+              title="Sinkronisasi Data"
             >
-              <RefreshCw className={`w-4 h-4 ${loadingData ? "animate-spin text-sky-800" : ""}`} />
+              <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? "animate-spin text-sky-800" : ""}`} />
+            </button>
+            <div className="w-7 h-7 rounded-full bg-sky-600 border border-sky-300 flex items-center justify-center text-white text-[10px] font-black shadow-xs">
+              {dosen ? getInitials(dosen.username) : "YK"}
+            </div>
+          </div>
+        </div>
+
+        {/* Top Header Pill & Real-time Sync Controller */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div className="inline-flex items-center gap-2.5 glass-pill rounded-2xl px-3.5 py-2 shadow-sm max-w-full">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0 animate-pulse" />
+            <span className="text-xs font-bold text-slate-900 truncate">
+              Ruang 207: Pemrograman Mobile (Kelas T3A)
+            </span>
+            <DoorOpen className="w-3.5 h-3.5 text-slate-800 ml-1 shrink-0" />
+          </div>
+
+          <div className="flex items-center flex-wrap gap-2.5">
+            {/* Real-time interval controller */}
+            <div className="flex items-center gap-2 glass-pill px-3 py-1.5 rounded-2xl shadow-sm border border-white/40">
+              <span className="flex items-center gap-1.5">
+                <span
+                  className={`w-2 h-2 rounded-full ${
+                    pollInterval > 0 ? "bg-emerald-500 animate-ping" : "bg-amber-400"
+                  }`}
+                />
+                <span className="text-[11px] font-bold text-slate-800 whitespace-nowrap">
+                  {pollInterval > 0 ? `Live Sync (${pollInterval}s)` : "Sync Dijeda"}
+                </span>
+              </span>
+
+              {/* Interval Options */}
+              <div className="flex items-center gap-1 bg-black/10 p-0.5 rounded-xl border border-white/20 text-[10px]">
+                {[
+                  { sec: 3, label: "3s" },
+                  { sec: 5, label: "5s" },
+                  { sec: 10, label: "10s" },
+                  { sec: 0, label: "Jeda" },
+                ].map((item) => (
+                  <button
+                    key={item.sec}
+                    type="button"
+                    onClick={() => {
+                      setPollInterval(item.sec);
+                      triggerToast(
+                        item.sec > 0
+                          ? `Interval update real-time diatur ke ${item.sec} detik`
+                          : "Interval update real-time dijeda"
+                      );
+                    }}
+                    className={`px-1.5 py-0.5 rounded-lg font-bold transition-all ${
+                      pollInterval === item.sec
+                        ? "bg-sky-900 text-white shadow-xs"
+                        : "text-slate-700 hover:bg-white/40"
+                    }`}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+
+              <span className="text-[10px] text-slate-600 font-semibold hidden md:inline">
+                Update: {lastSynced.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
+              </span>
+            </div>
+
+            <button
+              onClick={() => fetchAttendanceData(false)}
+              disabled={isSyncing}
+              className="p-2 rounded-xl glass-pill hover:bg-white/45 text-slate-800 shadow-sm transition-all"
+              title="Sinkronisasi Data Sekarang"
+            >
+              <RefreshCw className={`w-4 h-4 ${isSyncing ? "animate-spin text-sky-800" : ""}`} />
             </button>
 
             <div className="w-9 h-9 rounded-full bg-sky-600 border border-sky-300 flex items-center justify-center text-white text-xs font-black shadow-sm">
@@ -346,9 +571,21 @@ export function AttendanceDashboard() {
               <span className="bg-sky-950 text-sky-200 text-[11px] font-bold px-3 py-1 rounded-full shadow-sm">
                 SEMESTER GANJIL 2026/2027
               </span>
-              <span className="text-slate-800 text-[11px] font-semibold flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                Radar Geofence: Aktif 50m (Ruang 207 Lab Mobile)
+              <span
+                className={`text-[11px] font-bold flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border transition-all ${
+                  isGeofenceActive
+                    ? "text-emerald-950 bg-emerald-200/50 border-emerald-400/40"
+                    : "text-amber-950 bg-amber-200/50 border-amber-400/40"
+                }`}
+              >
+                <span
+                  className={`w-2 h-2 rounded-full ${
+                    isGeofenceActive ? "bg-emerald-600 animate-pulse" : "bg-amber-600"
+                  }`}
+                />
+                {isGeofenceActive
+                  ? "Radar Geofence: Aktif 50m (Ruang 207 Lab Mobile)"
+                  : "Radar Geofence: Nonaktif (Bebas Lokasi)"}
               </span>
             </div>
             <h2 className="text-2xl font-black text-slate-900 tracking-tight">
@@ -481,16 +718,22 @@ export function AttendanceDashboard() {
         {/* Middle Section: QR Code & Radar + Warning & Activity Feed */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
           {/* Left: Dynamic QR & Radar Geofence (7 cols) */}
-          <div className="lg:col-span-7 glass-panel rounded-3xl p-6 flex flex-col justify-between">
-            <div className="flex flex-col sm:flex-row gap-6 items-start">
-              {/* QR Code Container */}
-              <div className="flex flex-col items-center gap-2.5 shrink-0 self-center sm:self-start">
-                <QrCodeDisplay pin="15710" />
+          <div className="lg:col-span-7 glass-panel rounded-3xl p-5 sm:p-6 flex flex-col justify-between">
+            <div className="flex flex-col md:flex-row gap-6 items-center md:items-start">
+              {/* QR Code Container (Left on md+, Centered on mobile) */}
+              <div className="flex flex-col items-center gap-2.5 shrink-0 w-full sm:w-auto">
+                <DynamicQrDisplay
+                  value={qrPayload}
+                  pin={currentPin}
+                  size={135}
+                  onCopyPin={(pinVal) => triggerToast(`Kode PIN ${pinVal} berhasil disalin ke clipboard!`)}
+                  showDetails={true}
+                />
 
                 {/* Progress bar */}
-                <div className="w-36 mt-0.5">
+                <div className="w-40 max-w-full mt-0.5">
                   <div className="flex justify-between text-[10px] text-slate-700 font-bold mb-1">
-                    <span>Auto-Refresh</span>
+                    <span>Auto-Refresh QR</span>
                     <span className="text-sky-950 font-black">{qrTimer}s</span>
                   </div>
                   <div className="h-1.5 bg-black/15 rounded-full overflow-hidden border border-white/30">
@@ -502,20 +745,29 @@ export function AttendanceDashboard() {
                   </div>
                 </div>
 
-                <div className="flex gap-2 mt-1">
+                <div className="flex flex-wrap justify-center gap-1.5 mt-1 w-full">
                   <button
-                    onClick={() => {
-                      setQrTimer(15);
-                      triggerToast("Token QR sesi berhasil di-generate ulang!");
-                    }}
-                    className="flex items-center gap-1.5 text-[10px] font-bold glass-pill text-slate-800 px-2.5 py-1.5 rounded-xl hover:bg-white/45 transition-all shadow-sm"
+                    type="button"
+                    onClick={handleRegenerateQr}
+                    className="flex items-center gap-1 text-[10px] font-bold glass-pill text-slate-800 px-2.5 py-1.5 rounded-xl hover:bg-white/45 transition-all shadow-sm"
+                    title="Generate token QR baru"
                   >
-                    <RotateCcw className="w-3 h-3" />
-                    Reset Token
+                    <RotateCcw className="w-3 h-3 text-sky-800" />
+                    QR Baru
                   </button>
                   <button
+                    type="button"
+                    onClick={handleGenerateNewPin}
+                    className="flex items-center gap-1 text-[10px] font-bold glass-pill text-slate-800 px-2.5 py-1.5 rounded-xl hover:bg-white/45 transition-all shadow-sm"
+                    title="Generate kode PIN darurat baru"
+                  >
+                    <Shuffle className="w-3 h-3 text-sky-800" />
+                    Acak PIN
+                  </button>
+                  <button
+                    type="button"
                     onClick={() => setShowProjectorModal(true)}
-                    className="flex items-center gap-1.5 text-[10px] font-bold bg-sky-600 hover:bg-sky-700 text-white px-2.5 py-1.5 rounded-xl transition-all shadow-md"
+                    className="flex items-center gap-1 text-[10px] font-bold bg-sky-600 hover:bg-sky-700 text-white px-2.5 py-1.5 rounded-xl transition-all shadow-md"
                   >
                     <Maximize2 className="w-3 h-3" />
                     Layar Penuh
@@ -523,39 +775,124 @@ export function AttendanceDashboard() {
                 </div>
               </div>
 
-              {/* Information Side */}
-              <div className="flex-1 min-w-0 flex flex-col justify-between">
+              {/* Information Side (Geofence & Session Controls - Full Width of remaining space) */}
+              <div className="flex-1 min-w-0 flex flex-col justify-between w-full gap-4">
                 <div>
-                  <h3 className="text-lg font-black text-slate-900 leading-tight">
-                    QR-Code Dinamis &amp; Radar Perimeter
+                  <h3 className="text-base sm:text-lg font-black text-slate-900 leading-tight">
+                    Kontrol Geofence &amp; Keamanan Sesi
                   </h3>
-                  <p className="text-xs text-slate-700 mt-2 leading-relaxed font-medium">
-                    Setiap QR berganti otomatis setiap 15 detik dan dienkripsi dengan koordinat GPS satelit ruang 207 Gedung B. Mahasiswa yang berada di luar radius 50 meter tidak dapat melakukan validasi presensi.
+                  <p className="text-xs text-slate-700 mt-1 leading-relaxed font-medium">
+                    Token QR dinamis dan PIN darurat terhubung langsung dengan batas perimeter satelit Ruang 207 Lab Mobile.
                   </p>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
-                  <div className="glass-inner rounded-2xl p-3.5 hover:bg-white/30 transition-all">
-                    <p className="text-[10px] text-slate-700 font-extrabold uppercase tracking-wide">
-                      Kode Pin Darurat
+                {/* Main Geofence Card */}
+                <div
+                  className={`glass-inner rounded-2xl p-4 transition-all flex flex-col justify-between gap-3 border ${
+                    isGeofenceActive
+                      ? "border-emerald-300/70 bg-emerald-50/25"
+                      : "border-amber-300/70 bg-amber-50/25"
+                  }`}
+                >
+                  {/* Card Header with Switch */}
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div
+                        className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
+                          isGeofenceActive ? "bg-emerald-500/20 text-emerald-800" : "bg-amber-500/20 text-amber-800"
+                        }`}
+                      >
+                        <MapPin className="w-4 h-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-[10px] font-black uppercase tracking-wider text-slate-700 truncate">
+                          AREA GEOFENCE KAMPUS
+                        </p>
+                        <p
+                          className={`text-xs font-black truncate ${
+                            isGeofenceActive ? "text-emerald-950" : "text-amber-950"
+                          }`}
+                        >
+                          {isGeofenceActive ? `Perimeter Aktif (${geofenceRadius}m)` : "Bebas Lokasi (Nonaktif)"}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Interactive Switch with Clear Tap Area */}
+                    <button
+                      type="button"
+                      onClick={handleToggleGeofence}
+                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-sky-600 focus:ring-offset-1 ${
+                        isGeofenceActive ? "bg-emerald-600" : "bg-slate-400"
+                      }`}
+                      role="switch"
+                      aria-checked={isGeofenceActive}
+                      title={isGeofenceActive ? "Klik untuk mematikan area geofence" : "Klik untuk menyalakan area geofence"}
+                    >
+                      <span
+                        aria-hidden="true"
+                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                          isGeofenceActive ? "translate-x-5" : "translate-x-0"
+                        }`}
+                      />
+                    </button>
+                  </div>
+
+                  {/* Geofence Details */}
+                  <div className="space-y-1 text-xs">
+                    <p className="text-slate-700 font-medium">
+                      {isGeofenceActive
+                        ? `Validasi radius ${geofenceRadius} meter dari titik pusat Lab 207 Gedung B.`
+                        : "Validasi koordinat GPS dilewati. Mahasiswa dapat presensi dari mana saja (mode online)."}
                     </p>
-                    <p className="text-xl font-black text-sky-950 tracking-wider mt-0.5">15710</p>
-                    <p className="text-[10px] text-slate-700 mt-0.5 font-medium">
-                      Gunakan ketika kamera ponsel mahasiswa bermasalah
+                    <p className="text-[11px] font-mono font-semibold text-slate-800">
+                      {isGeofenceActive ? "Koordinat: -6.89042, 107.61031 (Toleransi 15m)" : "GPS Perimeter: Bypass"}
                     </p>
                   </div>
 
-                  <div className="glass-inner rounded-2xl p-3.5 hover:bg-white/30 transition-all border-emerald-300/40">
-                    <p className="text-[10px] text-emerald-950 font-extrabold uppercase tracking-wide">
-                      Area Geofence Valid
-                    </p>
-                    <div className="flex items-center gap-1.5 mt-1">
-                      <MapPin className="w-4 h-4 text-emerald-700" />
-                      <p className="text-sm font-black text-emerald-950">Radius 50m</p>
+                  {/* Radius Options (when active) */}
+                  {isGeofenceActive && (
+                    <div className="pt-2 border-t border-black/5 flex items-center justify-between gap-2 flex-wrap">
+                      <span className="text-[10px] font-bold text-slate-700 uppercase tracking-wider">
+                        Atur Radius:
+                      </span>
+                      <div className="flex items-center gap-1.5">
+                        {[25, 50, 100].map((rad) => (
+                          <button
+                            key={rad}
+                            type="button"
+                            onClick={() => handleRadiusChange(rad)}
+                            className={`px-2 py-0.5 rounded-lg text-[10px] font-bold transition-all ${
+                              geofenceRadius === rad
+                                ? "bg-emerald-700 text-white shadow-xs"
+                                : "bg-white/60 text-slate-700 hover:bg-white"
+                            }`}
+                          >
+                            {rad}m
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                    <p className="text-[10px] text-slate-700 mt-0.5 font-mono font-semibold">
-                      -6.89042, 107.61031 (Ruang 207)
-                    </p>
+                  )}
+
+                  {/* Card Footer Status */}
+                  <div className="pt-2 border-t border-black/5 flex items-center justify-between text-[10px]">
+                    <span
+                      className={`font-bold px-2 py-0.5 rounded-full ${
+                        isGeofenceActive
+                          ? "bg-emerald-200/80 text-emerald-950"
+                          : "bg-amber-200/80 text-amber-950"
+                      }`}
+                    >
+                      {isGeofenceActive ? "Geofence ON" : "Geofence OFF"}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={handleToggleGeofence}
+                      className="font-bold text-sky-900 hover:text-black hover:underline"
+                    >
+                      {isGeofenceActive ? "Nonaktifkan Geofence" : "Aktifkan Geofence"}
+                    </button>
                   </div>
                 </div>
               </div>
@@ -911,8 +1248,41 @@ export function AttendanceDashboard() {
                 </button>
               </div>
 
-              <div className="my-2 p-6 glass-inner rounded-3xl shadow-inner">
-                <QrCodeDisplay pin="15710" />
+              <div className="my-2 p-6 glass-inner rounded-3xl shadow-inner flex flex-col items-center">
+                <DynamicQrDisplay
+                  value={qrPayload}
+                  pin={currentPin}
+                  size={200}
+                  onCopyPin={(p) => triggerToast(`Kode PIN ${p} berhasil disalin!`)}
+                />
+              </div>
+
+              <div className="flex items-center flex-wrap justify-center gap-2">
+                <span
+                  className={`text-xs font-bold px-3 py-1 rounded-full border ${
+                    isGeofenceActive
+                      ? "bg-emerald-100 text-emerald-800 border-emerald-300"
+                      : "bg-amber-100 text-amber-800 border-amber-300"
+                  }`}
+                >
+                  {isGeofenceActive ? "Geofence: Aktif (Radius 50m)" : "Geofence: Nonaktif (Bebas Lokasi)"}
+                </span>
+                <button
+                  type="button"
+                  onClick={handleGenerateNewPin}
+                  className="text-xs font-bold text-sky-800 hover:text-sky-950 flex items-center gap-1 bg-white/70 px-2.5 py-1 rounded-xl shadow-xs"
+                >
+                  <Shuffle className="w-3 h-3" />
+                  Acak PIN
+                </button>
+                <button
+                  type="button"
+                  onClick={handleRegenerateQr}
+                  className="text-xs font-bold text-sky-800 hover:text-sky-950 flex items-center gap-1 bg-white/70 px-2.5 py-1 rounded-xl shadow-xs"
+                >
+                  <RotateCcw className="w-3 h-3" />
+                  QR Baru
+                </button>
               </div>
 
               <div className="w-full max-w-xs">
@@ -930,7 +1300,9 @@ export function AttendanceDashboard() {
               </div>
 
               <p className="text-xs text-slate-600 font-medium leading-relaxed max-w-sm mt-1">
-                Scan menggunakan aplikasi SATPAMO Mahasiswa dalam radius perimeter 50 meter Lab 207 Gedung B.
+                {isGeofenceActive
+                  ? "Scan menggunakan aplikasi SATPAMO Mahasiswa dalam radius perimeter 50 meter Lab 207 Gedung B."
+                  : "Mode bebas lokasi aktif: Mahasiswa dapat melakukan presensi tanpa batasan perimeter GPS."}
               </p>
             </motion.div>
           </motion.div>
