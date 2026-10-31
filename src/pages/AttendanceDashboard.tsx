@@ -26,7 +26,6 @@ import {
   DoorOpen,
   Maximize2,
   Shuffle,
-  Copy,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import {
