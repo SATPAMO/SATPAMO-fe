@@ -9,6 +9,7 @@ import { KelasDetail } from "./pages/KelasDetail";
 import { KelasAttendance } from "./pages/KelasAttendance";
 import { StudentCheckIn } from "./pages/StudentCheckIn";
 import { JadwalSesi } from "./pages/JadwalSesi";
+import { ManajemenJadwal } from "./pages/ManajemenJadwal";
 import { StatistikKelas } from "./pages/StatistikKelas";
 import { PengaturanKuota } from "./pages/PengaturanKuota";
 
@@ -44,6 +45,22 @@ function App() {
             element={
               <ProtectedRoute>
                 <JadwalSesi />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/manajemen-jadwal"
+            element={
+              <ProtectedRoute>
+                <ManajemenJadwal />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/manajemen"
+            element={
+              <ProtectedRoute>
+                <ManajemenJadwal />
               </ProtectedRoute>
             }
           />
