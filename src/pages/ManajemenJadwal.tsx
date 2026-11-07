@@ -305,14 +305,14 @@ export const ManajemenJadwal = () => {
     <div
       className="min-h-screen flex text-slate-800 relative overflow-hidden"
       style={{
-        background: "linear-gradient(145deg, #def0fb 0%, #c8e6f8 35%, #b3d7f4 65%, #cce8fb 100%)",
+        background: "linear-gradient(145deg, #38bdf8 0%, #29b6f6 30%, #0ea5e9 70%, #0284c7 100%)",
         fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
       }}
     >
       {/* Decorative ambient blobs */}
-      <div className="pointer-events-none absolute -top-32 -right-32 w-96 h-96 bg-sky-200/40 rounded-full blur-3xl" />
-      <div className="pointer-events-none absolute top-1/2 left-1/3 w-72 h-72 bg-blue-100/50 rounded-full blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-24 right-1/4 w-96 h-96 bg-cyan-100/40 rounded-full blur-3xl" />
+      <div className="pointer-events-none absolute -top-32 -right-32 w-96 h-96 bg-white/15 rounded-full blur-3xl" />
+      <div className="pointer-events-none absolute top-1/2 left-1/3 w-72 h-72 bg-sky-200/20 rounded-full blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-24 right-1/4 w-96 h-96 bg-white/15 rounded-full blur-3xl" />
 
       {/* Toast Notification */}
       <AnimatePresence>
@@ -334,20 +334,20 @@ export const ManajemenJadwal = () => {
         className="w-60 shrink-0 flex flex-col py-6 px-4 gap-4 sidebar-glass z-10"
       >
         <div className="mb-2">
-          <h1 className="text-3xl font-black text-sky-600 tracking-tight leading-none">SATPAMO</h1>
-          <p className="text-sky-400 text-xs font-semibold tracking-widest mt-0.5">ADMIN</p>
+          <h1 className="text-3xl font-black text-yellow-300 tracking-tight leading-none drop-shadow-xs">SATPAMO</h1>
+          <p className="text-sky-950 font-black text-[11px] tracking-widest mt-0.5">ADMIN</p>
         </div>
 
         {/* Profile Card */}
-        <div className="flex items-center gap-3 bg-sky-50/80 border border-sky-100 rounded-2xl px-3 py-2.5">
-          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-sky-400 to-blue-500 flex items-center justify-center text-white text-sm font-black shrink-0 shadow-sm">
-            {dosen?.username ? getInitials(dosen.username) : "A"}
+        <div className="flex items-center gap-3 bg-white/25 border border-white/40 rounded-2xl px-3 py-2.5">
+          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-sky-400 to-blue-600 flex items-center justify-center text-white text-sm font-black shrink-0 shadow-xs">
+            {dosen?.username ? getInitials(dosen.username) : "YK"}
           </div>
           <div className="min-w-0">
-            <p className="text-slate-800 text-xs font-bold leading-tight truncate">
-              {dosen?.username ?? "admin"}
+            <p className="text-slate-900 text-xs font-black leading-tight truncate">
+              {dosen?.username ?? "Dr. Yurii Kharlistov, M.T."}
             </p>
-            <p className="text-sky-500 text-[10px] truncate">NIP: 123456789098761</p>
+            <p className="text-sky-950 text-[10px] font-bold truncate">NIP: 123456789098761</p>
           </div>
         </div>
 
@@ -359,24 +359,24 @@ export const ManajemenJadwal = () => {
               onClick={() => navigate(item.path)}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all text-left ${
                 item.active
-                  ? "nav-active"
-                  : "text-slate-500 hover:bg-sky-50 hover:text-slate-800"
+                  ? "bg-sky-500/40 text-slate-950 font-black shadow-xs border border-white/40"
+                  : "text-slate-800 hover:bg-white/20 hover:text-black font-semibold"
               }`}
             >
               {item.icon}
               <span className="flex-1">{item.label}</span>
               {item.active && (
-                <span className="w-2.5 h-2.5 rounded-full bg-sky-500 ring-2 ring-sky-200 shrink-0" />
+                <span className="w-2.5 h-2.5 rounded-full bg-sky-950 ring-2 ring-sky-300 shrink-0" />
               )}
             </button>
           ))}
         </nav>
 
         {/* Sidebar Footer */}
-        <div className="flex flex-col gap-1 border-t border-sky-100 pt-3">
+        <div className="flex flex-col gap-1 border-t border-white/25 pt-3">
           <button
             onClick={() => setShowHelpModal(true)}
-            className="flex items-center gap-2 text-slate-500 hover:text-slate-800 text-xs px-2 py-2 rounded-lg hover:bg-sky-50 transition-all font-medium"
+            className="flex items-center gap-2 text-slate-800 hover:text-black text-xs px-2 py-2 rounded-lg hover:bg-white/20 transition-all font-semibold"
           >
             <HelpCircle className="w-4 h-4" />
             Bantuan SATPAMO
@@ -386,7 +386,7 @@ export const ManajemenJadwal = () => {
               logout();
               navigate("/login");
             }}
-            className="flex items-center gap-2 text-red-400 hover:text-red-600 text-xs px-2 py-2 rounded-lg hover:bg-red-50 transition-all font-semibold"
+            className="flex items-center gap-2 text-red-600 hover:text-red-700 text-xs px-2 py-2 rounded-lg hover:bg-red-500/15 transition-all font-bold"
           >
             <LogOut className="w-4 h-4" />
             Keluar

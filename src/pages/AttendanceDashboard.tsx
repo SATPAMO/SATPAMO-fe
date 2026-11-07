@@ -26,6 +26,7 @@ import {
   DoorOpen,
   Maximize2,
   Shuffle,
+  Copy,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import {
@@ -268,14 +269,14 @@ export function AttendanceDashboard() {
     <div
       className="min-h-screen flex text-slate-800 relative overflow-hidden"
       style={{
-        background: "linear-gradient(145deg, #def0fb 0%, #c8e6f8 35%, #b3d7f4 65%, #cce8fb 100%)",
+        background: "linear-gradient(145deg, #38bdf8 0%, #29b6f6 30%, #0ea5e9 70%, #0284c7 100%)",
         fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
       }}
     >
       {/* Decorative ambient blobs */}
-      <div className="pointer-events-none absolute -top-32 -right-32 w-96 h-96 bg-sky-200/40 rounded-full blur-3xl" />
-      <div className="pointer-events-none absolute top-1/2 left-1/3 w-72 h-72 bg-blue-100/50 rounded-full blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-24 right-1/4 w-96 h-96 bg-cyan-100/40 rounded-full blur-3xl" />
+      <div className="pointer-events-none absolute -top-32 -right-32 w-96 h-96 bg-white/15 rounded-full blur-3xl" />
+      <div className="pointer-events-none absolute top-1/2 left-1/3 w-72 h-72 bg-sky-200/20 rounded-full blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-24 right-1/4 w-96 h-96 bg-white/15 rounded-full blur-3xl" />
       {/* Toast Notification */}
       <AnimatePresence>
         {toastMessage && (
@@ -291,26 +292,25 @@ export function AttendanceDashboard() {
         )}
       </AnimatePresence>
 
-      {/* Desktop Sidebar (lg screens and up) */}
+      {/* Desktop Sidebar (lg screens and up) - ORIGINAL TRANSLUCENT CYAN */}
       <aside
         className="hidden lg:flex w-60 shrink-0 flex-col py-6 px-4 gap-4 sidebar-glass z-10"
       >
         <div className="mb-2">
-          <h1 className="text-3xl font-black text-sky-600 tracking-tight leading-none">SATPAMO</h1>
-          <p className="text-sky-400 text-xs font-semibold tracking-widest mt-0.5">ADMIN</p>
+          <h1 className="text-3xl font-black text-yellow-300 tracking-tight leading-none drop-shadow-xs">SATPAMO</h1>
+          <p className="text-sky-950 font-black text-[11px] tracking-widest mt-0.5">ADMIN</p>
         </div>
 
-
         {/* Profile Card */}
-        <div className="flex items-center gap-3 bg-sky-50/80 border border-sky-100 rounded-2xl px-3 py-2.5">
-          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-sky-400 to-blue-500 flex items-center justify-center text-white text-sm font-black shrink-0">
+        <div className="flex items-center gap-3 bg-white/25 border border-white/40 rounded-2xl px-3 py-2.5">
+          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-sky-400 to-blue-600 flex items-center justify-center text-white text-sm font-black shrink-0 shadow-xs">
             {dosen ? getInitials(dosen.username) : "YK"}
           </div>
           <div className="min-w-0">
-            <p className="text-slate-800 text-xs font-bold leading-tight truncate">
+            <p className="text-slate-900 text-xs font-black leading-tight truncate">
               {dosen?.username ?? "Dr. Yurii Kharlistov, M.T."}
             </p>
-            <p className="text-sky-500 text-[10px] truncate">NIP: 123456789098761</p>
+            <p className="text-sky-950 text-[10px] font-bold truncate">NIP: 123456789098761</p>
           </div>
         </div>
 
@@ -322,31 +322,53 @@ export function AttendanceDashboard() {
               onClick={() => navigate(item.path)}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all text-left ${
                 item.active
-                  ? "nav-active"
-                  : "text-slate-500 hover:bg-sky-50 hover:text-slate-800"
+                  ? "bg-sky-500/40 text-slate-950 font-black shadow-xs border border-white/40"
+                  : "text-slate-800 hover:bg-white/20 hover:text-black font-semibold"
               }`}
             >
               {item.icon}
               <span className="flex-1">{item.label}</span>
               {item.active && (
-                <span className="w-2.5 h-2.5 rounded-full bg-sky-500 ring-2 ring-sky-200 shrink-0" />
+                <span className="w-2.5 h-2.5 rounded-full bg-sky-950 ring-2 ring-sky-300 shrink-0" />
               )}
             </button>
           ))}
         </nav>
 
+        {/* MODE RADAR GPS box from reference screenshot */}
+        <div className="bg-white/25 border border-white/40 rounded-2xl p-3 flex flex-col gap-2">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-black uppercase tracking-wider text-slate-900">
+              MODE RADAR GPS
+            </span>
+            <span className="bg-sky-500/50 border border-white/35 text-slate-950 text-[9px] font-black px-1.5 py-0.5 rounded-full">
+              {isGeofenceActive ? "AKTIF 50 METER" : "NONAKTIF"}
+            </span>
+          </div>
+          <p className="text-[11px] text-slate-800 font-medium leading-snug">
+            Presensi hanya sah dalam perimeter Ruang 207 Kampus Pusat.
+          </p>
+          <button
+            onClick={handleRegenerateQr}
+            className="bg-sky-700 hover:bg-sky-800 text-white font-bold text-xs py-2 px-3 rounded-xl transition-all shadow-xs flex items-center justify-center gap-1.5"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+            Generate QR Dinamis
+          </button>
+        </div>
+
         {/* Sidebar Footer */}
-        <div className="flex flex-col gap-1 border-t border-sky-100 pt-3">
+        <div className="flex flex-col gap-1 border-t border-white/25 pt-3">
           <button
             onClick={() => triggerToast("Pusat Bantuan SATPAMO: satpamo-support@ac.id")}
-            className="flex items-center gap-2 text-slate-500 hover:text-slate-800 text-xs px-2 py-2 rounded-lg hover:bg-sky-50 transition-all font-medium"
+            className="flex items-center gap-2 text-slate-800 hover:text-black text-xs px-2 py-2 rounded-lg hover:bg-white/20 transition-all font-semibold"
           >
             <HelpCircle className="w-4 h-4" />
             Bantuan SATPAMO
           </button>
           <button
             onClick={handleLogout}
-            className="flex items-center gap-2 text-red-400 hover:text-red-600 text-xs px-2 py-2 rounded-lg hover:bg-red-50 transition-all font-semibold"
+            className="flex items-center gap-2 text-red-600 hover:text-red-700 text-xs px-2 py-2 rounded-lg hover:bg-red-500/15 transition-all font-bold"
           >
             <LogOut className="w-4 h-4" />
             Keluar
@@ -374,20 +396,20 @@ export function AttendanceDashboard() {
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
               className="relative w-72 max-w-[85vw] h-full flex flex-col py-6 px-4 gap-4 z-10"
               style={{
-                background: "linear-gradient(180deg, #1e6fa8 0%, #155e86 60%, #0c4a6e 100%)",
+                background: "linear-gradient(180deg, #38bdf8 0%, #0284c7 100%)",
                 boxShadow: "4px 0 24px rgba(0,0,0,0.3)",
               }}
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between mb-2">
                 <div>
-                  <h1 className="text-2xl font-black text-yellow-400 tracking-tight leading-none">SATPAMO</h1>
-                  <p className="text-sky-300 text-[10px] font-semibold tracking-widest mt-0.5">ADMIN DOSEN</p>
+                  <h1 className="text-2xl font-black text-yellow-300 tracking-tight leading-none">SATPAMO</h1>
+                  <p className="text-sky-950 text-[10px] font-black tracking-widest mt-0.5">ADMIN</p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="p-2 text-sky-100 hover:text-white rounded-xl hover:bg-white/10"
+                  className="p-2 text-slate-800 hover:text-black rounded-xl hover:bg-white/20"
                   aria-label="Tutup Menu"
                 >
                   <X className="w-5 h-5" />
@@ -395,15 +417,15 @@ export function AttendanceDashboard() {
               </div>
 
               {/* Profile Card */}
-              <div className="flex items-center gap-3 bg-white/10 rounded-2xl px-3 py-2.5">
-                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-sky-300 to-blue-500 flex items-center justify-center text-white text-sm font-black shrink-0">
+              <div className="flex items-center gap-3 bg-white/25 border border-white/40 rounded-2xl px-3 py-2.5">
+                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-sky-400 to-blue-600 flex items-center justify-center text-white text-sm font-black shrink-0">
                   {dosen ? getInitials(dosen.username) : "YK"}
                 </div>
                 <div className="min-w-0">
-                  <p className="text-white text-xs font-bold leading-tight truncate">
+                  <p className="text-slate-900 text-xs font-black leading-tight truncate">
                     {dosen?.username ?? "Dr. Yurii Kharlistov, M.T."}
                   </p>
-                  <p className="text-sky-300 text-[10px] truncate">NIP: 123456789098761</p>
+                  <p className="text-sky-950 text-[10px] font-bold truncate">NIP: 123456789098761</p>
                 </div>
               </div>
 
@@ -418,8 +440,8 @@ export function AttendanceDashboard() {
                     }}
                     className={`flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold transition-all text-left ${
                       item.active
-                        ? "bg-sky-400/35 text-white shadow-sm border border-sky-300/40"
-                        : "text-sky-100 hover:bg-white/10 hover:text-white"
+                        ? "bg-sky-500/50 text-slate-950 font-black shadow-xs border border-white/40"
+                        : "text-slate-800 hover:bg-white/20 hover:text-black font-semibold"
                     }`}
                   >
                     {item.icon}
@@ -432,17 +454,17 @@ export function AttendanceDashboard() {
               </nav>
 
               {/* Sidebar Footer */}
-              <div className="flex flex-col gap-1 border-t border-white/10 pt-3">
+              <div className="flex flex-col gap-1 border-t border-white/20 pt-3">
                 <button
                   onClick={() => triggerToast("Pusat Bantuan SATPAMO: satpamo-support@ac.id")}
-                  className="flex items-center gap-2 text-sky-200 hover:text-white text-xs px-2 py-2.5 rounded-lg hover:bg-white/10 transition-all font-medium"
+                  className="flex items-center gap-2 text-slate-800 hover:text-black text-xs px-2 py-2.5 rounded-lg hover:bg-white/20 transition-all font-semibold"
                 >
                   <HelpCircle className="w-4 h-4" />
                   Bantuan SATPAMO
                 </button>
                 <button
                   onClick={handleLogout}
-                  className="flex items-center gap-2 text-red-300 hover:text-red-200 text-xs px-2 py-2.5 rounded-lg hover:bg-red-500/10 transition-all font-semibold"
+                  className="flex items-center gap-2 text-red-600 hover:text-red-700 text-xs px-2 py-2.5 rounded-lg hover:bg-red-500/15 transition-all font-bold"
                 >
                   <LogOut className="w-4 h-4" />
                   Keluar
@@ -452,6 +474,7 @@ export function AttendanceDashboard() {
           </div>
         )}
       </AnimatePresence>
+
 
       {/* Main Content Area */}
       <main className="flex-1 overflow-y-auto no-scrollbar px-3.5 py-4 sm:px-6 sm:py-5 lg:px-7 flex flex-col gap-4 sm:gap-5 w-full min-w-0">
@@ -715,182 +738,213 @@ export function AttendanceDashboard() {
 
         {/* Middle Section: QR Code & Radar + Warning & Activity Feed */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
-          {/* Left: Dynamic QR & Radar Geofence (7 cols) */}
-          <div className="lg:col-span-7 glass-panel rounded-3xl p-5 sm:p-6 flex flex-col justify-between">
-            <div className="flex flex-col md:flex-row gap-6 items-center md:items-start">
-              {/* QR Code Container (Left on md+, Centered on mobile) */}
+          {/* Left: Dynamic QR, PIN & Radar Geofence (7 cols) - ORIGINAL VIBRANT SKY BLUE DESIGN */}
+          <div
+            className="lg:col-span-7 rounded-3xl p-5 sm:p-6 flex flex-col justify-between relative overflow-hidden border border-sky-300/50 shadow-xl"
+            style={{
+              background: "linear-gradient(145deg, #38bdf8 0%, #29b6f6 50%, #0ea5e9 100%)",
+            }}
+          >
+            {/* Gloss highlight on top */}
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-white/20 to-transparent" />
+
+            <div className="flex flex-col md:flex-row gap-6 items-center md:items-start relative z-10">
+              {/* Left Column: QR Code Container */}
               <div className="flex flex-col items-center gap-2.5 shrink-0 w-full sm:w-auto">
                 <DynamicQrDisplay
                   value={qrPayload}
                   pin={currentPin}
-                  size={135}
+                  size={140}
                   onCopyPin={(pinVal) => triggerToast(`Kode PIN ${pinVal} berhasil disalin ke clipboard!`)}
                   showDetails={true}
                 />
 
                 {/* Progress bar */}
-                <div className="w-40 max-w-full mt-0.5">
-                  <div className="flex justify-between text-[10px] text-slate-700 font-bold mb-1">
+                <div className="w-44 max-w-full mt-0.5">
+                  <div className="flex justify-between text-[11px] text-slate-800 font-bold mb-1">
                     <span>Auto-Refresh QR</span>
-                    <span className="text-sky-950 font-black">{qrTimer}s</span>
+                    <span className="text-slate-950 font-black">{qrTimer}s</span>
                   </div>
-                  <div className="h-1.5 bg-sky-100 rounded-full overflow-hidden border border-sky-200/60">
+                  <div className="h-1.5 bg-black/15 rounded-full overflow-hidden border border-white/40">
                     <motion.div
-                      className="h-full bg-gradient-to-r from-sky-400 to-sky-600 rounded-full"
+                      className="h-full bg-slate-900 rounded-full"
                       style={{ width: `${(qrTimer / 15) * 100}%` }}
                       transition={{ duration: 0.5 }}
                     />
                   </div>
                 </div>
 
+                {/* Action Buttons */}
                 <div className="flex flex-wrap justify-center gap-1.5 mt-1 w-full">
                   <button
                     type="button"
                     onClick={handleRegenerateQr}
-                    className="flex items-center gap-1 text-[10px] font-bold glass-pill text-slate-800 px-2.5 py-1.5 rounded-xl hover:bg-white/45 transition-all shadow-sm"
+                    className="flex items-center gap-1 text-[11px] font-bold bg-sky-200/80 hover:bg-sky-100 text-slate-900 px-3 py-1.5 rounded-xl transition-all shadow-xs"
                     title="Generate token QR baru"
                   >
-                    <RotateCcw className="w-3 h-3 text-sky-800" />
+                    <RotateCcw className="w-3.5 h-3.5 text-slate-800" />
                     QR Baru
                   </button>
                   <button
                     type="button"
                     onClick={handleGenerateNewPin}
-                    className="flex items-center gap-1 text-[10px] font-bold glass-pill text-slate-800 px-2.5 py-1.5 rounded-xl hover:bg-white/45 transition-all shadow-sm"
+                    className="flex items-center gap-1 text-[11px] font-bold bg-sky-200/80 hover:bg-sky-100 text-slate-900 px-3 py-1.5 rounded-xl transition-all shadow-xs"
                     title="Generate kode PIN darurat baru"
                   >
-                    <Shuffle className="w-3 h-3 text-sky-800" />
+                    <Shuffle className="w-3.5 h-3.5 text-slate-800" />
                     Acak PIN
                   </button>
                   <button
                     type="button"
                     onClick={() => setShowProjectorModal(true)}
-                    className="flex items-center gap-1 text-[10px] font-bold bg-sky-600 hover:bg-sky-700 text-white px-2.5 py-1.5 rounded-xl transition-all shadow-md"
+                    className="flex items-center gap-1 text-[11px] font-bold bg-sky-700 hover:bg-sky-800 text-white px-3 py-1.5 rounded-xl transition-all shadow-md"
                   >
-                    <Maximize2 className="w-3 h-3" />
+                    <Maximize2 className="w-3.5 h-3.5" />
                     Layar Penuh
                   </button>
                 </div>
               </div>
 
-              {/* Information Side (Geofence & Session Controls - Full Width of remaining space) */}
+              {/* Right Column: Title, Description, and the Two Interactive Cards */}
               <div className="flex-1 min-w-0 flex flex-col justify-between w-full gap-4">
                 <div>
-                  <h3 className="text-base sm:text-lg font-black text-slate-900 leading-tight">
-                    Kontrol Geofence &amp; Keamanan Sesi
+                  <h3 className="text-xl sm:text-2xl font-black text-slate-900 leading-tight tracking-tight">
+                    Generator QR, PIN, &amp; Area Geofence
                   </h3>
-                  <p className="text-xs text-slate-700 mt-1 leading-relaxed font-medium">
-                    Token QR dinamis dan PIN darurat terhubung langsung dengan batas perimeter satelit Ruang 207 Lab Mobile.
+                  <p className="text-xs sm:text-sm text-slate-800 mt-1.5 leading-relaxed font-medium">
+                    Sistem presensi menghasilkan token QR dinamis dan PIN darurat yang sinkron dengan switch perimeter lokasi. Mahasiswa dapat memvalidasi kehadiran secara otomatis via aplikasi mobile.
                   </p>
                 </div>
 
-                {/* Main Geofence Card */}
-                <div
-                  className={`glass-inner rounded-2xl p-4 transition-all flex flex-col justify-between gap-3 border ${
-                    isGeofenceActive
-                      ? "border-emerald-300/70 bg-emerald-50/25"
-                      : "border-amber-300/70 bg-amber-50/25"
-                  }`}
-                >
-                  {/* Card Header with Switch */}
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <div
-                        className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
-                          isGeofenceActive ? "bg-emerald-500/20 text-emerald-800" : "bg-amber-500/20 text-amber-800"
-                        }`}
-                      >
-                        <MapPin className="w-4 h-4" />
+                {/* The Two Interactive Cards - Full Width Stack (No squishing or clipping) */}
+                <div className="flex flex-col gap-3 w-full">
+                  {/* Card 1: KODE PIN DARURAT */}
+                  <div className="bg-white/40 backdrop-blur-md rounded-2xl p-3.5 sm:p-4 border border-white/60 shadow-xs flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center justify-between gap-2 mb-1">
+                        <span className="text-[11px] font-black uppercase tracking-wider text-slate-900">
+                          KODE PIN DARURAT
+                        </span>
+                        <span className="bg-sky-300/80 text-sky-950 text-[10px] font-black px-2 py-0.5 rounded-full shrink-0">
+                          5 Digit
+                        </span>
                       </div>
-                      <div className="min-w-0">
-                        <p className="text-[10px] font-black uppercase tracking-wider text-slate-700 truncate">
-                          AREA GEOFENCE KAMPUS
-                        </p>
-                        <p
-                          className={`text-xs font-black truncate ${
-                            isGeofenceActive ? "text-emerald-950" : "text-amber-950"
+
+                      <div className="flex items-center justify-between gap-2 my-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-2xl sm:text-3xl font-black font-mono text-slate-950 tracking-widest">
+                            {currentPin}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              navigator.clipboard.writeText(currentPin);
+                              triggerToast(`Kode PIN ${currentPin} berhasil disalin!`);
+                            }}
+                            className="p-1.5 text-slate-700 hover:text-black rounded-lg hover:bg-white/40 transition-colors"
+                            title="Salin PIN"
+                          >
+                            <Copy className="w-4 h-4 text-slate-900" />
+                          </button>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={handleGenerateNewPin}
+                          className="text-xs font-black text-sky-950 hover:text-black hover:underline inline-flex items-center gap-1.5 bg-white/50 hover:bg-white/80 px-3 py-1.5 rounded-xl transition-all shadow-2xs shrink-0"
+                        >
+                          <Shuffle className="w-3.5 h-3.5 text-sky-900" />
+                          Generate Baru
+                        </button>
+                      </div>
+
+                      <p className="text-[11px] text-slate-700 font-medium">
+                        Alternatif saat kamera atau sensor QR mahasiswa terkendala.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Card 2: AREA GEOFENCE VALID */}
+                  <div className="bg-white/40 backdrop-blur-md rounded-2xl p-3.5 sm:p-4 border border-white/60 shadow-xs flex flex-col justify-between">
+                    <div>
+                      {/* Header row */}
+                      <div className="flex items-center justify-between gap-2 mb-1.5">
+                        <div className="flex items-center gap-1.5">
+                          <MapPin className="w-4 h-4 text-slate-900 shrink-0" />
+                          <span className="text-[11px] font-black uppercase tracking-wider text-slate-900">
+                            AREA GEOFENCE VALID
+                          </span>
+                        </div>
+
+                        <span
+                          className={`text-[10px] font-black px-2.5 py-0.5 rounded-full shrink-0 ${
+                            isGeofenceActive
+                              ? "bg-emerald-300/90 text-emerald-950"
+                              : "bg-slate-300/80 text-slate-800"
                           }`}
                         >
-                          {isGeofenceActive ? `Perimeter Aktif (${geofenceRadius}m)` : "Bebas Lokasi (Nonaktif)"}
-                        </p>
+                          {isGeofenceActive ? "Perimeter Nyala" : "Nonaktif"}
+                        </span>
                       </div>
-                    </div>
 
-                    {/* Interactive Switch with Clear Tap Area */}
-                    <button
-                      type="button"
-                      onClick={handleToggleGeofence}
-                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-sky-600 focus:ring-offset-1 ${
-                        isGeofenceActive ? "bg-emerald-600" : "bg-slate-400"
-                      }`}
-                      role="switch"
-                      aria-checked={isGeofenceActive}
-                      title={isGeofenceActive ? "Klik untuk mematikan area geofence" : "Klik untuk menyalakan area geofence"}
-                    >
-                      <span
-                        aria-hidden="true"
-                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
-                          isGeofenceActive ? "translate-x-5" : "translate-x-0"
-                        }`}
-                      />
-                    </button>
-                  </div>
+                      {/* Status & Switch */}
+                      <div className="flex items-center justify-between gap-3 my-1">
+                        <div className="min-w-0">
+                          <p className="text-sm sm:text-base font-black text-slate-950 leading-tight">
+                            {isGeofenceActive ? `Radius ${geofenceRadius}m (Aktif)` : "Bebas Lokasi (Nonaktif)"}
+                          </p>
+                          <p className="text-[11px] font-mono text-slate-700 font-bold mt-0.5">
+                            {isGeofenceActive ? "-6.89042, 107.61031 (Ruang 207)" : "GPS Perimeter: Bypass"}
+                          </p>
+                        </div>
 
-                  {/* Geofence Details */}
-                  <div className="space-y-1 text-xs">
-                    <p className="text-slate-700 font-medium">
-                      {isGeofenceActive
-                        ? `Validasi radius ${geofenceRadius} meter dari titik pusat Lab 207 Gedung B.`
-                        : "Validasi koordinat GPS dilewati. Mahasiswa dapat presensi dari mana saja (mode online)."}
-                    </p>
-                    <p className="text-[11px] font-mono font-semibold text-slate-800">
-                      {isGeofenceActive ? "Koordinat: -6.89042, 107.61031 (Toleransi 15m)" : "GPS Perimeter: Bypass"}
-                    </p>
-                  </div>
-
-                  {/* Radius Options (when active) */}
-                  {isGeofenceActive && (
-                    <div className="pt-2 border-t border-black/5 flex items-center justify-between gap-2 flex-wrap">
-                      <span className="text-[10px] font-bold text-slate-700 uppercase tracking-wider">
-                        Atur Radius:
-                      </span>
-                      <div className="flex items-center gap-1.5">
-                        {[25, 50, 100].map((rad) => (
+                        {/* Switch Button */}
+                        <div className="shrink-0">
                           <button
-                            key={rad}
                             type="button"
-                            onClick={() => handleRadiusChange(rad)}
-                            className={`px-2 py-0.5 rounded-lg text-[10px] font-bold transition-all ${
-                              geofenceRadius === rad
-                                ? "bg-emerald-700 text-white shadow-xs"
-                                : "bg-white/60 text-slate-700 hover:bg-white"
+                            onClick={handleToggleGeofence}
+                            className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-sky-900 focus:ring-offset-1 ${
+                              isGeofenceActive ? "bg-emerald-600" : "bg-slate-500"
                             }`}
+                            role="switch"
+                            aria-checked={isGeofenceActive}
+                            title={isGeofenceActive ? "Klik untuk mematikan area geofence" : "Klik untuk menyalakan area geofence"}
                           >
-                            {rad}m
+                            <span
+                              aria-hidden="true"
+                              className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                                isGeofenceActive ? "translate-x-5" : "translate-x-0"
+                              }`}
+                            />
                           </button>
-                        ))}
+                        </div>
                       </div>
                     </div>
-                  )}
 
-                  {/* Card Footer Status */}
-                  <div className="pt-2 border-t border-black/5 flex items-center justify-between text-[10px]">
-                    <span
-                      className={`font-bold px-2 py-0.5 rounded-full ${
-                        isGeofenceActive
-                          ? "bg-emerald-200/80 text-emerald-950"
-                          : "bg-amber-200/80 text-amber-950"
-                      }`}
-                    >
-                      {isGeofenceActive ? "Geofence ON" : "Geofence OFF"}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={handleToggleGeofence}
-                      className="font-bold text-sky-900 hover:text-black hover:underline"
-                    >
-                      {isGeofenceActive ? "Nonaktifkan Geofence" : "Aktifkan Geofence"}
-                    </button>
+                    {/* Radius Selector Row (when active) */}
+                    {isGeofenceActive && (
+                      <div className="pt-2 mt-2 border-t border-black/10 flex items-center justify-between gap-2 flex-wrap">
+                        <span className="text-[10px] font-bold text-slate-800 uppercase tracking-wider">
+                          Atur Jarak Perimeter:
+                        </span>
+                        <div className="flex items-center gap-1.5">
+                          {[25, 50, 100].map((rad) => (
+                            <button
+                              key={rad}
+                              type="button"
+                              onClick={() => handleRadiusChange(rad)}
+                              className={`px-2.5 py-0.5 rounded-lg text-[10px] font-black transition-all ${
+                                geofenceRadius === rad
+                                  ? "bg-slate-950 text-white shadow-xs"
+                                  : "bg-white/60 text-slate-800 hover:bg-white"
+                              }`}
+                            >
+                              {rad}m
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -963,7 +1017,7 @@ export function AttendanceDashboard() {
         <div className="glass-panel rounded-3xl overflow-hidden flex flex-col">
           {/* Table Header Filter & Search */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-4 border-b border-white/25">
-            <div className="flex items-center flex-wrap gap-1.5 bg-white/60 p-1 rounded-2xl backdrop-blur-sm border border-sky-100">
+            <div className="flex items-center flex-wrap gap-1.5 bg-white/30 p-1 rounded-2xl backdrop-blur-md border border-white/40">
               {(
                 [
                   { key: "semua", label: "Semua Mahasiswa", count: totalEnrolled },
@@ -977,14 +1031,14 @@ export function AttendanceDashboard() {
                   onClick={() => setActiveTab(tab.key)}
                   className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
                     activeTab === tab.key
-                      ? "bg-sky-500 text-white shadow-sm"
-                      : "text-slate-800 hover:bg-white/25 font-bold"
+                      ? "bg-sky-600 text-white shadow-sm"
+                      : "text-slate-900 hover:bg-white/25 font-bold"
                   }`}
                 >
                   <span>{tab.label}</span>
                   <span
                     className={`px-1.5 py-0.2 rounded-md text-[10px] font-bold ${
-                      activeTab === tab.key ? "bg-sky-600/20 text-white" : "bg-sky-50/80 text-slate-600"
+                      activeTab === tab.key ? "bg-sky-700 text-white" : "bg-white/40 text-slate-900"
                     }`}
                   >
                     {tab.count}
