@@ -1,4 +1,4 @@
-﻿/**
+/**
  * api.ts - Centralized API client untuk sama-fe
  * Semua request ke backend disalurkan melalui sini.
  * JWT token otomatis disertakan dari localStorage.
@@ -113,9 +113,10 @@ async function request<T>(
   options: RequestInit = {}
 ): Promise<ApiResponse<T>> {
   const token = localStorage.getItem("sama_token");
+  const isFormData = typeof FormData !== "undefined" && options.body instanceof FormData;
 
   const headers: Record<string, string> = {
-    "Content-Type": "application/json",
+    ...(isFormData ? {} : { "Content-Type": "application/json" }),
     ...(options.headers as Record<string, string>),
   };
 
@@ -442,6 +443,26 @@ export const kelasApi = {
       method: 'POST',
       body: JSON.stringify({ students }),
     }),
+
+  importFile: async (file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    return request<{
+      totalRows: number;
+      classesProcessed: number;
+      classesCreated: number;
+      classesUpdated: number;
+      schedulesCreated: number;
+      studentsCreated: number;
+      studentsUpdated: number;
+      studentsEnrolled: number;
+      alreadyEnrolled: number;
+      errors: { kode?: string; jadwal?: string; reason: string; type?: string }[];
+    }>("/kelas/import-file", {
+      method: "POST",
+      body: formData,
+    });
+  },
 
   recordClassAttendance: async (kelasId: number | string, data: {
     date?: string;

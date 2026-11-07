@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -27,12 +27,18 @@ import {
   FileText,
   BookOpen,
   CalendarCheck,
-  Save
+  Save,
+  FileSpreadsheet,
+  UploadCloud,
+  Download,
+  Check,
+  Loader2
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import { kelasApi } from "../lib/api";
 
 export interface JadwalItem {
-  id: number;
+  id: number | string;
   sesi: number;
   mataKuliah: string;
   kelas: string;
@@ -43,6 +49,8 @@ export interface JadwalItem {
   status: "ongoing" | "upcoming" | "replacement" | "completed";
   jenisPerubahan?: string;
   alasanPerubahan?: string;
+  kelasId?: string;
+  totalMahasiswa?: number;
 }
 
 const initialJadwalList: JadwalItem[] = [
@@ -119,6 +127,7 @@ export const ManajemenJadwal = () => {
 
   // Schedule data state
   const [jadwalList, setJadwalList] = useState<JadwalItem[]>(initialJadwalList);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Filters & Views
   const [searchTerm, setSearchTerm] = useState("");
@@ -134,6 +143,126 @@ export const ManajemenJadwal = () => {
   const [showDetailModal, setShowDetailModal] = useState<JadwalItem | null>(null);
   const [showBapGuideModal, setShowBapGuideModal] = useState(false);
   const [showHelpModal, setShowHelpModal] = useState(false);
+
+  // Import Modal state
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [importFile, setImportFile] = useState<File | null>(null);
+  const [isImporting, setIsImporting] = useState(false);
+  const [importSummary, setImportSummary] = useState<any | null>(null);
+  const [isDragOver, setIsDragOver] = useState(false);
+
+  // Fetch real data from backend
+  const fetchJadwal = async () => {
+    try {
+      setIsLoading(true);
+      const res = await kelasApi.getAll();
+      if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+        const mapped: JadwalItem[] = [];
+        let globalSesi = 1;
+
+        res.data.forEach((k: any) => {
+          const jadwals = k.jadwals || k.jadwal || [];
+          if (jadwals.length > 0) {
+            jadwals.forEach((j: any) => {
+              mapped.push({
+                id: j.id || `${k.id}-${globalSesi}`,
+                sesi: globalSesi++,
+                mataKuliah: k.nama,
+                kelas: k.kode,
+                tanggal: j.hari ? `${j.hari}` : "Reguler",
+                jamMulai: j.jamMulai ? `${j.jamMulai} WIB` : "08:00 WIB",
+                jamSelesai: j.jamSelesai ? `${j.jamSelesai} WIB` : "10:30 WIB",
+                ruangan: j.ruangan || "Lab / Ruang Kelas",
+                status: "upcoming",
+                jenisPerubahan: "Jadwal Semester Reguler",
+                alasanPerubahan: k.deskripsi || "Jadwal resmi terdaftar",
+                kelasId: k.id,
+                totalMahasiswa: k.totalMahasiswa || k._count?.mahasiswas || 0,
+              });
+            });
+          } else {
+            mapped.push({
+              id: k.id,
+              sesi: globalSesi++,
+              mataKuliah: k.nama,
+              kelas: k.kode,
+              tanggal: "Belum Diatur",
+              jamMulai: "-",
+              jamSelesai: "-",
+              ruangan: "Belum Ditentukan",
+              status: "upcoming",
+              jenisPerubahan: "Jadwal Belum Diatur",
+              alasanPerubahan: k.deskripsi || "Silakan tambahkan jadwal sesi",
+              kelasId: k.id,
+              totalMahasiswa: k.totalMahasiswa || k._count?.mahasiswas || 0,
+            });
+          }
+        });
+
+        if (mapped.length > 0) {
+          setJadwalList(mapped);
+        }
+      }
+    } catch (err: any) {
+      console.error("Gagal memuat jadwal dari server:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchJadwal();
+  }, []);
+
+  const handleDownloadTemplate = () => {
+    const csvHeader = "kode_kelas,nama_kelas,hari,jam_mulai,jam_selesai,ruangan,nim,nama_mahasiswa,jurusan,email\n";
+    const sampleRows = [
+      "IF101,Algoritma Pemrograman,SENIN,08:00,10:30,Lab Komputer 1,202401001,Budi Santoso,Teknik Informatika,budi@kampus.ac.id",
+      "IF101,Algoritma Pemrograman,SENIN,08:00,10:30,Lab Komputer 1,202401002,Siti Aminah,Teknik Informatika,siti@kampus.ac.id",
+      "IF201,Basis Data,RABU,13:00,15:30,Ruang Teori 302,202401001,Budi Santoso,Teknik Informatika,budi@kampus.ac.id",
+    ].join("\n");
+    const blob = new Blob([csvHeader + sampleRows], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "template_import_jadwal.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast("Template CSV berhasil diunduh!");
+  };
+
+  const handleExecuteImport = async () => {
+    if (!importFile) {
+      showToast("Pilih file .xlsx atau .csv terlebih dahulu!");
+      return;
+    }
+
+    setIsImporting(true);
+    setImportSummary(null);
+
+    try {
+      const res = await kelasApi.importFile(importFile);
+      if (res.success && res.data) {
+        setImportSummary(res.data);
+        showToast("Import data berhasil diproses!");
+        await fetchJadwal();
+      } else {
+        showToast(res.message || "Import selesai dengan catatan.");
+      }
+    } catch (err: any) {
+      showToast(err.message || "Gagal mengimpor file.");
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await fetchJadwal();
+    setIsRefreshing(false);
+    showToast("Data jadwal perkuliahan berhasil diperbarui!");
+  };
 
   // Edit form state
   const [editForm, setEditForm] = useState({
@@ -180,13 +309,6 @@ export const ManajemenJadwal = () => {
     setTimeout(() => setToastMessage(null), 3500);
   };
 
-  const handleRefresh = () => {
-    setIsRefreshing(true);
-    setTimeout(() => {
-      setIsRefreshing(false);
-      showToast("Data jadwal perkuliahan berhasil diperbarui!");
-    }, 700);
-  };
 
   const openEditModal = (item: JadwalItem) => {
     setEditingJadwal(item);
@@ -412,7 +534,7 @@ export const ManajemenJadwal = () => {
               title="Perbarui Data"
               className="w-9 h-9 rounded-xl bg-white/70 hover:bg-white text-slate-700 flex items-center justify-center backdrop-blur-md border border-white/80 shadow-sm transition-all active:scale-95"
             >
-              <RotateCw className={`w-4 h-4 ${isRefreshing ? "animate-spin text-sky-600" : ""}`} />
+              <RotateCw className={`w-4 h-4 ${isRefreshing || isLoading ? "animate-spin text-sky-600" : ""}`} />
             </button>
             <div className="w-9 h-9 rounded-xl bg-sky-500 text-white font-bold text-xs flex items-center justify-center shadow-sm">
               {dosen?.username ? getInitials(dosen.username) : "A"}
@@ -425,22 +547,36 @@ export const ManajemenJadwal = () => {
           <div>
             <h1 className="text-3xl font-black text-sky-950 tracking-tight">Manajemen Jadwal</h1>
             <p className="text-sky-900/85 text-sm font-medium mt-0.5">
-              Atur jadwal perkuliahan, sesi pengganti, dan perubahan kelas.
+              Atur jadwal perkuliahan, sesi pengganti, dan kelola kelas terdaftar.
             </p>
           </div>
 
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="self-start md:self-auto flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/20 hover:bg-white/35 text-sky-950 font-bold text-sm backdrop-blur-md border border-white/40 shadow-sm transition-all hover:shadow active:scale-95"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Jadwalkan Kelas</span>
-          </button>
+          <div className="flex items-center gap-2.5 self-start md:self-auto">
+            <button
+              onClick={() => {
+                setShowImportModal(true);
+                setImportSummary(null);
+                setImportFile(null);
+              }}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/30 hover:bg-white/45 text-sky-950 font-bold text-sm backdrop-blur-md border border-white/50 shadow-xs transition-all hover:shadow-sm active:scale-95"
+            >
+              <FileSpreadsheet className="w-4 h-4 text-emerald-800" />
+              <span>Import Excel / CSV</span>
+            </button>
+
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-sky-700 hover:bg-sky-800 text-white font-bold text-sm shadow-xs transition-all hover:shadow-sm active:scale-95"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Jadwalkan Kelas</span>
+            </button>
+          </div>
         </div>
 
         {/* 4 Summary Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Card 1: Jadwal Aktif */}
+          {/* Card 1: Total Sesi Jadwal */}
           <div
             onClick={() => {
               setSelectedStatus("Semua Status");
@@ -453,8 +589,8 @@ export const ManajemenJadwal = () => {
                 <CalendarIcon className="w-5 h-5" />
               </div>
               <div>
-                <p className="text-sky-900/80 text-xs font-semibold">Jadwal Aktif</p>
-                <p className="text-2xl font-black text-sky-950">16</p>
+                <p className="text-sky-900/80 text-xs font-semibold">Total Sesi Jadwal</p>
+                <p className="text-2xl font-black text-sky-950">{jadwalList.length}</p>
               </div>
             </div>
             <div className="flex justify-end mt-2">
@@ -462,11 +598,11 @@ export const ManajemenJadwal = () => {
             </div>
           </div>
 
-          {/* Card 2: Perlu Konfirmasi */}
+          {/* Card 2: Akan Datang */}
           <div
             onClick={() => {
               setSelectedStatus("Akan Datang");
-              showToast("Filter jadwal yang memerlukan konfirmasi dosen & BAAK");
+              showToast("Filter jadwal sesi yang akan datang");
             }}
             className="glass-panel glass-card-interactive rounded-2xl p-4 shadow-sm cursor-pointer flex flex-col justify-between group"
           >
@@ -475,8 +611,10 @@ export const ManajemenJadwal = () => {
                 <AlertCircle className="w-5 h-5" />
               </div>
               <div>
-                <p className="text-sky-900/80 text-xs font-semibold">Perlu Konfirmasi</p>
-                <p className="text-2xl font-black text-sky-950">2</p>
+                <p className="text-sky-900/80 text-xs font-semibold">Sesi Akan Datang</p>
+                <p className="text-2xl font-black text-sky-950">
+                  {jadwalList.filter((j) => j.status === "upcoming").length}
+                </p>
               </div>
             </div>
             <div className="flex justify-end mt-2">
@@ -498,7 +636,9 @@ export const ManajemenJadwal = () => {
               </div>
               <div>
                 <p className="text-sky-900/80 text-xs font-semibold">Kelas Pengganti</p>
-                <p className="text-2xl font-black text-sky-950">3</p>
+                <p className="text-2xl font-black text-sky-950">
+                  {jadwalList.filter((j) => j.status === "replacement").length}
+                </p>
               </div>
             </div>
             <div className="flex justify-end mt-2">
@@ -506,20 +646,22 @@ export const ManajemenJadwal = () => {
             </div>
           </div>
 
-          {/* Card 4: Potensi Bentrok */}
+          {/* Card 4: Total Kelas Unik */}
           <div
             onClick={() => {
-              showToast("Peringatan: Ruang 207 memiliki potensi bentrok jadwal pada Sesi 13!");
+              showToast(`Total ${new Set(jadwalList.map((j) => j.kelas)).size} kelas aktif terdaftar`);
             }}
             className="glass-panel glass-card-interactive rounded-2xl p-4 shadow-sm cursor-pointer flex flex-col justify-between group"
           >
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-amber-200/60 flex items-center justify-center text-amber-900 shrink-0">
-                <AlertTriangle className="w-5 h-5 text-amber-800" />
+              <div className="w-10 h-10 rounded-xl bg-emerald-200/60 flex items-center justify-center text-emerald-900 shrink-0">
+                <BookOpen className="w-5 h-5 text-emerald-800" />
               </div>
               <div>
-                <p className="text-sky-900/80 text-xs font-semibold">Potensi Bentrok</p>
-                <p className="text-2xl font-black text-amber-950">1</p>
+                <p className="text-sky-900/80 text-xs font-semibold">Kelas Terdaftar</p>
+                <p className="text-2xl font-black text-sky-950">
+                  {new Set(jadwalList.map((j) => j.kelas)).size}
+                </p>
               </div>
             </div>
             <div className="flex justify-end mt-2">
@@ -559,9 +701,13 @@ export const ManajemenJadwal = () => {
                 className="appearance-none pl-3.5 pr-8 py-2 bg-white/40 hover:bg-white/50 text-sky-950 rounded-xl border border-white/50 text-xs font-semibold outline-none focus:ring-2 focus:ring-sky-400 backdrop-blur-md cursor-pointer transition-all"
               >
                 <option value="Semua Kelas">Semua Kelas</option>
-                <option value="T3A">Kelas T3A</option>
-                <option value="T3B">Kelas T3B</option>
-                <option value="T3C">Kelas T3C</option>
+                {Array.from(new Set(jadwalList.map((j) => j.kelas)))
+                  .filter(Boolean)
+                  .map((k) => (
+                    <option key={k} value={k}>
+                      Kelas {k}
+                    </option>
+                  ))}
               </select>
               <ChevronDown className="w-3.5 h-3.5 absolute right-3 top-1/2 -translate-y-1/2 text-sky-900/70 pointer-events-none" />
             </div>
@@ -610,8 +756,13 @@ export const ManajemenJadwal = () => {
           </div>
         </div>
 
-        {/* View Mode: DAFTAR (Table) */}
-        {viewMode === "daftar" ? (
+        {/* View Mode: DAFTAR (Table) / Loading State */}
+        {isLoading ? (
+          <div className="glass-panel rounded-3xl p-12 flex flex-col items-center justify-center text-sky-950 gap-2.5 shadow-lg">
+            <Loader2 className="w-8 h-8 animate-spin text-sky-800" />
+            <p className="text-xs font-bold text-sky-950">Memuat data jadwal perkuliahan dari server...</p>
+          </div>
+        ) : viewMode === "daftar" ? (
           <div className="glass-panel rounded-3xl overflow-hidden flex flex-col shadow-lg">
             {/* Table Header Section */}
             <div className="px-5 py-4 border-b border-sky-200/40 flex items-center justify-between">
@@ -1332,6 +1483,231 @@ export const ManajemenJadwal = () => {
                 >
                   Mengerti
                 </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* =========================================================================
+          MODAL: Import Jadwal & Mahasiswa (.xlsx / .csv)
+      ========================================================================= */}
+      <AnimatePresence>
+        {showImportModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.96 }}
+              className="bg-white rounded-3xl shadow-2xl border border-slate-100 w-full max-w-xl overflow-hidden p-6"
+            >
+              {/* Modal Header */}
+              <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+                    <FileSpreadsheet className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-slate-900 text-base">Import Jadwal & Mahasiswa</h3>
+                    <p className="text-slate-500 text-xs mt-0.5">Mendukung format file Excel (.xlsx, .xls) dan .csv</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    if (!isImporting) {
+                      setShowImportModal(false);
+                      setImportFile(null);
+                      setImportSummary(null);
+                    }
+                  }}
+                  className="text-slate-400 hover:text-slate-600 transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Modal Body */}
+              <div className="py-4 space-y-4">
+                {/* Download Template Banner */}
+                <div className="flex items-center justify-between bg-sky-50 border border-sky-200/70 p-3.5 rounded-2xl">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <FileText className="w-5 h-5 text-sky-600 shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-sky-950">Gunakan Format Template</p>
+                      <p className="text-[11px] text-sky-800/80 truncate">
+                        Kolom: kode_kelas, nama_kelas, hari, jam_mulai, jam_selesai, ruangan, nim, nama_mahasiswa
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleDownloadTemplate}
+                    type="button"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-sky-100 text-sky-700 text-xs font-bold border border-sky-200 shadow-2xs shrink-0 transition-colors"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>Download Template</span>
+                  </button>
+                </div>
+
+                {/* Dropzone */}
+                {!importSummary && (
+                  <div
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      setIsDragOver(true);
+                    }}
+                    onDragLeave={() => setIsDragOver(false)}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      setIsDragOver(false);
+                      const file = e.dataTransfer.files?.[0];
+                      if (file) setImportFile(file);
+                    }}
+                    className={`border-2 border-dashed rounded-2xl p-6 text-center transition-all ${
+                      isDragOver
+                        ? "border-sky-500 bg-sky-50/60"
+                        : importFile
+                        ? "border-emerald-400 bg-emerald-50/30"
+                        : "border-slate-200 hover:border-sky-400 bg-slate-50/50"
+                    }`}
+                  >
+                    <input
+                      type="file"
+                      id="excel-file-input"
+                      accept=".xlsx, .xls, .csv"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) setImportFile(file);
+                      }}
+                      className="hidden"
+                    />
+
+                    {importFile ? (
+                      <div className="flex flex-col items-center">
+                        <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center mb-2 shadow-2xs">
+                          <FileSpreadsheet className="w-6 h-6" />
+                        </div>
+                        <p className="text-sm font-bold text-slate-800">{importFile.name}</p>
+                        <p className="text-xs text-slate-500 mt-0.5">
+                          {(importFile.size / 1024).toFixed(1)} KB • Siap diproses
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => setImportFile(null)}
+                          className="mt-3 text-xs text-rose-600 hover:underline font-semibold"
+                        >
+                          Ganti file lain
+                        </button>
+                      </div>
+                    ) : (
+                      <label htmlFor="excel-file-input" className="cursor-pointer block">
+                        <div className="w-12 h-12 rounded-2xl bg-sky-100 text-sky-600 mx-auto flex items-center justify-center mb-2">
+                          <UploadCloud className="w-6 h-6" />
+                        </div>
+                        <p className="text-sm font-bold text-slate-800">
+                          Tarik file ke sini, atau <span className="text-sky-600 hover:underline">pilih file</span>
+                        </p>
+                        <p className="text-xs text-slate-400 mt-1">Mendukung format .xlsx, .xls, dan .csv (Maksimal 10MB)</p>
+                      </label>
+                    )}
+                  </div>
+                )}
+
+                {/* Import Summary Result Banner */}
+                {importSummary && (
+                  <div className="space-y-3">
+                    <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-emerald-950">
+                      <div className="flex items-center gap-2 font-bold text-sm mb-2">
+                        <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+                        <span>Import Berhasil Diselesaikan!</span>
+                      </div>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs">
+                        <div className="bg-white/80 p-2 rounded-xl border border-emerald-200">
+                          <p className="text-slate-500 text-[10px]">Kelas Dibuat</p>
+                          <p className="font-extrabold text-base text-slate-800">{importSummary.classesCreated}</p>
+                        </div>
+                        <div className="bg-white/80 p-2 rounded-xl border border-emerald-200">
+                          <p className="text-slate-500 text-[10px]">Kelas Diupdate</p>
+                          <p className="font-extrabold text-base text-slate-800">{importSummary.classesUpdated}</p>
+                        </div>
+                        <div className="bg-white/80 p-2 rounded-xl border border-emerald-200">
+                          <p className="text-slate-500 text-[10px]">Jadwal Baru</p>
+                          <p className="font-extrabold text-base text-slate-800">{importSummary.schedulesCreated}</p>
+                        </div>
+                        <div className="bg-white/80 p-2 rounded-xl border border-emerald-200">
+                          <p className="text-slate-500 text-[10px]">Mhs Terdaftar</p>
+                          <p className="font-extrabold text-base text-slate-800">{importSummary.studentsEnrolled}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Conflict / Warning Section if any */}
+                    {importSummary.errors && importSummary.errors.length > 0 && (
+                      <div className="bg-amber-50 border border-amber-200/80 rounded-2xl p-3.5 text-xs">
+                        <div className="flex items-center gap-2 font-bold text-amber-900 mb-1.5">
+                          <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+                          <span>Catatan / Bentrok Jadwal Terdeteksi ({importSummary.errors.length}):</span>
+                        </div>
+                        <div className="max-h-36 overflow-y-auto space-y-1 pl-6 text-amber-800/90 list-disc">
+                          {importSummary.errors.map((err: any, idx: number) => (
+                            <p key={idx} className="text-[11px] leading-relaxed">
+                              • <strong>{err.kode || "Umum"}:</strong> {err.reason}
+                            </p>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Modal Footer */}
+              <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2.5">
+                {importSummary ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowImportModal(false);
+                      setImportSummary(null);
+                      setImportFile(null);
+                    }}
+                    className="px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs shadow-xs transition-colors"
+                  >
+                    Selesai & Tutup
+                  </button>
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      disabled={isImporting}
+                      onClick={() => {
+                        setShowImportModal(false);
+                        setImportFile(null);
+                      }}
+                      className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition-colors"
+                    >
+                      Batal
+                    </button>
+                    <button
+                      type="button"
+                      disabled={!importFile || isImporting}
+                      onClick={handleExecuteImport}
+                      className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold text-xs shadow-xs transition-all"
+                    >
+                      {isImporting ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <span>Memproses Import...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Check className="w-4 h-4" />
+                          <span>Mulai Import Data</span>
+                        </>
+                      )}
+                    </button>
+                  </>
+                )}
               </div>
             </motion.div>
           </div>
