@@ -163,6 +163,40 @@ export const authApi = {
       body: JSON.stringify(data),
     }),
 
+  requestActivation: (nim: string) =>
+    request<{
+      nim: string;
+      email: string;
+      expiresIn: string;
+      devMode?: boolean;
+      devActivationUrl?: string;
+    }>('/auth/request-activation', {
+      method: 'POST',
+      body: JSON.stringify({ nim }),
+    }),
+
+  verifyActivationToken: (token: string) =>
+    request<{
+      id: string;
+      nim: string;
+      name: string;
+      email: string | null;
+      jurusan: string;
+      semester: number;
+    }>('/auth/verify-activation-token', {
+      method: 'POST',
+      body: JSON.stringify({ token }),
+    }),
+
+  activate: (token: string, password: string) =>
+    request<{
+      mahasiswa: any;
+      token: string;
+    }>('/auth/activate', {
+      method: 'POST',
+      body: JSON.stringify({ token, password }),
+    }),
+
   me: () => request<{ dosen: DosenUser }>("/auth/me"),
 };
 
@@ -444,9 +478,12 @@ export const kelasApi = {
       body: JSON.stringify({ students }),
     }),
 
-  importFile: async (file: File) => {
+  importFile: async (file: File, sendActivationEmail: boolean = false) => {
     const formData = new FormData();
     formData.append("file", file);
+    if (sendActivationEmail) {
+      formData.append("sendActivationEmail", "true");
+    }
     return request<{
       totalRows: number;
       classesProcessed: number;
@@ -457,6 +494,7 @@ export const kelasApi = {
       studentsUpdated: number;
       studentsEnrolled: number;
       alreadyEnrolled: number;
+      emailsSent?: number;
       errors: { kode?: string; jadwal?: string; reason: string; type?: string }[];
     }>("/kelas/import-file", {
       method: "POST",

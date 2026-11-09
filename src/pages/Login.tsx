@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, ShieldCheck, LogIn } from "lucide-react";
@@ -129,12 +129,20 @@ export function Login() {
             </Button>
           </form>
 
-          <p className="text-center text-sm text-gray-500 mt-6">
-            Belum punya akun?{" "}
-            <Link to="/register" className="text-primary font-medium hover:underline">
-              Daftar
-            </Link>
-          </p>
+          <div className="mt-6 pt-4 border-t border-gray-100 flex flex-col items-center gap-2 text-sm text-gray-500">
+            <p>
+              Mahasiswa terdaftar di jadwal?{" "}
+              <Link to="/aktivasi" className="text-blue-600 font-semibold hover:underline">
+                Aktivasi Akun
+              </Link>
+            </p>
+            <p className="text-xs">
+              Belum punya akun Dosen?{" "}
+              <Link to="/register" className="text-primary font-medium hover:underline">
+                Daftar
+              </Link>
+            </p>
+          </div>
         </div>
       </motion.div>
     </div>

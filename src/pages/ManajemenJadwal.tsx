@@ -150,6 +150,7 @@ export const ManajemenJadwal = () => {
   const [isImporting, setIsImporting] = useState(false);
   const [importSummary, setImportSummary] = useState<any | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [sendActivationEmail, setSendActivationEmail] = useState(true);
 
   // Fetch real data from backend
   const fetchJadwal = async () => {
@@ -242,7 +243,7 @@ export const ManajemenJadwal = () => {
     setImportSummary(null);
 
     try {
-      const res = await kelasApi.importFile(importFile);
+      const res = await kelasApi.importFile(importFile, sendActivationEmail);
       if (res.success && res.data) {
         setImportSummary(res.data);
         showToast("Import data berhasil diproses!");
@@ -1613,6 +1614,25 @@ export const ManajemenJadwal = () => {
                   </div>
                 )}
 
+                {/* Blast Email Activation Option */}
+                {!importSummary && (
+                  <div className="flex items-center gap-3 p-3.5 rounded-xl bg-blue-50/70 border border-blue-100 text-xs text-blue-950">
+                    <input
+                      id="blast-email-toggle"
+                      type="checkbox"
+                      checked={sendActivationEmail}
+                      onChange={(e) => setSendActivationEmail(e.target.checked)}
+                      className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 border-gray-300 cursor-pointer"
+                    />
+                    <label htmlFor="blast-email-toggle" className="cursor-pointer select-none">
+                      <span className="font-bold block text-blue-900">Kirim Email Aktivasi Otomatis</span>
+                      <span className="text-[11px] text-blue-700/80">
+                        Kirim tautan aktivasi langsung ke Gmail mahasiswa baru yang terdaftar di file.
+                      </span>
+                    </label>
+                  </div>
+                )}
+
                 {/* Import Summary Result Banner */}
                 {importSummary && (
                   <div className="space-y-3">
@@ -1621,7 +1641,7 @@ export const ManajemenJadwal = () => {
                         <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
                         <span>Import Berhasil Diselesaikan!</span>
                       </div>
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs">
+                      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-center text-xs">
                         <div className="bg-white/80 p-2 rounded-xl border border-emerald-200">
                           <p className="text-slate-500 text-[10px]">Kelas Dibuat</p>
                           <p className="font-extrabold text-base text-slate-800">{importSummary.classesCreated}</p>
@@ -1637,6 +1657,10 @@ export const ManajemenJadwal = () => {
                         <div className="bg-white/80 p-2 rounded-xl border border-emerald-200">
                           <p className="text-slate-500 text-[10px]">Mhs Terdaftar</p>
                           <p className="font-extrabold text-base text-slate-800">{importSummary.studentsEnrolled}</p>
+                        </div>
+                        <div className="bg-white/80 p-2 rounded-xl border border-emerald-200 col-span-2 sm:col-span-1">
+                          <p className="text-slate-500 text-[10px]">Email Aktivasi</p>
+                          <p className="font-extrabold text-base text-blue-700">{importSummary.emailsSent || 0}</p>
                         </div>
                       </div>
                     </div>

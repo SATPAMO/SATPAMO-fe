@@ -3,6 +3,7 @@ import { AuthProvider } from "./context/AuthContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { Login } from "./pages/Login";
 import { Register } from "./pages/Register";
+import { AktivasiAkun } from "./pages/AktivasiAkun";
 import { AttendanceDashboard } from "./pages/AttendanceDashboard";
 import { KelasList } from "./pages/KelasList";
 import { KelasDetail } from "./pages/KelasDetail";
@@ -20,6 +21,8 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/aktivasi" element={<AktivasiAkun />} />
+          <Route path="/activate" element={<AktivasiAkun />} />
           <Route path="/check-in" element={<StudentCheckIn />} />
           <Route path="/absen" element={<StudentCheckIn />} />
           
