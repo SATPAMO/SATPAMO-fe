@@ -13,6 +13,7 @@ import { Label } from "../components/ui/label";
 import {
   attendanceApi, mahasiswaApi,
   type MahasiswaSimple, type AttendanceRecord,
+  type GeofenceSession,
 } from "../lib/api";
 
 export function StudentCheckIn() {
@@ -20,6 +21,7 @@ export function StudentCheckIn() {
   const [mahasiswas, setMahasiswas] = useState<MahasiswaSimple[]>([]);
   const [selectedMahasiswaId, setSelectedMahasiswaId] = useState("");
   const [notes, setNotes] = useState("");
+  const [activeGeofence, setActiveGeofence] = useState<GeofenceSession | null>(null);
 
   // Kamera & Foto
   const [cameraActive, setCameraActive] = useState(false);
@@ -45,7 +47,7 @@ export function StudentCheckIn() {
   } | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  // --- 1. Load daftar mahasiswa ----------------------------------------------
+  // --- 1. Load daftar mahasiswa & status geofence dosen ----------------------
   useEffect(() => {
     mahasiswaApi.getPublicList()
       .then((res) => {
@@ -57,6 +59,14 @@ export function StudentCheckIn() {
         }
       })
       .catch((err) => console.error("Gagal memuat mahasiswa:", err));
+
+    attendanceApi.getActiveGeofence()
+      .then((res) => {
+        if (res.success && res.data) {
+          setActiveGeofence(res.data);
+        }
+      })
+      .catch((err) => console.error("Gagal memuat geofence:", err));
   }, []);
 
   // --- 2. Deteksi Lokasi GPS --------------------------------------------------
@@ -401,6 +411,35 @@ export function StudentCheckIn() {
             </CardHeader>
 
             <CardContent className="space-y-5">
+              {/* Geofence Status Indicator dari Web Dosen */}
+              {activeGeofence && (
+                <div
+                  className={`p-3 rounded-xl border flex items-center gap-2.5 text-xs font-semibold ${
+                    activeGeofence.isActive
+                      ? "bg-emerald-50/80 border-emerald-300 text-emerald-950"
+                      : "bg-rose-50/80 border-rose-300 text-rose-950"
+                  }`}
+                >
+                  <span
+                    className={`w-2.5 h-2.5 rounded-full shrink-0 ${
+                      activeGeofence.isActive ? "bg-emerald-500 animate-pulse" : "bg-rose-500"
+                    }`}
+                  />
+                  <div>
+                    {activeGeofence.isActive ? (
+                      <span>
+                        Sesi Presensi Aktif: Geofence dinyalakan oleh dosen dengan radius toleransi{" "}
+                        <strong className="font-extrabold">{activeGeofence.radius}m</strong> ({activeGeofence.ruangan}).
+                      </span>
+                    ) : (
+                      <span>
+                        Sesi Presensi Belum Dibuka: Area geofence dinonaktifkan oleh dosen. Mahasiswa belum dapat presensi.
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {/* Pilih Mahasiswa */}
               <div className="space-y-1.5">
                 <Label htmlFor="mahasiswa-select" className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">

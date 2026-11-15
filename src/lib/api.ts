@@ -62,6 +62,8 @@ export interface AiVerificationResult {
 export interface AttendanceRecord {
   id: string;
   mahasiswaId: string;
+  kelasId?: string | null;
+  kelas?: { id: string; kode: string; nama: string } | null;
   nim: string;
   name: string;
   jurusan: string;
@@ -87,6 +89,16 @@ export interface AttendanceStats {
   absent: number;
   izin: number;
   notRecorded: number;
+}
+
+export interface GeofenceSession {
+  isActive: boolean;
+  latitude: number;
+  longitude: number;
+  radius: number;
+  ruangan: string;
+  kelasId: string;
+  updatedAt: string;
 }
 
 export interface AiInsight {
@@ -218,6 +230,10 @@ export const attendanceApi = {
     endDate?: string;
     status?: string;
     search?: string;
+    kelasId?: string;
+    all?: boolean | string;
+    page?: number;
+    limit?: number;
   }) => {
     return request<AttendanceRecord[]>(`/attendance${buildQueryString(params)}`);
   },
@@ -255,6 +271,22 @@ export const attendanceApi = {
   update: (id: string, data: Partial<AttendanceRecord>) =>
     request<AttendanceRecord>(`/attendance/${id}`, {
       method: "PUT",
+      body: JSON.stringify(data),
+    }),
+
+  getActiveGeofence: (kelasId?: string) =>
+    request<GeofenceSession>(`/attendance/session/geofence${kelasId ? `?kelasId=${kelasId}` : ""}`),
+
+  updateGeofenceSession: (data: {
+    isActive: boolean;
+    radius: number;
+    latitude?: number;
+    longitude?: number;
+    ruangan?: string;
+    kelasId?: string;
+  }) =>
+    request<GeofenceSession>("/attendance/session/geofence", {
+      method: "POST",
       body: JSON.stringify(data),
     }),
 };
@@ -418,6 +450,7 @@ export interface ClassAttendanceStudent {
   distance?: number | null;
   isLocationValid?: boolean;
   verification?: any;
+  aiVerification?: AiVerificationResult | null;
   pertemuanKe?: number;
 }
 

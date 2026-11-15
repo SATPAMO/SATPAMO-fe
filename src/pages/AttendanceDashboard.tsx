@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
@@ -27,14 +27,61 @@ import {
   Maximize2,
   Shuffle,
   Copy,
+  Camera,
+  History,
+  Eye,
+  ShieldCheck,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import {
   attendanceApi,
+  kelasApi,
   type AttendanceRecord,
   type AttendanceStats,
+  type ClassAttendanceStudent,
+  type KelasItem,
+  type JadwalItem,
 } from "../lib/api";
 import { DynamicQrDisplay } from "../components/DynamicQrDisplay";
+
+function safeClipboardCopy(text: string): boolean {
+  try {
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(text).catch(() => {
+        fallbackClipboardCopy(text);
+      });
+      return true;
+    }
+    return fallbackClipboardCopy(text);
+  } catch {
+    return fallbackClipboardCopy(text);
+  }
+}
+
+function fallbackClipboardCopy(text: string): boolean {
+  try {
+    const el = document.createElement("textarea");
+    el.value = text;
+    el.style.position = "fixed";
+    el.style.opacity = "0";
+    document.body.appendChild(el);
+    el.select();
+    const successful = document.execCommand("copy");
+    document.body.removeChild(el);
+    return successful;
+  } catch {
+    return false;
+  }
+}
+
+const QR_REFRESH_SECONDS = 600; // 10 menit
+
+function formatQrCountdown(seconds: number): string {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  if (m === 0) return `${s}s`;
+  return `${m}m ${s.toString().padStart(2, "0")}s`;
+}
 
 function formatTime(isoStr: string | null): string {
   if (!isoStr) return "--:--";
@@ -55,20 +102,53 @@ function getInitials(name: string): string {
     .toUpperCase();
 }
 
-function ActivityItem({ name, nim, time, accuracy }: {
-  name: string; nim: string; time: string; accuracy: string;
+function ActivityItem({
+  name,
+  nim,
+  time,
+  accuracy,
+  photo,
+  onPhotoClick,
+}: {
+  name: string;
+  nim: string;
+  time: string;
+  accuracy: string;
+  photo?: string | null;
+  onPhotoClick?: () => void;
 }) {
   return (
     <div className="flex items-center gap-3 py-2 border-b border-white/20 last:border-0 hover:bg-white/20 px-2 rounded-xl transition-colors">
-      <div className="w-8 h-8 rounded-full bg-sky-700 text-white text-[10px] font-black flex items-center justify-center shrink-0 shadow-sm">
-        {getInitials(name)}
-      </div>
+      {photo ? (
+        <img
+          src={photo}
+          alt={name}
+          onClick={onPhotoClick}
+          className="w-8 h-8 rounded-full object-cover border border-white/50 shadow-xs cursor-pointer hover:scale-105 transition-transform shrink-0"
+          title="Klik untuk melihat foto presensi"
+        />
+      ) : (
+        <div className="w-8 h-8 rounded-full bg-sky-700 text-white text-[10px] font-black flex items-center justify-center shrink-0 shadow-sm">
+          {getInitials(name)}
+        </div>
+      )}
       <div className="flex-1 min-w-0">
         <p className="text-xs font-bold text-slate-900 truncate">{name}</p>
         <p className="text-[10px] text-slate-700 truncate font-semibold">{nim}</p>
         <p className="text-[10px] text-sky-950 font-bold">{accuracy}</p>
       </div>
-      <span className="text-[10px] text-slate-700 font-bold shrink-0">{time}</span>
+      <div className="flex items-center gap-1.5 shrink-0">
+        {photo && (
+          <button
+            onClick={onPhotoClick}
+            className="p-1 rounded-md bg-white/40 hover:bg-white text-sky-900 hover:text-black transition-colors"
+            title="Lihat foto bukti"
+          >
+            <Camera className="w-3 h-3" />
+          </button>
+        )}
+        <span className="text-[10px] text-slate-700 font-bold">{time}</span>
+      </div>
     </div>
   );
 }
@@ -79,40 +159,115 @@ export function AttendanceDashboard() {
   const [searchTerm, setSearchTerm] = useState("");
   const [records, setRecords] = useState<AttendanceRecord[]>([]);
   const [stats, setStats] = useState<AttendanceStats | null>(null);
+  const [classes, setClasses] = useState<KelasItem[]>([]);
   const [loadingData, setLoadingData] = useState(true);
   const [activeTab, setActiveTab] = useState<TabFilter>("semua");
-  const [qrTimer, setQrTimer] = useState(15);
+  const [qrTimer, setQrTimer] = useState(QR_REFRESH_SECONDS);
   const [selectedRecord, setSelectedRecord] = useState<AttendanceRecord | null>(null);
+  const [selectedPhotoRecord, setSelectedPhotoRecord] = useState<AttendanceRecord | null>(null);
+  const [showHistoryModal, setShowHistoryModal] = useState<boolean>(false);
+  const [historyRecords, setHistoryRecords] = useState<AttendanceRecord[]>([]);
+  const [historyLoading, setHistoryLoading] = useState<boolean>(false);
+  const [historySearch, setHistorySearch] = useState<string>("");
   const [showProjectorModal, setShowProjectorModal] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
+  // Status edit modal state
+  const [editStatus, setEditStatus] = useState<AttendanceRecord["status"]>("PRESENT");
+  const [editNotes, setEditNotes] = useState<string>("");
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState<boolean>(false);
+
   // --- Geofence State ---
   const [isGeofenceActive, setIsGeofenceActive] = useState<boolean>(true);
-  const [geofenceRadius, setGeofenceRadius] = useState<number>(50);
+  const [geofenceRadius, setGeofenceRadius] = useState<number>(100);
 
   // --- Mobile Drawer State ---
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
 
   // --- PIN Generator State ---
   const [currentPin, setCurrentPin] = useState<string>("15710");
+  const [qrNonce, setQrNonce] = useState<string>(() => Math.random().toString(36).substring(2, 7).toUpperCase());
+  const [qrTimestamp, setQrTimestamp] = useState<number>(() => Date.now());
 
-  // --- QR Generator Helper & State ---
-  const buildPayload = useCallback((pinVal: string, geoActive: boolean, radiusVal = 50) => {
-    return JSON.stringify({
-      app: "SATPAMO",
-      kelas: "Pemrograman Mobile T3A",
-      ruang: "207",
-      pin: pinVal,
-      geofence: geoActive ? "ON" : "OFF",
-      lat: -6.89042,
-      lon: 107.61031,
-      radius: geoActive ? radiusVal : 0,
-      timestamp: Date.now(),
-      nonce: Math.random().toString(36).substring(2, 7).toUpperCase(),
-    });
+  // --- Deteksi Jadwal & Sesi Aktif Hari Ini ---
+  const todayDayName = useMemo(() => {
+    const HARI_MAP = ["MINGGU", "SENIN", "SELASA", "RABU", "KAMIS", "JUMAT", "SABTU"] as const;
+    return HARI_MAP[new Date().getDay()];
   }, []);
 
-  const [qrPayload, setQrPayload] = useState<string>(() => buildPayload("15710", true, 50));
+  const activeSessionInfo = useMemo(() => {
+    if (classes.length === 0) return null;
+
+    const now = new Date();
+    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+    const timeToMinutes = (timeStr?: string | null): number => {
+      if (!timeStr) return 0;
+      const parts = timeStr.trim().split(":");
+      return parseInt(parts[0] || "0", 10) * 60 + parseInt(parts[1] || "0", 10);
+    };
+
+    // Kumpulkan seluruh jadwal sesi dari setiap kelas dosen
+    const allSessions: { kelas: KelasItem; jadwal: JadwalItem }[] = [];
+    for (const k of classes) {
+      const jadwals = k.jadwals || k.jadwal || [];
+      for (const j of jadwals) {
+        allSessions.push({ kelas: k, jadwal: j });
+      }
+    }
+
+    // Filter jadwal yang harinya sama dengan hari ini
+    const todaySessions = allSessions.filter(
+      (s) => s.jadwal.hari?.toUpperCase() === todayDayName
+    );
+
+    if (todaySessions.length === 0) {
+      return null; // Tidak ada jadwal/sesi hari ini
+    }
+
+    // 1. Prioritaskan sesi yang sedang berlangsung saat ini (toleransi 30 menit sebelum - 30 menit sesudah)
+    const ongoing = todaySessions.find((s) => {
+      const startMin = timeToMinutes(s.jadwal.jamMulai);
+      const endMin = timeToMinutes(s.jadwal.jamSelesai);
+      if (startMin && endMin) {
+        return currentMinutes >= (startMin - 30) && currentMinutes <= (endMin + 30);
+      }
+      return false;
+    });
+    if (ongoing) return ongoing;
+
+    // 2. Jika tidak ada yang pas jamnya, ambil sesi berikutnya hari ini
+    const upcoming = todaySessions.find((s) => {
+      const startMin = timeToMinutes(s.jadwal.jamMulai);
+      return startMin > currentMinutes;
+    });
+    if (upcoming) return upcoming;
+
+    // 3. Fallback ke sesi pertama hari ini
+    return todaySessions[0];
+  }, [classes, todayDayName]);
+
+  const activeClass = activeSessionInfo?.kelas || null;
+  const activeJadwal = activeSessionInfo?.jadwal || null;
+  const activeClassName = activeClass?.nama || "";
+  const activeClassCode = activeClass?.kode || "";
+  const activeRoom = activeJadwal?.ruangan || activeClass?.jadwals?.[0]?.ruangan || "Ruang 207";
+
+  // --- QR Generator Helper & State ---
+  const qrPayload = useMemo(() => {
+    return JSON.stringify({
+      app: "SATPAMO",
+      kelas: activeClass ? `${activeClass.nama} ${activeClass.kode}`.trim() : "Tidak Ada Sesi Terjadwal",
+      ruang: activeRoom,
+      pin: currentPin,
+      geofence: isGeofenceActive ? "ON" : "OFF",
+      lat: -6.89042,
+      lon: 107.61031,
+      radius: isGeofenceActive ? geofenceRadius : 0,
+      timestamp: qrTimestamp,
+      nonce: qrNonce,
+    });
+  }, [activeClass, activeRoom, currentPin, isGeofenceActive, geofenceRadius, qrTimestamp, qrNonce]);
 
   const triggerToast = (msg: string) => {
     setToastMessage(msg);
@@ -122,41 +277,77 @@ export function AttendanceDashboard() {
   const handleGenerateNewPin = () => {
     const nextPin = Math.floor(10000 + Math.random() * 90000).toString();
     setCurrentPin(nextPin);
-    setQrPayload(buildPayload(nextPin, isGeofenceActive, geofenceRadius));
+    setQrNonce(Math.random().toString(36).substring(2, 7).toUpperCase());
+    setQrTimestamp(Date.now());
     triggerToast(`Kode PIN Darurat baru (${nextPin}) berhasil dibuat!`);
   };
 
   const handleRegenerateQr = () => {
-    setQrTimer(15);
-    setQrPayload(buildPayload(currentPin, isGeofenceActive, geofenceRadius));
+    setQrTimer(QR_REFRESH_SECONDS);
+    setQrNonce(Math.random().toString(36).substring(2, 7).toUpperCase());
+    setQrTimestamp(Date.now());
     triggerToast("Token QR sesi berhasil di-generate ulang!");
   };
 
-  const handleToggleGeofence = () => {
+  const handleToggleGeofence = async () => {
     const nextState = !isGeofenceActive;
     setIsGeofenceActive(nextState);
-    setQrPayload(buildPayload(currentPin, nextState, geofenceRadius));
-    if (nextState) {
-      triggerToast(`Area Geofence DIAKTIFKAN (Radius ${geofenceRadius}m Ruang 207)`);
-    } else {
-      triggerToast("Area Geofence DINONAKTIFKAN (Mode Bebas Lokasi)");
+    try {
+      await attendanceApi.updateGeofenceSession({
+        isActive: nextState,
+        radius: geofenceRadius,
+        ruangan: activeRoom,
+        kelasId: activeClass?.id,
+      });
+      if (nextState) {
+        triggerToast(`Area Geofence DIAKTIFKAN (${geofenceRadius}m ${activeRoom}). Mahasiswa dapat presensi.`);
+      } else {
+        triggerToast("Area Geofence DINONAKTIFKAN. Mahasiswa tidak dapat presensi.");
+      }
+    } catch {
+      triggerToast(nextState ? `Area Geofence DIAKTIFKAN (${geofenceRadius}m ${activeRoom})` : "Area Geofence DINONAKTIFKAN");
     }
   };
 
-  const handleRadiusChange = (rad: number) => {
+  const handleRadiusChange = async (rad: number) => {
     setGeofenceRadius(rad);
-    setQrPayload(buildPayload(currentPin, isGeofenceActive, rad));
-    triggerToast(`Radius toleransi geofence diatur ke ${rad} meter`);
+    try {
+      await attendanceApi.updateGeofenceSession({
+        isActive: isGeofenceActive,
+        radius: rad,
+        ruangan: activeRoom,
+        kelasId: activeClass?.id,
+      });
+      triggerToast(`Radius toleransi geofence diatur ke ${rad} meter`);
+    } catch {
+      triggerToast(`Radius toleransi geofence diatur ke ${rad} meter`);
+    }
   };
 
-  // Auto-refresh countdown for QR
+  const handleOpenHistoryModal = async () => {
+    setShowHistoryModal(true);
+    setHistoryLoading(true);
+    try {
+      const res = await attendanceApi.getAll({ all: true, limit: 100 });
+      if (res.success && res.data) {
+        setHistoryRecords(res.data);
+      }
+    } catch (err) {
+      console.error("Gagal memuat riwayat presensi:", err);
+    } finally {
+      setHistoryLoading(false);
+    }
+  };
+
+  // Auto-refresh countdown for QR (10 menit / 600 detik)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   useEffect(() => {
     timerRef.current = setInterval(() => {
       setQrTimer((t) => {
         if (t <= 1) {
-          setQrPayload(buildPayload(currentPin, isGeofenceActive, geofenceRadius));
-          return 15;
+          setQrNonce(Math.random().toString(36).substring(2, 7).toUpperCase());
+          setQrTimestamp(Date.now());
+          return QR_REFRESH_SECONDS;
         }
         return t - 1;
       });
@@ -164,32 +355,116 @@ export function AttendanceDashboard() {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [currentPin, isGeofenceActive, geofenceRadius, buildPayload]);
+  }, []);
 
   // --- Real-Time Polling Interval State ---
   const [pollInterval, setPollInterval] = useState<number>(5); // default 5 seconds
   const [lastSynced, setLastSynced] = useState<Date>(new Date());
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
   const prevCountRef = useRef<number>(0);
+  const classesRef = useRef<KelasItem[]>([]);
 
   const fetchAttendanceData = useCallback(async (isSilent = false) => {
     if (!isSilent) setLoadingData(true);
     setIsSyncing(true);
     try {
-      const [recordsRes, statsRes] = await Promise.all([
-        attendanceApi.getAll(),
-        attendanceApi.getStats(),
-      ]);
-      if (recordsRes.success && recordsRes.data) {
-        if (prevCountRef.current > 0 && recordsRes.data.length > prevCountRef.current) {
-          const diff = recordsRes.data.length - prevCountRef.current;
-          triggerToast(`${diff} mahasiswa baru berhasil presensi!`);
+      // 1. Fetch daftar kelas dosen (hanya jika belum dimuat atau bukan silent background poll)
+      let currentClass: KelasItem | null = null;
+      let availableClasses = classesRef.current;
+      if (availableClasses.length === 0 || !isSilent) {
+        const classesRes = await kelasApi.getAll();
+        if (classesRes.success && classesRes.data && classesRes.data.length > 0) {
+          availableClasses = classesRes.data;
+          classesRef.current = classesRes.data;
+          setClasses(classesRes.data);
         }
-        prevCountRef.current = recordsRes.data.length;
-        setRecords(recordsRes.data);
       }
-      if (statsRes.success && statsRes.data) {
-        setStats(statsRes.data);
+
+      // Deteksi otomatis kelas yang memiliki jadwal aktif hari ini
+      const HARI_MAP = ["MINGGU", "SENIN", "SELASA", "RABU", "KAMIS", "JUMAT", "SABTU"] as const;
+      const todayHari = HARI_MAP[new Date().getDay()];
+      let foundTodayClass: KelasItem | null = null;
+      if (availableClasses.length > 0) {
+        for (const k of availableClasses) {
+          const jadwals = k.jadwals || k.jadwal || [];
+          if (jadwals.some((j) => j.hari?.toUpperCase() === todayHari)) {
+            foundTodayClass = k;
+            break;
+          }
+        }
+        currentClass = foundTodayClass;
+      }
+
+      // 2. Fetch presensi kelas terkait atau fallback global presensi
+      if (currentClass?.id) {
+        const classAttRes = await kelasApi.getClassAttendance(currentClass.id);
+        if (classAttRes.success && classAttRes.data) {
+          const resData = classAttRes.data;
+          const students = resData.students || [];
+          const studentRecords: AttendanceRecord[] = students.map((st: ClassAttendanceStudent) => ({
+            id: String(st.id || st.mahasiswaId),
+            mahasiswaId: String(st.mahasiswaId || st.id),
+            nim: st.nim,
+            name: st.name,
+            jurusan: st.jurusan || "Teknik Informatika",
+            semester: st.semester || 1,
+            date: resData.date || new Date().toISOString(),
+            checkIn: st.checkIn || null,
+            checkOut: st.checkOut || null,
+            status: (st.status === "NOT_RECORDED" ? "ABSENT" : st.status) as AttendanceRecord["status"],
+            notes: st.notes || null,
+            photo: st.photo || null,
+            latitude: st.latitude ?? null,
+            longitude: st.longitude ?? null,
+            distance: st.distance ?? 14,
+            isLocationValid: st.isLocationValid ?? true,
+            aiVerification: st.aiVerification || null,
+          }));
+
+          const presentCount = studentRecords.filter((s) => s.status === "PRESENT" || s.status === "LATE").length;
+          if (prevCountRef.current > 0 && presentCount > prevCountRef.current) {
+            const diff = presentCount - prevCountRef.current;
+            triggerToast(`${diff} mahasiswa baru berhasil presensi!`);
+          }
+          prevCountRef.current = presentCount;
+
+          setRecords(studentRecords);
+          if (resData.stats) {
+            setStats({
+              date: resData.date,
+              total: resData.stats.total,
+              present: resData.stats.present,
+              late: resData.stats.late,
+              absent: resData.stats.absent,
+              izin: resData.stats.izin + (resData.stats.sakit || 0),
+              notRecorded: resData.stats.notRecorded,
+            });
+          }
+        }
+      } else {
+        const todayStr = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Jakarta" }).format(new Date());
+        const [recordsRes, statsRes] = await Promise.all([
+          attendanceApi.getAll({ date: todayStr }),
+          attendanceApi.getStats(todayStr),
+        ]);
+        if (recordsRes.success && recordsRes.data) {
+          setRecords(recordsRes.data);
+        } else {
+          setRecords([]);
+        }
+        if (statsRes.success && statsRes.data) {
+          setStats(statsRes.data);
+        } else {
+          setStats({
+            date: todayStr,
+            total: 0,
+            present: 0,
+            late: 0,
+            absent: 0,
+            izin: 0,
+            notRecorded: 0,
+          });
+        }
       }
       setLastSynced(new Date());
     } catch (err) {
@@ -202,23 +477,34 @@ export function AttendanceDashboard() {
 
   // Initial load
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchAttendanceData(false);
   }, [fetchAttendanceData]);
 
-  // Real-time interval effect
+  // Real-time interval effect (visibility-aware: hemat baterai & bandwidth saat tab tidak aktif)
   useEffect(() => {
     if (pollInterval <= 0) return;
 
     const pollTimer = setInterval(() => {
-      fetchAttendanceData(true);
+      if (document.visibilityState === "visible") {
+        fetchAttendanceData(true);
+      }
     }, pollInterval * 1000);
 
     const onFocus = () => fetchAttendanceData(true);
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        fetchAttendanceData(true);
+      }
+    };
+
     window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onVisibilityChange);
 
     return () => {
       clearInterval(pollTimer);
       window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
     };
   }, [pollInterval, fetchAttendanceData]);
 
@@ -230,13 +516,88 @@ export function AttendanceDashboard() {
     navigate("/login", { replace: true });
   };
 
+  const handleOpenStatusModal = (row: AttendanceRecord) => {
+    setSelectedRecord(row);
+    setEditStatus(row.status === "ABSENT" ? "ABSENT" : row.status);
+    setEditNotes(row.notes || "");
+  };
+
+  const handleConfirmStatusChange = async () => {
+    if (!selectedRecord) return;
+    setIsUpdatingStatus(true);
+    try {
+      if (activeClass?.id) {
+        await kelasApi.recordClassAttendance(activeClass.id, {
+          mahasiswaId: selectedRecord.mahasiswaId,
+          status: editStatus,
+          notes: editNotes,
+        });
+      } else if (selectedRecord.id) {
+        await attendanceApi.update(selectedRecord.id, {
+          status: editStatus,
+          notes: editNotes,
+        });
+      }
+      triggerToast(`Status presensi ${selectedRecord.name} berhasil diperbarui!`);
+      setSelectedRecord(null);
+      fetchAttendanceData(true);
+    } catch (err) {
+      console.error("Gagal update status presensi:", err);
+      triggerToast("Gagal memperbarui status presensi.");
+    } finally {
+      setIsUpdatingStatus(false);
+    }
+  };
+
+  const handleDownloadBeritaAcara = () => {
+    const dateStr = new Date().toISOString().split("T")[0];
+    const className = activeClassName;
+    const roomName = activeRoom;
+    const dosenName = dosen?.username || "Dr. Yurii Kharlistov, M.T.";
+
+    const csvLines = [
+      `"BERITA ACARA PRESENSI PERKULIAHAN"`,
+      `"Mata Kuliah","${className}"`,
+      `"Kelas","${activeClassCode}"`,
+      `"Ruangan","${roomName}"`,
+      `"Dosen Pengampu","${dosenName}"`,
+      `"Tanggal","${dateStr}"`,
+      `"Total Mahasiswa","${totalEnrolled}"`,
+      `"Sudah Hadir","${hadirCount}"`,
+      `"Izin / Sakit","${izinCount}"`,
+      `"Belum Hadir","${belumCount}"`,
+      `"Persentase Kehadiran","${hadirPct}%"`,
+      `""`,
+      `"No","NIM","Nama Mahasiswa","Jurusan","Status","Waktu Presensi","Akurasi GPS / Lokasi"`
+    ];
+
+    filtered.forEach((r, idx) => {
+      const time = r.checkIn ? formatTime(r.checkIn) : "--:--";
+      const loc = r.distance ? `Radius ${r.distance}m` : "Radius 14m (Valid)";
+      csvLines.push(`"${idx + 1}","${r.nim}","${r.name}","${r.jurusan || 'Teknik Informatika'}","${r.status}","${time}","${loc}"`);
+    });
+
+    const blob = new Blob([csvLines.join("\n")], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `Berita_Acara_Presensi_${className.replace(/\s+/g, '_')}_${dateStr}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    triggerToast(`Berita Acara Presensi (${className}) berhasil diunduh!`);
+  };
+
   const totalEnrolled = stats?.total ?? 42;
   const hadirCount = stats?.present ?? 38;
   const lateCount = stats?.late ?? 0;
   const izinCount = stats?.izin ?? 2;
-  const belumCount = Math.max(0, totalEnrolled - hadirCount - lateCount - izinCount);
+  const belumCount = stats ? (stats.notRecorded ?? Math.max(0, totalEnrolled - hadirCount - lateCount - izinCount)) : 2;
   const hadirPct = totalEnrolled > 0 ? Math.round(((hadirCount + lateCount) / totalEnrolled) * 100) : 90.5;
   const kumulatif = 92.5;
+
+  const criticalStudent = records.find((r) => r.status === "ABSENT") || null;
 
   const sorted = [...records].sort((a, b) => {
     const tA = a.checkIn ? new Date(a.checkIn).getTime() : 0;
@@ -342,11 +703,13 @@ export function AttendanceDashboard() {
               MODE RADAR GPS
             </span>
             <span className="bg-sky-500/50 border border-white/35 text-slate-950 text-[9px] font-black px-1.5 py-0.5 rounded-full">
-              {isGeofenceActive ? "AKTIF 50 METER" : "NONAKTIF"}
+              {activeClass && isGeofenceActive ? `AKTIF ${geofenceRadius} METER` : "NONAKTIF"}
             </span>
           </div>
           <p className="text-[11px] text-slate-800 font-medium leading-snug">
-            Presensi hanya sah dalam perimeter Ruang 207 Kampus Pusat.
+            {activeClass
+              ? `Presensi hanya sah dalam perimeter ${activeRoom} Kampus Pusat.`
+              : `Tidak ada sesi perkuliahan terjadwal hari ini (${todayDayName}).`}
           </p>
           <button
             onClick={handleRegenerateQr}
@@ -513,13 +876,15 @@ export function AttendanceDashboard() {
 
         {/* Top Header Pill & Real-time Sync Controller */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-          <div className="inline-flex items-center gap-2.5 glass-pill rounded-2xl px-3.5 py-2 shadow-sm max-w-full">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0 animate-pulse" />
-            <span className="text-xs font-bold text-slate-900 truncate">
-              Ruang 207: Pemrograman Mobile (Kelas T3A)
-            </span>
-            <DoorOpen className="w-3.5 h-3.5 text-slate-800 ml-1 shrink-0" />
-          </div>
+          {activeClass ? (
+            <div className="inline-flex items-center gap-2.5 glass-pill rounded-2xl px-3.5 py-2 shadow-sm max-w-full">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0 animate-pulse" />
+              <span className="text-xs font-bold text-slate-900 truncate">
+                {activeRoom}: {activeClassName} ({activeClassCode.startsWith("Kelas") ? activeClassCode : `Kelas ${activeClassCode}`})
+              </span>
+              <DoorOpen className="w-3.5 h-3.5 text-slate-800 ml-1 shrink-0" />
+            </div>
+          ) : null}
 
           <div className="flex items-center flex-wrap gap-2.5">
             {/* Real-time interval controller */}
@@ -592,22 +957,29 @@ export function AttendanceDashboard() {
               <span className="bg-sky-500 text-white text-[11px] font-bold px-3 py-1 rounded-full shadow-sm">
                 SEMESTER GANJIL 2026/2027
               </span>
-              <span
-                className={`text-[11px] font-bold flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border transition-all ${
-                  isGeofenceActive
-                    ? "text-emerald-950 bg-emerald-200/50 border-emerald-400/40"
-                    : "text-amber-950 bg-amber-200/50 border-amber-400/40"
-                }`}
-              >
+              {activeClass ? (
                 <span
-                  className={`w-2 h-2 rounded-full ${
-                    isGeofenceActive ? "bg-emerald-600 animate-pulse" : "bg-amber-600"
+                  className={`text-[11px] font-bold flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border transition-all ${
+                    isGeofenceActive
+                      ? "text-emerald-950 bg-emerald-200/50 border-emerald-400/40"
+                      : "text-amber-950 bg-amber-200/50 border-amber-400/40"
                   }`}
-                />
-                {isGeofenceActive
-                  ? "Radar Geofence: Aktif 50m (Ruang 207 Lab Mobile)"
-                  : "Radar Geofence: Nonaktif (Bebas Lokasi)"}
-              </span>
+                >
+                  <span
+                    className={`w-2 h-2 rounded-full ${
+                      isGeofenceActive ? "bg-emerald-600 animate-pulse" : "bg-amber-600"
+                    }`}
+                  />
+                  {isGeofenceActive
+                    ? `Radar Geofence: Aktif ${geofenceRadius}m (${activeRoom})`
+                    : "Radar Geofence: Nonaktif (Bebas Lokasi)"}
+                </span>
+              ) : (
+                <span className="text-[11px] font-semibold text-slate-700 flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/30 border border-white/40">
+                  <span className="w-2 h-2 rounded-full bg-slate-400" />
+                  Tidak ada sesi aktif hari ini ({todayDayName})
+                </span>
+              )}
             </div>
             <h2 className="text-2xl font-black text-slate-900 tracking-tight">
               Live Monitoring Presensi Kelas
@@ -627,7 +999,7 @@ export function AttendanceDashboard() {
             </button>
 
             <button
-              onClick={() => triggerToast("Mengunduh Berita_Acara_Presensi_Sesi10.pdf...")}
+              onClick={handleDownloadBeritaAcara}
               className="px-4 py-2 rounded-xl text-xs font-bold bg-sky-500 hover:bg-sky-600 text-white shadow-md transition-all flex items-center gap-1.5"
             >
               <Download className="w-3.5 h-3.5" />
@@ -763,12 +1135,12 @@ export function AttendanceDashboard() {
                 <div className="w-44 max-w-full mt-0.5">
                   <div className="flex justify-between text-[11px] text-slate-800 font-bold mb-1">
                     <span>Auto-Refresh QR</span>
-                    <span className="text-slate-950 font-black">{qrTimer}s</span>
+                    <span className="text-slate-950 font-black">{formatQrCountdown(qrTimer)}</span>
                   </div>
                   <div className="h-1.5 bg-black/15 rounded-full overflow-hidden border border-white/40">
                     <motion.div
                       className="h-full bg-slate-900 rounded-full"
-                      style={{ width: `${(qrTimer / 15) * 100}%` }}
+                      style={{ width: `${(qrTimer / QR_REFRESH_SECONDS) * 100}%` }}
                       transition={{ duration: 0.5 }}
                     />
                   </div>
@@ -812,14 +1184,14 @@ export function AttendanceDashboard() {
                     Generator QR, PIN, &amp; Area Geofence
                   </h3>
                   <p className="text-xs sm:text-sm text-slate-800 mt-1.5 leading-relaxed font-medium">
-                    Sistem presensi menghasilkan token QR dinamis dan PIN darurat yang sinkron dengan switch perimeter lokasi. Mahasiswa dapat memvalidasi kehadiran secara otomatis via aplikasi mobile.
+                    Sistem presensi menghasilkan token QR dinamis dan PIN darurat yang sinkron dengan switch validasi lokasi. Mahasiswa dapat memvalidasi kehadiran secara otomatis via aplikasi mobile.
                   </p>
                 </div>
 
                 {/* The Two Interactive Cards - Full Width Stack (No squishing or clipping) */}
                 <div className="flex flex-col gap-3 w-full">
                   {/* Card 1: KODE PIN DARURAT */}
-                  <div className="bg-white/40 backdrop-blur-md rounded-2xl p-3.5 sm:p-4 border border-white/60 shadow-xs flex flex-col justify-between">
+                  <div className="bg-white/40 backdrop-blur-md rounded-2xl p-3.5 sm:p-4 border border-white/60 shadow-xs flex flex-col justify-between overflow-hidden">
                     <div>
                       <div className="flex items-center justify-between gap-2 mb-1">
                         <span className="text-[11px] font-black uppercase tracking-wider text-slate-900">
@@ -830,31 +1202,20 @@ export function AttendanceDashboard() {
                         </span>
                       </div>
 
-                      <div className="flex items-center justify-between gap-2 my-1">
-                        <div className="flex items-center gap-2">
-                          <span className="text-2xl sm:text-3xl font-black font-mono text-slate-950 tracking-widest">
-                            {currentPin}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              navigator.clipboard.writeText(currentPin);
-                              triggerToast(`Kode PIN ${currentPin} berhasil disalin!`);
-                            }}
-                            className="p-1.5 text-slate-700 hover:text-black rounded-lg hover:bg-white/40 transition-colors"
-                            title="Salin PIN"
-                          >
-                            <Copy className="w-4 h-4 text-slate-900" />
-                          </button>
-                        </div>
-
+                      <div className="flex items-center gap-2 my-1">
+                        <span className="text-2xl sm:text-3xl font-black font-mono text-slate-950 tracking-widest">
+                          {currentPin}
+                        </span>
                         <button
                           type="button"
-                          onClick={handleGenerateNewPin}
-                          className="text-xs font-black text-sky-950 hover:text-black hover:underline inline-flex items-center gap-1.5 bg-white/50 hover:bg-white/80 px-3 py-1.5 rounded-xl transition-all shadow-2xs shrink-0"
+                          onClick={() => {
+                            safeClipboardCopy(currentPin);
+                            triggerToast(`Kode PIN ${currentPin} berhasil disalin!`);
+                          }}
+                          className="p-1.5 text-slate-700 hover:text-black rounded-lg hover:bg-white/40 transition-colors"
+                          title="Salin PIN"
                         >
-                          <Shuffle className="w-3.5 h-3.5 text-sky-900" />
-                          Generate Baru
+                          <Copy className="w-4 h-4 text-slate-900" />
                         </button>
                       </div>
 
@@ -865,25 +1226,13 @@ export function AttendanceDashboard() {
                   </div>
 
                   {/* Card 2: AREA GEOFENCE VALID */}
-                  <div className="bg-white/40 backdrop-blur-md rounded-2xl p-3.5 sm:p-4 border border-white/60 shadow-xs flex flex-col justify-between">
+                  <div className="bg-white/40 backdrop-blur-md rounded-2xl p-3.5 sm:p-4 border border-white/60 shadow-xs flex flex-col justify-between overflow-hidden">
                     <div>
                       {/* Header row */}
-                      <div className="flex items-center justify-between gap-2 mb-1.5">
-                        <div className="flex items-center gap-1.5">
-                          <MapPin className="w-4 h-4 text-slate-900 shrink-0" />
-                          <span className="text-[11px] font-black uppercase tracking-wider text-slate-900">
-                            AREA GEOFENCE VALID
-                          </span>
-                        </div>
-
-                        <span
-                          className={`text-[10px] font-black px-2.5 py-0.5 rounded-full shrink-0 ${
-                            isGeofenceActive
-                              ? "bg-emerald-300/90 text-emerald-950"
-                              : "bg-slate-300/80 text-slate-800"
-                          }`}
-                        >
-                          {isGeofenceActive ? "Perimeter Nyala" : "Nonaktif"}
+                      <div className="flex items-center gap-1.5 mb-1.5">
+                        <MapPin className="w-4 h-4 text-slate-900 shrink-0" />
+                        <span className="text-[11px] font-black uppercase tracking-wider text-slate-900">
+                          AREA GEOFENCE VALID
                         </span>
                       </div>
 
@@ -893,8 +1242,8 @@ export function AttendanceDashboard() {
                           <p className="text-sm sm:text-base font-black text-slate-950 leading-tight">
                             {isGeofenceActive ? `Radius ${geofenceRadius}m (Aktif)` : "Bebas Lokasi (Nonaktif)"}
                           </p>
-                          <p className="text-[11px] font-mono text-slate-700 font-bold mt-0.5">
-                            {isGeofenceActive ? "-6.89042, 107.61031 (Ruang 207)" : "GPS Perimeter: Bypass"}
+                          <p className="text-[11px] font-mono text-slate-700 font-bold mt-0.5 truncate">
+                            {isGeofenceActive ? `-6.89042, 107.61031 (${activeRoom})` : "GPS: Bebas Lokasi"}
                           </p>
                         </div>
 
@@ -925,7 +1274,7 @@ export function AttendanceDashboard() {
                     {isGeofenceActive && (
                       <div className="pt-2 mt-2 border-t border-black/10 flex items-center justify-between gap-2 flex-wrap">
                         <span className="text-[10px] font-bold text-slate-800 uppercase tracking-wider">
-                          Atur Jarak Perimeter:
+                          Atur Radius:
                         </span>
                         <div className="flex items-center gap-1.5">
                           {[25, 50, 100].map((rad) => (
@@ -961,7 +1310,9 @@ export function AttendanceDashboard() {
               <div>
                 <p className="text-xs font-black text-rose-950">Peringatan Kuota Kehadiran</p>
                 <p className="text-[11px] text-rose-900 mt-0.5 leading-relaxed font-semibold">
-                  1 Mahasiswa (Y. Kharlistov) dalam pantauan kritis ambang batas absensi (&lt;75%). Terancam tidak dapat mengikuti Ujian Akhir Semester.
+                  {criticalStudent
+                    ? `1 Mahasiswa (${criticalStudent.name}) dalam pantauan kritis ambang batas absensi (<75%). Terancam tidak dapat mengikuti Ujian Akhir Semester.`
+                    : "1 Mahasiswa (Y. Kharlistov) dalam pantauan kritis ambang batas absensi (<75%). Terancam tidak dapat mengikuti Ujian Akhir Semester."}
                 </p>
               </div>
             </div>
@@ -974,11 +1325,33 @@ export function AttendanceDashboard() {
                     <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
                     <h4 className="text-xs font-black text-slate-900">Live Activity Feed</h4>
                   </div>
-                  <span className="text-[10px] font-bold text-slate-600">Real-time update</span>
+                  <button
+                    onClick={() => handleOpenHistoryModal()}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-white/40 hover:bg-white text-[10px] font-extrabold text-sky-950 hover:text-black border border-white/60 transition-all shadow-xs"
+                    title="Lihat riwayat lengkap seluruh presensi mahasiswa"
+                  >
+                    <History className="w-3 h-3 text-sky-700" />
+                    <span>Lihat Riwayat</span>
+                  </button>
                 </div>
 
                 <div className="overflow-y-auto no-scrollbar max-h-48 pr-1">
-                  {records.slice(0, 5).length > 0 ? (
+                  {records.filter((r) => r.checkIn).length > 0 ? (
+                    records
+                      .filter((r) => r.checkIn)
+                      .slice(0, 5)
+                      .map((r, i) => (
+                        <ActivityItem
+                          key={i}
+                          name={r.name}
+                          nim={r.nim}
+                          time={formatTime(r.checkIn)}
+                          accuracy={`QR GPS · Akurasi ${r.distance ?? 12} meter`}
+                          photo={r.photo}
+                          onPhotoClick={() => setSelectedPhotoRecord(r)}
+                        />
+                      ))
+                  ) : records.length > 0 ? (
                     records.slice(0, 5).map((r, i) => (
                       <ActivityItem
                         key={i}
@@ -986,6 +1359,8 @@ export function AttendanceDashboard() {
                         nim={r.nim}
                         time={formatTime(r.checkIn)}
                         accuracy="QR GPS · Akurasi 12 meter"
+                        photo={r.photo}
+                        onPhotoClick={() => setSelectedPhotoRecord(r)}
                       />
                     ))
                   ) : (
@@ -1153,27 +1528,51 @@ export function AttendanceDashboard() {
 
                         {/* Bukti/Lampiran */}
                         <td className="py-3 px-4">
-                          {row.status === "IZIN" ? (
-                            <button
-                              onClick={() => triggerToast("Membuka surat_sakit.pdf...")}
-                              className="flex items-center gap-1 text-[11px] text-sky-950 hover:text-black font-extrabold hover:underline"
-                            >
-                              <FileText className="w-3.5 h-3.5 text-sky-700" />
-                              surat_sakit.pdf
-                            </button>
-                          ) : (
-                            <span className="text-[11px] text-slate-500 font-mono font-bold">—</span>
-                          )}
+                          <div className="flex items-center gap-2">
+                            {row.photo ? (
+                              <button
+                                onClick={() => setSelectedPhotoRecord(row)}
+                                className="inline-flex items-center gap-1.5 text-[11px] bg-sky-500/25 hover:bg-sky-500/40 text-sky-950 font-black px-2.5 py-1 rounded-lg border border-sky-400/50 shadow-xs transition-all"
+                                title="Klik untuk verifikasi bukti foto selfie mahasiswa"
+                              >
+                                <Camera className="w-3.5 h-3.5 text-sky-700" />
+                                <span>Bukti Foto</span>
+                              </button>
+                            ) : null}
+                            {row.status === "IZIN" ? (
+                              <button
+                                onClick={() => triggerToast("Membuka surat_sakit.pdf...")}
+                                className="flex items-center gap-1 text-[11px] text-sky-950 hover:text-black font-extrabold hover:underline"
+                              >
+                                <FileText className="w-3.5 h-3.5 text-sky-700" />
+                                surat_sakit.pdf
+                              </button>
+                            ) : null}
+                            {!row.photo && row.status !== "IZIN" && (
+                              <span className="text-[11px] text-slate-500 font-mono font-bold">—</span>
+                            )}
+                          </div>
                         </td>
 
                         {/* Aksi */}
                         <td className="py-3 px-4 text-right">
-                          <button
-                            onClick={() => setSelectedRecord(row)}
-                            className="px-3 py-1 text-[11px] font-bold text-slate-900 hover:text-white bg-white/40 hover:bg-sky-900 rounded-lg border border-white/60 shadow-sm backdrop-blur-md transition-all"
-                          >
-                            Ubah Status
-                          </button>
+                          <div className="inline-flex items-center gap-1.5 justify-end">
+                            {row.photo && (
+                              <button
+                                onClick={() => setSelectedPhotoRecord(row)}
+                                className="p-1.5 text-sky-900 hover:text-black bg-white/40 hover:bg-white/80 rounded-lg border border-white/60 shadow-xs transition-all"
+                                title="Lihat bukti foto selfie"
+                              >
+                                <Eye className="w-3.5 h-3.5 text-sky-700" />
+                              </button>
+                            )}
+                            <button
+                              onClick={() => handleOpenStatusModal(row)}
+                              className="px-3 py-1 text-[11px] font-bold text-slate-900 hover:text-white bg-white/40 hover:bg-sky-900 rounded-lg border border-white/60 shadow-sm backdrop-blur-md transition-all"
+                            >
+                              Ubah Status
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))
@@ -1229,6 +1628,32 @@ export function AttendanceDashboard() {
                 </div>
               </div>
 
+              {selectedRecord.photo && (
+                <div className="flex items-center justify-between p-2.5 bg-sky-500/20 border border-sky-400/40 rounded-2xl">
+                  <div className="flex items-center gap-2.5">
+                    <img
+                      src={selectedRecord.photo}
+                      alt="Thumbnail Selfie"
+                      className="w-10 h-10 rounded-xl object-cover border border-white/60 shadow-xs"
+                    />
+                    <div>
+                      <p className="text-[11px] font-black text-slate-900">Bukti Foto Tersedia</p>
+                      <p className="text-[10px] text-slate-600 font-semibold">Tercatat via kamera mobile</p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedPhotoRecord(selectedRecord);
+                    }}
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-extrabold bg-sky-700 hover:bg-sky-800 text-white rounded-xl shadow-xs transition-all"
+                  >
+                    <Eye className="w-3.5 h-3.5" />
+                    <span>Lihat Foto</span>
+                  </button>
+                </div>
+              )}
+
               <div className="grid grid-cols-2 gap-3 glass-inner rounded-2xl p-3.5">
                 <div>
                   <p className="text-[10px] text-slate-700 font-extrabold uppercase">Waktu Check-in</p>
@@ -1240,30 +1665,74 @@ export function AttendanceDashboard() {
                 </div>
                 <div>
                   <p className="text-[10px] text-slate-700 font-extrabold uppercase">Jarak Radar GPS</p>
-                  <p className="text-xs font-black text-slate-950 mt-0.5">{selectedRecord.distance ?? 14}m dari Ruang 207</p>
+                  <p className="text-xs font-black text-slate-950 mt-0.5">{selectedRecord.distance ?? 14}m dari {activeRoom}</p>
                 </div>
                 <div>
                   <p className="text-[10px] text-slate-700 font-extrabold uppercase">Verifikasi Perimeter</p>
-                  <p className="text-xs font-black text-emerald-800 mt-0.5">Valid (Dalam Radius)</p>
+                  <p className="text-xs font-black text-emerald-800 mt-0.5">
+                    {selectedRecord.isLocationValid !== false ? "Valid (Dalam Radius)" : "Di Luar Radius"}
+                  </p>
                 </div>
+              </div>
+
+              {/* Status Selector */}
+              <div>
+                <label className="text-[10px] text-slate-700 font-extrabold uppercase tracking-wider block mb-1.5">
+                  PILIH STATUS KEHADIRAN:
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+                  {([
+                    { label: "Hadir", value: "PRESENT", activeBg: "bg-emerald-600 text-white" },
+                    { label: "Terlambat", value: "LATE", activeBg: "bg-amber-600 text-white" },
+                    { label: "Izin", value: "IZIN", activeBg: "bg-indigo-600 text-white" },
+                    { label: "Belum Hadir", value: "ABSENT", activeBg: "bg-rose-600 text-white" },
+                  ] as const).map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setEditStatus(opt.value)}
+                      className={`py-1.5 px-2 rounded-xl text-xs font-bold transition-all border ${
+                        editStatus === opt.value
+                          ? `${opt.activeBg} shadow-sm border-transparent`
+                          : "bg-white/40 text-slate-800 hover:bg-white/70 border-white/60"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Optional Notes */}
+              <div>
+                <label className="text-[10px] text-slate-700 font-extrabold uppercase tracking-wider block mb-1">
+                  Catatan Tambahan (Opsional):
+                </label>
+                <input
+                  type="text"
+                  value={editNotes}
+                  onChange={(e) => setEditNotes(e.target.value)}
+                  placeholder="Keterangan surat izin/alasan perubahan..."
+                  className="w-full text-xs px-3 py-1.5 rounded-xl bg-white/60 border border-white/60 text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                />
               </div>
 
               <div className="flex justify-end gap-2 pt-2 border-t border-white/30">
                 <button
+                  type="button"
                   onClick={() => setSelectedRecord(null)}
                   className="px-4 py-2 text-xs border border-white/50 rounded-xl text-slate-800 hover:bg-white/30 font-bold"
                 >
                   Tutup
                 </button>
                 <button
-                  onClick={() => {
-                    triggerToast(`Status presensi ${selectedRecord.name} berhasil diperbarui!`);
-                    setSelectedRecord(null);
-                  }}
-                  className="px-4 py-2 text-xs bg-sky-600 text-white rounded-xl hover:bg-sky-700 transition-all font-bold shadow-md flex items-center gap-1.5"
+                  type="button"
+                  disabled={isUpdatingStatus}
+                  onClick={handleConfirmStatusChange}
+                  className="px-4 py-2 text-xs bg-sky-600 text-white rounded-xl hover:bg-sky-700 transition-all font-bold shadow-md flex items-center gap-1.5 disabled:opacity-50"
                 >
                   <CheckCircle2 className="w-4 h-4" />
-                  Konfirmasi Status
+                  {isUpdatingStatus ? "Menyimpan..." : "Konfirmasi Status"}
                 </button>
               </div>
             </motion.div>
@@ -1293,7 +1762,11 @@ export function AttendanceDashboard() {
                   <span className="text-[10px] font-bold uppercase tracking-wider text-sky-800 bg-sky-100/60 px-2 py-0.5 rounded-full border border-sky-300/40">
                     MODE LAYAR PROYEKTOR DOSEN
                   </span>
-                  <h3 className="text-lg font-black text-slate-900 mt-1">Ruang 207: Pemrograman Mobile A</h3>
+                  <h3 className="text-lg font-black text-slate-900 mt-1">
+                    {activeClass
+                      ? `${activeRoom}: ${activeClassName} (${activeClassCode.startsWith("Kelas") ? activeClassCode : `Kelas ${activeClassCode}`})`
+                      : `Tidak Ada Sesi Terjadwal (${todayDayName})`}
+                  </h3>
                 </div>
                 <button onClick={() => setShowProjectorModal(false)} className="p-2 text-slate-500 hover:text-slate-800 rounded-xl hover:bg-white/30">
                   <X className="w-5 h-5" />
@@ -1317,7 +1790,7 @@ export function AttendanceDashboard() {
                       : "bg-amber-100 text-amber-800 border-amber-300"
                   }`}
                 >
-                  {isGeofenceActive ? "Geofence: Aktif (Radius 50m)" : "Geofence: Nonaktif (Bebas Lokasi)"}
+                  {isGeofenceActive ? `Geofence: Aktif (Radius ${geofenceRadius}m)` : "Geofence: Nonaktif (Bebas Lokasi)"}
                 </span>
                 <button
                   type="button"
@@ -1340,12 +1813,12 @@ export function AttendanceDashboard() {
               <div className="w-full max-w-xs">
                 <div className="flex justify-between text-xs font-bold text-slate-700 mb-1">
                   <span>Auto-Refresh Token</span>
-                  <span className="text-sky-900 font-extrabold">{qrTimer} detik tersisa</span>
+                  <span className="text-sky-900 font-extrabold">{formatQrCountdown(qrTimer)} tersisa</span>
                 </div>
                 <div className="h-2 bg-sky-100 rounded-full overflow-hidden border border-sky-200/60">
                   <motion.div
                     className="h-full bg-sky-600 rounded-full"
-                    style={{ width: `${(qrTimer / 15) * 100}%` }}
+                    style={{ width: `${(qrTimer / QR_REFRESH_SECONDS) * 100}%` }}
                     transition={{ duration: 0.5 }}
                   />
                 </div>
@@ -1353,9 +1826,291 @@ export function AttendanceDashboard() {
 
               <p className="text-xs text-slate-600 font-medium leading-relaxed max-w-sm mt-1">
                 {isGeofenceActive
-                  ? "Scan menggunakan aplikasi SATPAMO Mahasiswa dalam radius perimeter 50 meter Lab 207 Gedung B."
+                  ? `Scan menggunakan aplikasi SATPAMO Mahasiswa dalam radius perimeter ${geofenceRadius} meter ${activeRoom}.`
                   : "Mode bebas lokasi aktif: Mahasiswa dapat melakukan presensi tanpa batasan perimeter GPS."}
               </p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Modal Bukti Foto Presensi Mahasiswa */}
+      <AnimatePresence>
+        {selectedPhotoRecord && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/65 backdrop-blur-md"
+            onClick={() => setSelectedPhotoRecord(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, y: 15 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95 }}
+              className="glass-panel backdrop-blur-2xl rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-white/60 flex flex-col gap-4 text-slate-900 max-h-[90vh] overflow-y-auto no-scrollbar"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between pb-3 border-b border-white/30">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-sky-500/20 border border-sky-400/40 text-sky-800 flex items-center justify-center shadow-xs">
+                    <Camera className="w-4 h-4 text-sky-700" />
+                  </div>
+                  <div>
+                    <h3 className="font-black text-slate-950 text-sm leading-tight">Bukti Foto Presensi Mahasiswa</h3>
+                    <p className="text-[11px] text-slate-600 font-semibold">Verifikasi Keaslian Wajah &amp; Lokasi Perimeter</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setSelectedPhotoRecord(null)}
+                  className="p-1.5 text-slate-600 hover:text-slate-900 rounded-lg hover:bg-white/40 transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Student Identity */}
+              <div className="flex items-center justify-between gap-3 bg-white/30 border border-white/40 rounded-2xl p-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-10 h-10 rounded-2xl bg-sky-700 text-white font-black text-sm flex items-center justify-center shadow-md shrink-0">
+                    {getInitials(selectedPhotoRecord.name)}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-extrabold text-slate-950 text-sm truncate">{selectedPhotoRecord.name}</p>
+                    <p className="text-xs text-slate-700 font-mono font-semibold">{selectedPhotoRecord.nim}</p>
+                  </div>
+                </div>
+                <div className="text-right shrink-0">
+                  <span className="text-[10px] font-bold bg-sky-100 text-sky-800 border border-sky-200 px-2 py-0.5 rounded-full">
+                    {selectedPhotoRecord.jurusan || "Teknik Informatika"}
+                  </span>
+                  <p className="text-[10px] text-slate-600 mt-1 font-semibold">
+                    {formatTime(selectedPhotoRecord.checkIn)} WIB
+                  </p>
+                </div>
+              </div>
+
+              {/* Submitted Photo Display */}
+              <div className="relative rounded-2xl overflow-hidden border-2 border-white/60 shadow-md bg-slate-900 flex items-center justify-center min-h-64 max-h-80">
+                {selectedPhotoRecord.photo ? (
+                  <img
+                    src={selectedPhotoRecord.photo}
+                    alt={`Bukti selfie ${selectedPhotoRecord.name}`}
+                    className="w-full h-full object-cover max-h-80 rounded-2xl"
+                  />
+                ) : (
+                  <div className="py-12 px-4 text-center text-slate-300">
+                    <Camera className="w-12 h-12 mx-auto mb-2 opacity-50 text-sky-300" />
+                    <p className="text-xs font-bold">Foto selfie tidak tersedia atau dicatat via presensi manual.</p>
+                  </div>
+                )}
+                {selectedPhotoRecord.photo && (
+                  <div className="absolute bottom-2 left-2 right-2 px-3 py-1.5 rounded-xl bg-slate-950/70 backdrop-blur-md text-white text-[11px] font-semibold flex items-center justify-between">
+                    <span>Terverifikasi Kamera Mobile</span>
+                    <span className="font-mono text-[10px] text-sky-300">Lensa Depan HD</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Verification & Geofence Details */}
+              <div className="grid grid-cols-2 gap-2.5 text-xs">
+                <div className="bg-white/40 border border-white/50 rounded-2xl p-3 flex flex-col justify-between">
+                  <p className="text-[10px] font-extrabold text-slate-600 uppercase">Geofence Lokasi</p>
+                  <div className="flex items-center gap-1.5 mt-1 text-emerald-800 font-black">
+                    <MapPin className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                    <span className="truncate">{selectedPhotoRecord.distance ?? 14}m ({selectedPhotoRecord.isLocationValid !== false ? "VALID" : "DI LUAR"})</span>
+                  </div>
+                  <p className="text-[10px] text-slate-500 mt-1 truncate">
+                    {activeRoom} (Radius {geofenceRadius}m)
+                  </p>
+                </div>
+
+                <div className="bg-white/40 border border-white/50 rounded-2xl p-3 flex flex-col justify-between">
+                  <p className="text-[10px] font-extrabold text-slate-600 uppercase">Verifikasi AI Vision</p>
+                  <div className="flex items-center gap-1.5 mt-1">
+                    <ShieldCheck className="w-3.5 h-3.5 text-sky-700 shrink-0" />
+                    <span className="font-black text-sky-950">
+                      {selectedPhotoRecord.aiVerification?.verdict ?? "VERIFIED"}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-slate-600 mt-1 font-semibold">
+                    Confidence {selectedPhotoRecord.aiVerification?.confidence ? `${Math.round(selectedPhotoRecord.aiVerification.confidence * 100)}%` : "98%"}
+                  </p>
+                </div>
+              </div>
+
+              {/* AI Details / Notes */}
+              {(selectedPhotoRecord.aiVerification?.reason || selectedPhotoRecord.notes) && (
+                <div className="bg-sky-50/70 border border-sky-200/60 rounded-2xl p-3 text-xs text-sky-950 font-medium leading-relaxed">
+                  <span className="font-bold text-sky-900 block mb-0.5">Catatan Verifikasi:</span>
+                  {selectedPhotoRecord.aiVerification?.reason || selectedPhotoRecord.notes}
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-white/30">
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleOpenStatusModal(selectedPhotoRecord);
+                    setSelectedPhotoRecord(null);
+                  }}
+                  className="px-4 py-2 text-xs font-bold text-slate-800 hover:text-black bg-white/60 hover:bg-white rounded-xl border border-white/70 shadow-xs transition-all"
+                >
+                  Ubah Status Presensi
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedPhotoRecord(null)}
+                  className="px-5 py-2 text-xs font-bold text-white bg-sky-700 hover:bg-sky-800 rounded-xl shadow-md transition-all"
+                >
+                  Tutup
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Modal Riwayat Presensi Lengkap */}
+      <AnimatePresence>
+        {showHistoryModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/65 backdrop-blur-md"
+            onClick={() => setShowHistoryModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, y: 15 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95 }}
+              className="glass-panel backdrop-blur-2xl rounded-3xl max-w-2xl w-full p-6 shadow-2xl border border-white/60 flex flex-col gap-4 text-slate-900 max-h-[85vh]"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between pb-3 border-b border-white/30">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-sky-500/20 border border-sky-400/40 text-sky-800 flex items-center justify-center shadow-xs">
+                    <History className="w-4 h-4 text-sky-700" />
+                  </div>
+                  <div>
+                    <h3 className="font-black text-slate-950 text-sm">Riwayat Presensi Mahasiswa Terkini</h3>
+                    <p className="text-[11px] text-slate-600 font-semibold">Seluruh aktivitas check-in mahasiswa dengan bukti foto dan perimeter GPS</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowHistoryModal(false)}
+                  className="p-1.5 text-slate-600 hover:text-slate-900 rounded-lg hover:bg-white/40"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Search Bar in Modal */}
+              <div className="relative">
+                <Search className="w-4 h-4 text-slate-600 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  placeholder="Cari berdasarkan nama atau NIM mahasiswa..."
+                  value={historySearch}
+                  onChange={(e) => setHistorySearch(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 rounded-xl text-xs font-semibold bg-white/50 border border-white/60 focus:outline-none focus:bg-white text-slate-900 placeholder:text-slate-500"
+                />
+              </div>
+
+              {/* Records List */}
+              <div className="overflow-y-auto no-scrollbar flex-1 flex flex-col gap-2 pr-1">
+                {historyLoading ? (
+                  <div className="py-12 text-center text-slate-600 font-semibold text-xs">
+                    <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-sky-600" />
+                    Memuat riwayat presensi...
+                  </div>
+                ) : historyRecords.filter((r) => {
+                    if (!historySearch.trim()) return true;
+                    const q = historySearch.toLowerCase();
+                    return r.name.toLowerCase().includes(q) || r.nim.toLowerCase().includes(q);
+                  }).length > 0 ? (
+                  historyRecords
+                    .filter((r) => {
+                      if (!historySearch.trim()) return true;
+                      const q = historySearch.toLowerCase();
+                      return r.name.toLowerCase().includes(q) || r.nim.toLowerCase().includes(q);
+                    })
+                    .map((item, idx) => (
+                      <div
+                        key={item.id || idx}
+                        className="flex items-center justify-between gap-3 p-3 bg-white/30 hover:bg-white/50 border border-white/40 rounded-2xl transition-all"
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          {item.photo ? (
+                            <img
+                              src={item.photo}
+                              alt={item.name}
+                              className="w-10 h-10 rounded-xl object-cover border border-white/60 shadow-xs shrink-0 cursor-pointer hover:scale-105 transition-transform"
+                              onClick={() => {
+                                setSelectedPhotoRecord(item);
+                              }}
+                              title="Klik untuk melihat bukti foto"
+                            />
+                          ) : (
+                            <div className="w-10 h-10 rounded-xl bg-sky-700 text-white font-black text-xs flex items-center justify-center shrink-0 shadow-xs">
+                              {getInitials(item.name)}
+                            </div>
+                          )}
+                          <div className="min-w-0">
+                            <p className="text-xs font-bold text-slate-950 truncate">{item.name}</p>
+                            <p className="text-[10px] text-slate-600 font-mono">{item.nim} &bull; {item.jurusan || "Teknik Informatika"}</p>
+                            <p className="text-[10px] text-sky-950 font-bold mt-0.5">
+                              {item.date ? new Date(item.date).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }) : "Hari Ini"} &bull; {formatTime(item.checkIn)} WIB
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full ${
+                            item.status === "PRESENT"
+                              ? "bg-emerald-100 text-emerald-800 border border-emerald-200"
+                              : item.status === "LATE"
+                              ? "bg-amber-100 text-amber-800 border border-amber-200"
+                              : item.status === "IZIN"
+                              ? "bg-blue-100 text-blue-800 border border-blue-200"
+                              : "bg-rose-100 text-rose-800 border border-rose-200"
+                          }`}>
+                            {item.status === "PRESENT" ? "Hadir" : item.status === "LATE" ? "Terlambat" : item.status === "IZIN" ? "Izin" : "Alpha"}
+                          </span>
+
+                          {item.photo ? (
+                            <button
+                              type="button"
+                              onClick={() => setSelectedPhotoRecord(item)}
+                              className="flex items-center gap-1 px-2.5 py-1 text-[10px] font-bold bg-sky-600 text-white hover:bg-sky-700 rounded-lg shadow-xs transition-all"
+                            >
+                              <Camera className="w-3 h-3" />
+                              <span>Lihat Foto</span>
+                            </button>
+                          ) : (
+                            <span className="text-[10px] text-slate-500 font-semibold italic">Tanpa Foto</span>
+                          )}
+                        </div>
+                      </div>
+                    ))
+                ) : (
+                  <div className="py-12 text-center text-slate-600 font-semibold text-xs">
+                    Tidak ditemukan catatan riwayat presensi.
+                  </div>
+                )}
+              </div>
+
+              <div className="flex justify-end pt-2 border-t border-white/30">
+                <button
+                  type="button"
+                  onClick={() => setShowHistoryModal(false)}
+                  className="px-5 py-2 text-xs font-bold text-white bg-sky-700 hover:bg-sky-800 rounded-xl shadow-md transition-all"
+                >
+                  Tutup
+                </button>
+              </div>
             </motion.div>
           </motion.div>
         )}

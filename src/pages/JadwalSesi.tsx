@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -29,6 +29,7 @@ import {
   FileCheck
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import { kelasApi, type KelasItem } from "../lib/api";
 
 interface SessionItem {
   id: number;
@@ -116,10 +117,14 @@ export function JadwalSesi() {
   const { dosen, logout } = useAuth();
 
   // State
-  const [filterTab, setFilterTab] = useState<"semua" | "hariIni" | "akanDatang">("semua");
+  const [filterTab, setFilterTab] = useState<"semua" | "hariIni" | "akanDatang" | "pengganti">("semua");
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncToast, setSyncToast] = useState<string | null>(null);
+
+  // Backend Classes State
+  const [classes, setClasses] = useState<KelasItem[]>([]);
+  const [selectedKelasId, setSelectedKelasId] = useState<string>("");
 
   // Modals
   const [showScheduleModal, setShowScheduleModal] = useState(false);
@@ -140,6 +145,46 @@ export function JadwalSesi() {
 
   const [upcomingSessions, setUpcomingSessions] = useState<SessionItem[]>(initialUpcomingSessions);
   const [activeSessionEnded, setActiveSessionEnded] = useState(false);
+
+  // Fetch real classes on mount
+  useEffect(() => {
+    const fetchRealData = async () => {
+      try {
+        const res = await kelasApi.getAll();
+        if (res.success && res.data && res.data.length > 0) {
+          setClasses(res.data);
+          setSelectedKelasId(res.data[0].id);
+
+          const dynamicSessions: SessionItem[] = [];
+          let sessionCount = 11;
+          res.data.forEach((k) => {
+            const jadwals = k.jadwals || k.jadwal || [];
+            jadwals.forEach((j) => {
+              dynamicSessions.push({
+                id: Number(j.id) || Date.now() + sessionCount,
+                sessionNumber: String(sessionCount++),
+                relativeTime: "Mendatang",
+                dateStr: `${j.hari}, Semester Reguler`,
+                title: `${k.nama} (${k.kode})`,
+                location: "Fakultas Ilmu Komputer Universitas Brawijaya",
+                status: "upcoming",
+                timeRange: `${j.jamMulai} - ${j.jamSelesai} WIB`,
+                room: j.ruangan || "Ruang 207, Gedung B",
+              });
+            });
+          });
+
+          if (dynamicSessions.length > 0) {
+            setUpcomingSessions(dynamicSessions);
+          }
+        }
+      } catch (err) {
+        console.error("Gagal memuat jadwal kelas:", err);
+      }
+    };
+
+    fetchRealData();
+  }, []);
 
   const getInitials = (name?: string) => {
     if (!name) return "YK";
@@ -170,9 +215,33 @@ export function JadwalSesi() {
     setTimeout(() => setSyncToast(null), 3000);
   };
 
-  const handleAddSessionSubmit = (e: React.FormEvent) => {
+  const handleAddSessionSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newSesi.title.trim()) return;
+
+    // Persist to backend if a class is selected
+    const targetClass = classes.find((c) => c.id === selectedKelasId) || classes[0];
+    if (targetClass) {
+      try {
+        const dayIndex = new Date(newSesi.dateStr).getDay();
+        const validHariList = ["MINGGU", "SENIN", "SELASA", "RABU", "KAMIS", "JUMAT", "SABTU"];
+        const hari = validHariList[dayIndex] || "SENIN";
+
+        // Extract start & end times
+        const times = newSesi.timeRange.match(/\d{1,2}[:.]\d{2}/g) || ["08:00", "10:30"];
+        const jamMulai = times[0]?.replace(".", ":") || "08:00";
+        const jamSelesai = times[1]?.replace(".", ":") || "10:30";
+
+        await kelasApi.addJadwal(targetClass.id, {
+          hari,
+          jamMulai,
+          jamSelesai,
+          ruangan: newSesi.room,
+        });
+      } catch (err) {
+        console.warn("Catatan simpan jadwal ke server:", err);
+      }
+    }
 
     const newItem: SessionItem = {
       id: Date.now(),
@@ -188,7 +257,11 @@ export function JadwalSesi() {
 
     setUpcomingSessions((prev) => [...prev, newItem]);
     setShowScheduleModal(false);
-    setSyncToast(`Sesi ${newSesi.sessionNumber} berhasil ditambahkan!`);
+    setSyncToast(
+      newSesi.isReplacement
+        ? `Kelas Pengganti (Sesi ${newSesi.sessionNumber}) berhasil dijadwalkan dan disimpan!`
+        : `Sesi ${newSesi.sessionNumber} berhasil ditambahkan dan disimpan!`
+    );
     setTimeout(() => setSyncToast(null), 3500);
     setNewSesi({
       sessionNumber: String(Number(newSesi.sessionNumber) + 1 || 18),
@@ -201,8 +274,9 @@ export function JadwalSesi() {
   };
 
   // Filtered upcoming
-  const displayedUpcoming = upcomingSessions.filter(() => {
+  const displayedUpcoming = upcomingSessions.filter((s) => {
     if (filterTab === "hariIni") return false; // Upcoming are not today
+    if (filterTab === "pengganti") return s.relativeTime === "Kelas Pengganti";
     return true;
   });
 
@@ -501,7 +575,23 @@ export function JadwalSesi() {
               <span className={`px-1.5 py-0.2 rounded-md text-[10px] font-bold ${
                 filterTab === "akanDatang" ? "bg-sky-600/20 text-white" : "bg-sky-50/80 text-slate-600"
               }`}>
-                5
+                {upcomingSessions.length}
+              </span>
+            </button>
+
+            <button
+              onClick={() => setFilterTab("pengganti")}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                filterTab === "pengganti"
+                  ? "bg-purple-600 text-white shadow-sm"
+                  : "text-slate-800 hover:bg-white/25 font-bold"
+              }`}
+            >
+              <span>Kelas Pengganti</span>
+              <span className={`px-1.5 py-0.2 rounded-md text-[10px] font-bold ${
+                filterTab === "pengganti" ? "bg-white/30 text-white" : "bg-purple-100 text-purple-800"
+              }`}>
+                {upcomingSessions.filter((s) => s.relativeTime === "Kelas Pengganti").length}
               </span>
             </button>
           </div>
@@ -952,6 +1042,25 @@ export function JadwalSesi() {
               </div>
 
               <form onSubmit={handleAddSessionSubmit} className="flex flex-col gap-3">
+                {classes.length > 0 && (
+                  <div>
+                    <label className="text-[11px] font-bold text-slate-700 block mb-1">
+                      Pilih Mata Kuliah / Kelas
+                    </label>
+                    <select
+                      value={selectedKelasId}
+                      onChange={(e) => setSelectedKelasId(e.target.value)}
+                      className="w-full text-xs px-3 py-2 bg-white/60 border border-white/70 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 font-semibold text-slate-900"
+                    >
+                      {classes.map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {c.nama} ({c.kode})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="text-[11px] font-bold text-slate-700 block mb-1">

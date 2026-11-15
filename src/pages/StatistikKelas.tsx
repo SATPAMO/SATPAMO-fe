@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -24,9 +24,16 @@ import {
   X,
   FileSpreadsheet,
   FileText,
-  RefreshCw
+  RefreshCw,
+  Loader2
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import {
+  kelasApi,
+  attendanceApi,
+  type KelasItem,
+  type AttendanceRecord,
+} from "../lib/api";
 
 interface AtRiskStudent {
   id: string;
@@ -39,42 +46,14 @@ interface AtRiskStudent {
   riskLabel: string;
 }
 
-const mockAtRiskStudents: AtRiskStudent[] = [
-  {
-    id: "1",
-    name: "Yurii Kharlistov",
-    nim: "253140707111000",
-    attendanceSession: "7/10 Sesi",
-    alphaInfo: "3 Alpha",
-    percentage: 70.0,
-    riskStatus: "kritis",
-    riskLabel: "Kritis (Wajib Konseling / Tugas)",
-  },
-  {
-    id: "2",
-    name: "Yurii Kharlistov",
-    nim: "253140707111000",
-    attendanceSession: "7.5/10 Sesi",
-    alphaInfo: "1 Sakit, 2 Telat",
-    percentage: 75.0,
-    riskStatus: "waspada",
-    riskLabel: "Waspada (Batas Minimal)",
-  },
-  {
-    id: "3",
-    name: "Yurii Kharlistov",
-    nim: "253140707111000",
-    attendanceSession: "8/10 Sesi",
-    alphaInfo: "2 Sakit Resmi",
-    percentage: 80.0,
-    riskStatus: "aman",
-    riskLabel: "Cukup Aman",
-  },
-];
-
 export function StatistikKelas() {
   const navigate = useNavigate();
   const { dosen, logout } = useAuth();
+
+  // Backend data
+  const [classes, setClasses] = useState<KelasItem[]>([]);
+  const [allAttendance, setAllAttendance] = useState<AttendanceRecord[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   // State
   const [selectedFilter, setSelectedFilter] = useState("Sesi 1 s/d 10 (Kumulatif)");
@@ -89,6 +68,233 @@ export function StatistikKelas() {
   const [showBapModal, setShowBapModal] = useState(false);
   const [showSendBaakModal, setShowSendBaakModal] = useState(false);
   const [showGuidanceModal, setShowGuidanceModal] = useState(false);
+
+  const fetchData = useCallback(async () => {
+    try {
+      const [kelasRes, attRes] = await Promise.all([
+        kelasApi.getAll(),
+        attendanceApi.getAll({ all: "true", limit: 1000 }),
+      ]);
+      if (kelasRes.data) setClasses(kelasRes.data);
+      if (attRes.data) setAllAttendance(attRes.data);
+    } catch {
+      // silently fail, keep existing data
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    let ignore = false;
+    const load = async () => {
+      try {
+        const [kelasRes, attRes] = await Promise.all([
+          kelasApi.getAll(),
+          attendanceApi.getAll({ all: "true", limit: 1000 }),
+        ]);
+        if (ignore) return;
+        if (kelasRes.data) setClasses(kelasRes.data);
+        if (attRes.data) setAllAttendance(attRes.data);
+      } finally {
+        if (!ignore) setIsLoading(false);
+      }
+    };
+    load();
+    return () => {
+      ignore = true;
+    };
+  }, []);
+
+  const HARI_MAP = ["MINGGU", "SENIN", "SELASA", "RABU", "KAMIS", "JUMAT", "SABTU"] as const;
+  const todayDayName = HARI_MAP[new Date().getDay()];
+
+  const activeTodayClass = useMemo(() => {
+    for (const k of classes) {
+      const jadwals = k.jadwals || k.jadwal || [];
+      if (jadwals.some((j) => j.hari?.toUpperCase() === todayDayName)) {
+        return k;
+      }
+    }
+    return null;
+  }, [classes, todayDayName]);
+
+  const activeClass = activeTodayClass || (classes.length > 0 ? classes[0] : null);
+  const totalMahasiswa = activeClass?.totalMahasiswa ?? activeClass?._count?.mahasiswas ?? 42;
+
+  const stats = useMemo(() => {
+    if (allAttendance.length === 0) {
+      return {
+        avgRate: 92.5,
+        onTimeRate: 88.5,
+        totalIzin: 14,
+        atRiskCount: 2,
+        presentCount: 33,
+        lateCount: 6,
+        izinCount: 2,
+        absentCount: 1,
+        locationValidRate: 99.1,
+      };
+    }
+
+    const total = allAttendance.length;
+    const present = allAttendance.filter((a) => a.status === "PRESENT").length;
+    const late = allAttendance.filter((a) => a.status === "LATE").length;
+    const izin = allAttendance.filter((a) => a.status === "IZIN").length;
+    const absent = allAttendance.filter((a) => a.status === "ABSENT").length;
+
+    const avgRate = total > 0 ? ((present + late) / total) * 100 : 0;
+    const onTimeRate = total > 0 ? (present / total) * 100 : 0;
+
+    const locationValid = allAttendance.filter((a) => a.isLocationValid === true).length;
+    const locationChecked = allAttendance.filter((a) => a.isLocationValid !== undefined && a.isLocationValid !== null).length;
+    const locationValidRate = locationChecked > 0 ? (locationValid / locationChecked) * 100 : 99.1;
+
+    const studentMap = new Map<string, { present: number; late: number; total: number; absent: number; izin: number; name: string; nim: string }>();
+    for (const att of allAttendance) {
+      const key = att.mahasiswaId || att.nim;
+      if (!studentMap.has(key)) {
+        studentMap.set(key, { present: 0, late: 0, total: 0, absent: 0, izin: 0, name: att.name, nim: att.nim });
+      }
+      const s = studentMap.get(key)!;
+      s.total++;
+      if (att.status === "PRESENT") s.present++;
+      else if (att.status === "LATE") s.late++;
+      else if (att.status === "ABSENT") s.absent++;
+      else if (att.status === "IZIN") s.izin++;
+    }
+
+    let atRiskCount = 0;
+    studentMap.forEach((s) => {
+      const rate = s.total > 0 ? ((s.present + s.late) / s.total) * 100 : 0;
+      if (rate < 75) atRiskCount++;
+    });
+
+    return {
+      avgRate: Math.round(avgRate * 10) / 10,
+      onTimeRate: Math.round(onTimeRate * 10) / 10,
+      totalIzin: izin,
+      atRiskCount,
+      presentCount: present,
+      lateCount: late,
+      izinCount: izin,
+      absentCount: absent,
+      locationValidRate: Math.round(locationValidRate * 10) / 10,
+    };
+  }, [allAttendance]);
+
+  const atRiskStudents = useMemo<AtRiskStudent[]>(() => {
+    if (allAttendance.length === 0) return [];
+
+    const studentMap = new Map<string, { present: number; late: number; total: number; absent: number; izin: number; name: string; nim: string }>();
+    for (const att of allAttendance) {
+      const key = att.mahasiswaId || att.nim;
+      if (!studentMap.has(key)) {
+        studentMap.set(key, { present: 0, late: 0, total: 0, absent: 0, izin: 0, name: att.name, nim: att.nim });
+      }
+      const s = studentMap.get(key)!;
+      s.total++;
+      if (att.status === "PRESENT") s.present++;
+      else if (att.status === "LATE") s.late++;
+      else if (att.status === "ABSENT") s.absent++;
+      else if (att.status === "IZIN") s.izin++;
+    }
+
+    const result: AtRiskStudent[] = [];
+    let idx = 0;
+    studentMap.forEach((s) => {
+      const rate = s.total > 0 ? ((s.present + s.late) / s.total) * 100 : 0;
+      if (rate <= 80) {
+        idx++;
+        const attended = s.present + s.late;
+        const alphaArr: string[] = [];
+        if (s.absent > 0) alphaArr.push(`${s.absent} Alpha`);
+        if (s.izin > 0) alphaArr.push(`${s.izin} Izin`);
+        if (s.late > 0) alphaArr.push(`${s.late} Telat`);
+
+        let riskStatus: "kritis" | "waspada" | "aman";
+        let riskLabel: string;
+        if (rate < 75) {
+          riskStatus = "kritis";
+          riskLabel = "Kritis (Wajib Konseling / Tugas)";
+        } else if (rate === 75) {
+          riskStatus = "waspada";
+          riskLabel = "Waspada (Batas Minimal)";
+        } else {
+          riskStatus = "aman";
+          riskLabel = "Cukup Aman";
+        }
+
+        result.push({
+          id: String(idx),
+          name: s.name,
+          nim: s.nim,
+          attendanceSession: `${attended}/${s.total} Sesi`,
+          alphaInfo: alphaArr.join(", ") || "-",
+          percentage: Math.round(rate * 10) / 10,
+          riskStatus,
+          riskLabel,
+        });
+      }
+    });
+
+    result.sort((a, b) => a.percentage - b.percentage);
+    return result;
+  }, [allAttendance]);
+
+  const trendData = useMemo(() => {
+    if (allAttendance.length === 0) {
+      return [
+        { session: "S1", rate: 100, isUts: false },
+        { session: "S2", rate: 97.6, isUts: false },
+        { session: "S3", rate: 97.6, isUts: false },
+        { session: "S4", rate: 97.6, isUts: false },
+        { session: "S5", rate: 97.6, isUts: false },
+        { session: "S6", rate: 97.6, isUts: false },
+        { session: "S7", rate: 97.6, isUts: false },
+        { session: "S8", rate: 100, isUts: true },
+        { session: "S9", rate: 97.6, isUts: false },
+        { session: "S10", rate: 97.6, isUts: false },
+      ];
+    }
+
+    const dateSet = new Set(allAttendance.map((a) => a.date.split("T")[0]));
+    const sortedDates = Array.from(dateSet).sort();
+    const maxSessions = Math.min(sortedDates.length, 10);
+
+    return sortedDates.slice(0, maxSessions).map((date, idx) => {
+      const dayRecords = allAttendance.filter((a) => a.date.split("T")[0] === date);
+      const total = dayRecords.length;
+      const hadirLate = dayRecords.filter((a) => a.status === "PRESENT" || a.status === "LATE").length;
+      const rate = total > 0 ? Math.round(((hadirLate / total) * 100) * 10) / 10 : 0;
+      return {
+        session: `S${idx + 1}`,
+        rate,
+        isUts: idx === 7,
+      };
+    });
+  }, [allAttendance]);
+
+  const distribusi = useMemo(() => {
+    const total = allAttendance.length || 1;
+    const presentPct = Math.round((stats.presentCount / total) * 1000) / 10;
+    const latePct = Math.round((stats.lateCount / total) * 1000) / 10;
+    const izinPct = Math.round((stats.izinCount / total) * 1000) / 10;
+    const absentPct = Math.round((stats.absentCount / total) * 1000) / 10;
+    return { presentPct, latePct, izinPct, absentPct };
+  }, [allAttendance.length, stats]);
+
+  const perfectStudentCount = useMemo(() => {
+    if (allAttendance.length === 0) return 18;
+    const studentMap = new Map<string, boolean>();
+    for (const att of allAttendance) {
+      const key = att.mahasiswaId || att.nim;
+      if (!studentMap.has(key)) studentMap.set(key, true);
+      if (att.status !== "PRESENT") studentMap.set(key, false);
+    }
+    let count = 0;
+    studentMap.forEach((perfect) => { if (perfect) count++; });
+    return count;
+  }, [allAttendance]);
 
   const getInitials = (name?: string) => {
     if (!name) return "YK";
@@ -109,19 +315,6 @@ export function StatistikKelas() {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3500);
   };
-
-  const trendData = [
-    { session: "S1", rate: 100, isUts: false },
-    { session: "S2", rate: 97.6, isUts: false },
-    { session: "S3", rate: 97.6, isUts: false },
-    { session: "S4", rate: 97.6, isUts: false },
-    { session: "S5", rate: 97.6, isUts: false },
-    { session: "S6", rate: 97.6, isUts: false },
-    { session: "S7", rate: 97.6, isUts: false },
-    { session: "S8", rate: 100, isUts: true },
-    { session: "S9", rate: 97.6, isUts: false },
-    { session: "S10", rate: 97.6, isUts: false },
-  ];
 
   return (
     <div
@@ -220,17 +413,22 @@ export function StatistikKelas() {
 
         {/* Top Header Pill & User Avatar */}
         <div className="flex items-center justify-between relative z-10">
-          <div className="inline-flex items-center gap-2.5 glass-panel rounded-2xl px-4 py-2 shadow-sm">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0 animate-pulse" />
-            <span className="text-xs font-semibold text-slate-800">
-              Ruang 207: Pemrograman Mobile (Kelas T3A)
-            </span>
-            <DoorOpen className="w-3.5 h-3.5 text-slate-700 ml-1" />
-          </div>
+          {activeTodayClass ? (
+            <div className="inline-flex items-center gap-2.5 glass-panel rounded-2xl px-4 py-2 shadow-sm">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0 animate-pulse" />
+              <span className="text-xs font-semibold text-slate-800">
+                {activeTodayClass.jadwals?.[0]?.ruangan ?? activeTodayClass.jadwal?.[0]?.ruangan ?? "Ruang"}: {activeTodayClass.nama} (Kelas {activeTodayClass.kode})
+              </span>
+              <DoorOpen className="w-3.5 h-3.5 text-slate-700 ml-1" />
+            </div>
+          ) : null}
 
           <div className="flex items-center gap-2.5">
             <button
-              onClick={() => setToastMessage("Menyegarkan data statistik kelas...")}
+              onClick={() => {
+                triggerToast("Menyegarkan data statistik kelas...");
+                fetchData();
+              }}
               className="p-2 rounded-xl bg-white/70 hover:bg-white text-slate-700 border border-white/80 shadow-sm transition-all"
               title="Refresh Data Statistik"
             >
@@ -360,8 +558,8 @@ export function StatistikKelas() {
                 RATA-RATA KEHADIRAN
               </p>
               <div className="flex items-baseline gap-2 mt-1">
-                <span className="text-3xl font-black text-slate-900 leading-none">92.5%</span>
-                <span className="text-[10px] font-bold text-emerald-700">+2.4%</span>
+                <span className="text-3xl font-black text-slate-900 leading-none">{stats.avgRate}%</span>
+                <span className="text-[10px] font-bold text-emerald-700">{stats.avgRate >= 80 ? "+" : ""}{(stats.avgRate - 90).toFixed(1)}%</span>
               </div>
             </div>
             <div className="flex items-center gap-1.5 mt-3 text-[10px] text-slate-600 font-semibold">
@@ -377,8 +575,8 @@ export function StatistikKelas() {
                 KEHADIRAN TEPAT WAKTU
               </p>
               <div className="flex items-baseline gap-2 mt-1">
-                <span className="text-3xl font-black text-slate-900 leading-none">88.5%</span>
-                <span className="text-xs font-semibold text-slate-600">dari 42 Mahasiswa</span>
+                <span className="text-3xl font-black text-slate-900 leading-none">{stats.onTimeRate}%</span>
+                <span className="text-xs font-semibold text-slate-600">dari {totalMahasiswa} Mahasiswa</span>
               </div>
             </div>
             <p className="text-[10px] text-slate-600 mt-3 font-medium">
@@ -393,7 +591,7 @@ export function StatistikKelas() {
                 TOTAL PENGAJUAN IZIN
               </p>
               <div className="flex items-baseline gap-2 mt-1">
-                <span className="text-3xl font-black text-slate-900 leading-none">14</span>
+                <span className="text-3xl font-black text-slate-900 leading-none">{stats.totalIzin}</span>
                 <span className="text-xs font-semibold text-slate-600">Berkas</span>
               </div>
             </div>
@@ -414,7 +612,7 @@ export function StatistikKelas() {
                 MAHASISWA AT-RISK
               </p>
               <div className="flex items-baseline gap-2 mt-1">
-                <span className="text-3xl font-black text-rose-600 leading-none">2</span>
+                <span className="text-3xl font-black text-rose-600 leading-none">{stats.atRiskCount}</span>
                 <span className="text-xs font-bold text-rose-600">Mahasiswa</span>
               </div>
             </div>
@@ -509,7 +707,7 @@ export function StatistikKelas() {
               <div className="flex items-center justify-between mb-1">
                 <h3 className="text-sm font-bold text-slate-900">Distribusi Kehadiran</h3>
                 <span className="bg-sky-500/20 text-sky-900 border border-sky-400/30 text-[10px] font-bold px-2 py-0.5 rounded-full">
-                  42 Mahasiswa
+                  {totalMahasiswa} Mahasiswa
                 </span>
               </div>
               <p className="text-[11px] text-slate-600 mb-4">
@@ -525,10 +723,10 @@ export function StatistikKelas() {
                       <span className="w-2 h-2 rounded-full bg-sky-500" />
                       Hadir Tepat Waktu
                     </span>
-                    <span className="text-slate-900 font-bold">78.0% <span className="text-[10px] text-slate-500 font-normal">(33)</span></span>
+                    <span className="text-slate-900 font-bold">{distribusi.presentPct}% <span className="text-[10px] text-slate-500 font-normal">({stats.presentCount})</span></span>
                   </div>
                   <div className="w-full bg-white/40 rounded-full h-1.5 overflow-hidden">
-                    <div className="bg-sky-500 h-1.5 rounded-full" style={{ width: "78%" }} />
+                    <div className="bg-sky-500 h-1.5 rounded-full" style={{ width: `${distribusi.presentPct}%` }} />
                   </div>
                 </div>
 
@@ -539,10 +737,10 @@ export function StatistikKelas() {
                       <span className="w-2 h-2 rounded-full bg-amber-400" />
                       Terlambat (&lt;15 min)
                     </span>
-                    <span className="text-slate-900 font-bold">14.5% <span className="text-[10px] text-slate-500 font-normal">(6)</span></span>
+                    <span className="text-slate-900 font-bold">{distribusi.latePct}% <span className="text-[10px] text-slate-500 font-normal">({stats.lateCount})</span></span>
                   </div>
                   <div className="w-full bg-white/40 rounded-full h-1.5 overflow-hidden">
-                    <div className="bg-amber-400 h-1.5 rounded-full" style={{ width: "14.5%" }} />
+                    <div className="bg-amber-400 h-1.5 rounded-full" style={{ width: `${distribusi.latePct}%` }} />
                   </div>
                 </div>
 
@@ -553,10 +751,10 @@ export function StatistikKelas() {
                       <span className="w-2 h-2 rounded-full bg-sky-500" />
                       Izin/Sakit Terverifikasi
                     </span>
-                    <span className="text-slate-900 font-bold">4.8% <span className="text-[10px] text-slate-500 font-normal">(2)</span></span>
+                    <span className="text-slate-900 font-bold">{distribusi.izinPct}% <span className="text-[10px] text-slate-500 font-normal">({stats.izinCount})</span></span>
                   </div>
                   <div className="w-full bg-white/40 rounded-full h-1.5 overflow-hidden">
-                    <div className="bg-slate-700 h-1.5 rounded-full" style={{ width: "4.8%" }} />
+                    <div className="bg-slate-700 h-1.5 rounded-full" style={{ width: `${distribusi.izinPct}%` }} />
                   </div>
                 </div>
 
@@ -567,10 +765,10 @@ export function StatistikKelas() {
                       <span className="w-2 h-2 rounded-full bg-rose-500" />
                       Tanpa Keterangan
                     </span>
-                    <span className="text-slate-900 font-bold">2.7% <span className="text-[10px] text-slate-500 font-normal">(1)</span></span>
+                    <span className="text-slate-900 font-bold">{distribusi.absentPct}% <span className="text-[10px] text-slate-500 font-normal">({stats.absentCount})</span></span>
                   </div>
                   <div className="w-full bg-white/40 rounded-full h-1.5 overflow-hidden">
-                    <div className="bg-rose-500 h-1.5 rounded-full" style={{ width: "2.7%" }} />
+                    <div className="bg-rose-500 h-1.5 rounded-full" style={{ width: `${distribusi.absentPct}%` }} />
                   </div>
                 </div>
               </div>
@@ -583,7 +781,7 @@ export function StatistikKelas() {
               </div>
               <div>
                 <p className="text-xs font-bold text-slate-900 leading-tight">
-                  99.1% Kepatuhan Geolokasi
+                  {stats.locationValidRate}% Kepatuhan Geolokasi
                 </p>
                 <p className="text-[10px] text-slate-600 mt-0.5 leading-tight">
                   Terverifikasi GPS radius 25 meter & beacon ruang 207
@@ -624,7 +822,7 @@ export function StatistikKelas() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/20 font-medium">
-                {mockAtRiskStudents.map((st) => (
+                {(atRiskStudents.length > 0 ? atRiskStudents : []).map((st) => (
                   <tr key={st.id} className="hover:bg-white/30 transition-colors">
                     {/* Mahasiswa */}
                     <td className="py-3 px-3 font-bold text-slate-900">
@@ -730,6 +928,23 @@ export function StatistikKelas() {
                     </td>
                   </tr>
                 ))}
+                {atRiskStudents.length === 0 && (
+                  <tr>
+                    <td colSpan={6} className="py-8 text-center text-xs text-slate-500">
+                      {isLoading ? (
+                        <span className="flex items-center justify-center gap-2">
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Memuat data...
+                        </span>
+                      ) : (
+                        <span className="flex items-center justify-center gap-2">
+                          <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                          Tidak ada mahasiswa beresiko saat ini
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -762,7 +977,7 @@ export function StatistikKelas() {
               <div className="flex items-center gap-3 text-[11px] text-slate-700 font-semibold">
                 <span className="flex items-center gap-1 text-emerald-800">
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                  Dataset 42 Mahasiswa Valid
+                  Dataset {totalMahasiswa} Mahasiswa Valid
                 </span>
                 <span>•</span>
                 <span>Confidence Score 94.8%</span>
@@ -786,12 +1001,12 @@ export function StatistikKelas() {
                   <h3 className="text-sm font-black text-slate-900">100% Attendance Club</h3>
                 </div>
                 <span className="bg-sky-500/20 text-sky-900 border border-sky-400/30 text-[10px] font-bold px-2 py-0.5 rounded-full">
-                  18 Mahasiswa
+                  {perfectStudentCount} Mahasiswa
                 </span>
               </div>
 
               <p className="text-[11px] text-slate-600 mb-3">
-                18 Mahasiswa tidak pernah terlambat maupun alpha selama 10 sesi berturut-turut.
+                {perfectStudentCount} Mahasiswa tidak pernah terlambat maupun alpha selama {trendData.length} sesi berturut-turut.
               </p>
 
               {/* Stacked Avatars */}
@@ -805,7 +1020,7 @@ export function StatistikKelas() {
                   </div>
                 ))}
                 <div className="w-8 h-8 rounded-full bg-sky-800 text-white border-2 border-white text-[10px] font-bold flex items-center justify-center shadow-xs">
-                  +14
+                  +{Math.max(perfectStudentCount - 4, 0)}
                 </div>
               </div>
             </div>

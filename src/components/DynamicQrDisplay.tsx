@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useRef } from "react";
 import { Copy, Check, Info, Download, QrCode } from "lucide-react";
 import { generateQrMatrix } from "../lib/qrCode";
 
@@ -12,6 +12,36 @@ interface DynamicQrDisplayProps {
   className?: string;
 }
 
+function safeCopy(text: string): boolean {
+  try {
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(text).catch(() => {
+        fallbackCopy(text);
+      });
+      return true;
+    }
+    return fallbackCopy(text);
+  } catch {
+    return fallbackCopy(text);
+  }
+}
+
+function fallbackCopy(text: string): boolean {
+  try {
+    const el = document.createElement("textarea");
+    el.value = text;
+    el.style.position = "fixed";
+    el.style.opacity = "0";
+    document.body.appendChild(el);
+    el.select();
+    const successful = document.execCommand("copy");
+    document.body.removeChild(el);
+    return successful;
+  } catch {
+    return false;
+  }
+}
+
 export function DynamicQrDisplay({
   value,
   pin,
@@ -23,6 +53,7 @@ export function DynamicQrDisplay({
 }: DynamicQrDisplayProps) {
   const [copiedPin, setCopiedPin] = useState(false);
   const [showPayloadModal, setShowPayloadModal] = useState(false);
+  const svgRef = useRef<SVGSVGElement | null>(null);
 
   // Generate QR Matrix
   const qrData = useMemo(() => {
@@ -36,7 +67,7 @@ export function DynamicQrDisplay({
 
   const handleCopyPin = (e: React.MouseEvent) => {
     e.stopPropagation();
-    navigator.clipboard.writeText(pin);
+    safeCopy(pin);
     setCopiedPin(true);
     if (onCopyPin) onCopyPin(pin);
     setTimeout(() => setCopiedPin(false), 2000);
@@ -44,7 +75,7 @@ export function DynamicQrDisplay({
 
   const handleDownloadSvg = (e: React.MouseEvent) => {
     e.stopPropagation();
-    const svgElem = document.getElementById(`qr-svg-${pin}`);
+    const svgElem = svgRef.current || document.getElementById(`qr-svg-${pin}`);
     if (!svgElem) return;
     const svgData = new XMLSerializer().serializeToString(svgElem);
     const blob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
@@ -69,6 +100,7 @@ export function DynamicQrDisplay({
         style={{ width: size + 28, height: size + 28 }}
       >
         <svg
+          ref={svgRef}
           id={`qr-svg-${pin}`}
           width={size}
           height={size}
@@ -225,7 +257,7 @@ export function DynamicQrDisplay({
               <button
                 type="button"
                 onClick={() => {
-                  navigator.clipboard.writeText(value);
+                  safeCopy(value);
                   setShowPayloadModal(false);
                 }}
                 className="text-xs font-bold bg-sky-600 hover:bg-sky-700 text-white px-3.5 py-1.5 rounded-xl shadow-sm transition-all"

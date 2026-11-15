@@ -35,7 +35,7 @@ import {
   Loader2
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
-import { kelasApi } from "../lib/api";
+import { kelasApi, type KelasItem } from "../lib/api";
 
 export interface JadwalItem {
   id: number | string;
@@ -127,6 +127,7 @@ export const ManajemenJadwal = () => {
 
   // Schedule data state
   const [jadwalList, setJadwalList] = useState<JadwalItem[]>(initialJadwalList);
+  const [rawClasses, setRawClasses] = useState<KelasItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   // Filters & Views
@@ -148,7 +149,19 @@ export const ManajemenJadwal = () => {
   const [showImportModal, setShowImportModal] = useState(false);
   const [importFile, setImportFile] = useState<File | null>(null);
   const [isImporting, setIsImporting] = useState(false);
-  const [importSummary, setImportSummary] = useState<any | null>(null);
+  const [importSummary, setImportSummary] = useState<{
+    totalRows: number;
+    classesProcessed: number;
+    classesCreated: number;
+    classesUpdated: number;
+    schedulesCreated: number;
+    studentsCreated: number;
+    studentsUpdated: number;
+    studentsEnrolled: number;
+    alreadyEnrolled: number;
+    emailsSent?: number;
+    errors: { kode?: string; jadwal?: string; reason: string; type?: string }[];
+  } | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const [sendActivationEmail, setSendActivationEmail] = useState(true);
 
@@ -158,13 +171,14 @@ export const ManajemenJadwal = () => {
       setIsLoading(true);
       const res = await kelasApi.getAll();
       if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+        setRawClasses(res.data);
         const mapped: JadwalItem[] = [];
         let globalSesi = 1;
 
-        res.data.forEach((k: any) => {
+        res.data.forEach((k) => {
           const jadwals = k.jadwals || k.jadwal || [];
           if (jadwals.length > 0) {
-            jadwals.forEach((j: any) => {
+            jadwals.forEach((j) => {
               mapped.push({
                 id: j.id || `${k.id}-${globalSesi}`,
                 sesi: globalSesi++,
@@ -204,7 +218,7 @@ export const ManajemenJadwal = () => {
           setJadwalList(mapped);
         }
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Gagal memuat jadwal dari server:", err);
     } finally {
       setIsLoading(false);
@@ -212,7 +226,66 @@ export const ManajemenJadwal = () => {
   };
 
   useEffect(() => {
-    fetchJadwal();
+    let ignore = false;
+    const run = async () => {
+      try {
+        const res = await kelasApi.getAll();
+        if (!ignore && res.success && Array.isArray(res.data) && res.data.length > 0) {
+          setRawClasses(res.data);
+          const mapped: JadwalItem[] = [];
+          let globalSesi = 1;
+
+          res.data.forEach((k) => {
+            const jadwals = k.jadwals || k.jadwal || [];
+            if (jadwals.length > 0) {
+              jadwals.forEach((j) => {
+                mapped.push({
+                  id: j.id || `${k.id}-${globalSesi}`,
+                  sesi: globalSesi++,
+                  mataKuliah: k.nama,
+                  kelas: k.kode,
+                  tanggal: j.hari ? `${j.hari}` : "Reguler",
+                  jamMulai: j.jamMulai ? `${j.jamMulai} WIB` : "08:00 WIB",
+                  jamSelesai: j.jamSelesai ? `${j.jamSelesai} WIB` : "10:30 WIB",
+                  ruangan: j.ruangan || "Lab / Ruang Kelas",
+                  status: "upcoming",
+                  jenisPerubahan: "Jadwal Semester Reguler",
+                  alasanPerubahan: k.deskripsi || "Jadwal resmi terdaftar",
+                  kelasId: k.id,
+                  totalMahasiswa: k.totalMahasiswa || k._count?.mahasiswas || 0,
+                });
+              });
+            } else {
+              mapped.push({
+                id: k.id,
+                sesi: globalSesi++,
+                mataKuliah: k.nama,
+                kelas: k.kode,
+                tanggal: "Belum Diatur",
+                jamMulai: "-",
+                jamSelesai: "-",
+                ruangan: "Belum Ditentukan",
+                status: "upcoming",
+                jenisPerubahan: "Jadwal Belum Diatur",
+                alasanPerubahan: k.deskripsi || "Silakan tambahkan jadwal sesi",
+                kelasId: k.id,
+                totalMahasiswa: k.totalMahasiswa || k._count?.mahasiswas || 0,
+              });
+            }
+          });
+
+          if (mapped.length > 0) {
+            setJadwalList(mapped);
+          }
+        }
+      } catch (err: unknown) {
+        console.error("Gagal memuat jadwal dari server:", err);
+      }
+    };
+    run();
+    return () => {
+      ignore = true;
+    };
   }, []);
 
   const handleDownloadTemplate = () => {
@@ -251,8 +324,8 @@ export const ManajemenJadwal = () => {
       } else {
         showToast(res.message || "Import selesai dengan catatan.");
       }
-    } catch (err: any) {
-      showToast(err.message || "Gagal mengimpor file.");
+    } catch (err: unknown) {
+      showToast((err as Error).message || "Gagal mengimpor file.");
     } finally {
       setIsImporting(false);
     }
@@ -350,9 +423,48 @@ export const ManajemenJadwal = () => {
     showToast(`Perubahan Sesi ${editingJadwal.sesi} berhasil disimpan & notifikasi terkirim!`);
   };
 
-  const handleCreateJadwal = (e: React.FormEvent) => {
+  const handleCreateJadwal = async (e: React.FormEvent) => {
     e.preventDefault();
     const nextSesi = Math.max(...jadwalList.map((j) => j.sesi), 0) + 1;
+
+    // Persist ke database server
+    const matchedClass = rawClasses.find(
+      (c) => c.kode === newForm.kelas || c.nama === newForm.mataKuliah
+    ) || rawClasses[0];
+
+    if (matchedClass) {
+      try {
+        const dayIndex = new Date(newForm.tanggal).getDay();
+        const validHariList = ["MINGGU", "SENIN", "SELASA", "RABU", "KAMIS", "JUMAT", "SABTU"];
+        const hari = validHariList[dayIndex] || "SENIN";
+
+        const startClean = newForm.jamMulai.replace(/[^\d:]/g, "").substring(0, 5) || "08:00";
+        const endClean = newForm.jamSelesai.replace(/[^\d:]/g, "").substring(0, 5) || "10:30";
+
+        const addRes = await kelasApi.addJadwal(matchedClass.id, {
+          hari,
+          jamMulai: startClean,
+          jamSelesai: endClean,
+          ruangan: newForm.ruangan,
+        });
+
+        if (!addRes.success && addRes.message) {
+          showToast(`Catatan: ${addRes.message}`);
+        } else {
+          showToast(
+            newForm.status === "replacement"
+              ? `Kelas Pengganti berhasil dijadwalkan di ${matchedClass.nama} (${hari}, ${startClean}-${endClean})!`
+              : `Jadwal baru berhasil disimpan ke server!`
+          );
+          await fetchJadwal();
+          setShowAddModal(false);
+          return;
+        }
+      } catch (err: unknown) {
+        console.warn("Gagal simpan jadwal ke server:", err);
+      }
+    }
+
     const newItem: JadwalItem = {
       id: Date.now(),
       sesi: nextSesi,
@@ -363,13 +475,18 @@ export const ManajemenJadwal = () => {
       jamSelesai: newForm.jamSelesai,
       ruangan: newForm.ruangan,
       status: newForm.status,
-      jenisPerubahan: newForm.jenisPerubahan,
-      alasanPerubahan: newForm.alasanPerubahan,
+      jenisPerubahan: newForm.status === "replacement" ? "Penjadwalan kelas pengganti" : newForm.jenisPerubahan,
+      alasanPerubahan: newForm.alasanPerubahan || (newForm.status === "replacement" ? "Sesi kelas pengganti" : "Jadwal resmi terdaftar"),
+      kelasId: matchedClass?.id,
     };
 
     setJadwalList((prev) => [...prev, newItem]);
     setShowAddModal(false);
-    showToast(`Jadwal baru Sesi ${nextSesi} (${newForm.mataKuliah}) berhasil ditambahkan!`);
+    showToast(
+      newForm.status === "replacement"
+        ? `Kelas Pengganti Sesi ${nextSesi} (${newForm.mataKuliah}) berhasil dijadwalkan!`
+        : `Jadwal baru Sesi ${nextSesi} (${newForm.mataKuliah}) berhasil ditambahkan!`
+    );
   };
 
   // Filtered jadwal list
@@ -1673,7 +1790,7 @@ export const ManajemenJadwal = () => {
                           <span>Catatan / Bentrok Jadwal Terdeteksi ({importSummary.errors.length}):</span>
                         </div>
                         <div className="max-h-36 overflow-y-auto space-y-1 pl-6 text-amber-800/90 list-disc">
-                          {importSummary.errors.map((err: any, idx: number) => (
+                          {importSummary.errors.map((err, idx: number) => (
                             <p key={idx} className="text-[11px] leading-relaxed">
                               • <strong>{err.kode || "Umum"}:</strong> {err.reason}
                             </p>
