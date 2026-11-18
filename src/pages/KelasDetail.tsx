@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -341,7 +341,7 @@ export function KelasDetail() {
       case "TERLAMBAT":
         return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-200">Terlambat</span>;
       case "IZIN":
-        return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-800 border border-indigo-200">Izin</span>;
+        return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-sky-100 text-sky-800 border border-sky-200">Izin</span>;
       case "SAKIT":
         return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 border border-blue-200">Sakit</span>;
       case "ABSENT":
@@ -354,11 +354,11 @@ export function KelasDetail() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 font-sans">
+      <div className="min-h-screen text-slate-800 relative overflow-hidden satpamo-page-bg font-sans">
         <Navbar />
         <div className="max-w-6xl mx-auto px-4 py-20 text-center space-y-3">
-          <div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="text-sm font-medium text-slate-500">Memuat data kelas & absensi terkini...</p>
+          <div className="w-10 h-10 border-4 border-sky-500 border-t-transparent rounded-full animate-spin mx-auto" />
+          <p className="text-sm font-semibold text-slate-600">Memuat data kelas & absensi terkini...</p>
         </div>
       </div>
     );
@@ -366,13 +366,13 @@ export function KelasDetail() {
 
   if (error || !kelas) {
     return (
-      <div className="min-h-screen bg-slate-50 font-sans">
+      <div className="min-h-screen text-slate-800 relative overflow-hidden satpamo-page-bg font-sans">
         <Navbar />
-        <div className="max-w-xl mx-auto px-4 py-16 text-center space-y-4">
-          <AlertCircle className="w-12 h-12 text-red-500 mx-auto" />
+        <div className="max-w-xl mx-auto px-4 py-16 text-center space-y-4 glass-panel rounded-3xl mt-12 p-8">
+          <AlertCircle className="w-12 h-12 text-rose-500 mx-auto" />
           <h2 className="text-xl font-bold text-slate-900">Kelas Tidak Ditemukan</h2>
-          <p className="text-sm text-slate-500">{error || "Data kelas tidak tersedia."}</p>
-          <Button onClick={() => navigate("/kelas")} variant="outline">
+          <p className="text-sm text-slate-600">{error || "Data kelas tidak tersedia."}</p>
+          <Button onClick={() => navigate("/kelas")} variant="outline" className="glass-pill rounded-xl">
             Kembali ke Daftar Kelas
           </Button>
         </div>
@@ -393,17 +393,22 @@ export function KelasDetail() {
   );
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans pb-20">
+    <div className="min-h-screen text-slate-800 relative overflow-hidden satpamo-page-bg font-sans pb-20">
+      {/* Decorative ambient blobs */}
+      <div className="pointer-events-none absolute -top-32 -right-32 w-96 h-96 bg-sky-200/20 rounded-full blur-3xl" />
+      <div className="pointer-events-none absolute top-1/2 left-1/3 w-72 h-72 bg-blue-100/30 rounded-full blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-24 right-1/4 w-96 h-96 bg-sky-200/20 rounded-full blur-3xl" />
+
       <Navbar />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 relative z-10">
         {/* Navigation Breadcrumb */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-xs text-slate-500">
             <button
               type="button"
               onClick={() => navigate("/kelas")}
-              className="hover:text-indigo-600 flex items-center gap-1 font-medium transition-colors"
+              className="hover:text-sky-600 flex items-center gap-1 font-medium transition-colors"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               Daftar Kelas
@@ -417,25 +422,25 @@ export function KelasDetail() {
             variant="outline"
             onClick={() => fetchDetail(true)}
             disabled={refreshing}
-            className="text-xs h-8 gap-1.5 bg-white shadow-xs"
+            className="text-xs h-8 gap-1.5 glass-pill rounded-xl text-slate-700 hover:text-slate-900"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? "animate-spin text-indigo-600" : ""}`} />
+            <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? "animate-spin text-sky-600" : ""}`} />
             {refreshing ? "Menyinkronkan..." : "Perbarui Data"}
           </Button>
         </div>
 
         {/* Hero Header Card */}
-        <div className="bg-white rounded-2xl border border-slate-200/80 p-6 sm:p-8 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden">
+        <div className="glass-panel rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden">
           <div className="space-y-3 z-10">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="font-mono text-xs font-extrabold px-3 py-1 rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-100">
+              <span className="font-mono text-xs font-extrabold px-3 py-1 rounded-xl bg-sky-100/70 text-sky-800 border border-sky-200/80 shadow-xs">
                 {kelas.kode}
               </span>
-              <span className="text-xs text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg font-medium">
-                Dosen: <strong className="text-slate-700">{kelas.dosen?.username || `Dosen #${kelas.dosenId}`}</strong>
+              <span className="text-xs text-slate-600 bg-white/60 border border-white/80 px-2.5 py-1 rounded-xl font-medium">
+                Dosen: <strong className="text-slate-800">{kelas.dosen?.username || `Dosen #${kelas.dosenId}`}</strong>
               </span>
               {latestAtt && (
-                <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-100 flex items-center gap-1">
+                <span className="text-xs font-semibold px-2.5 py-1 rounded-xl bg-emerald-500/15 text-emerald-800 border border-emerald-400/30 flex items-center gap-1">
                   <CheckCircle2 className="w-3.5 h-3.5" />
                   Presensi Sesi {latestAtt.pertemuanKe}: {latestAtt.stats.present + latestAtt.stats.late}/{latestAtt.stats.total} Hadir
                 </span>
@@ -446,7 +451,7 @@ export function KelasDetail() {
               <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
                 {kelas.nama}
               </h1>
-              <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl">
+              <p className="text-xs sm:text-sm text-slate-600 mt-1 max-w-2xl">
                 {kelas.deskripsi || "Mata kuliah aktif semester berjalan. Kelola data mahasiswa, jadwal perkuliahan, dan catatan presensi terpadu."}
               </p>
             </div>
@@ -455,7 +460,7 @@ export function KelasDetail() {
           <div className="flex flex-wrap items-center gap-3 z-10">
             <Button
               onClick={() => navigate(`/kelas/${kelas.id}/absen`)}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-200 gap-2 h-11 px-5 font-semibold"
+              className="bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white shadow-md shadow-sky-500/20 gap-2 h-11 px-5 font-bold rounded-2xl"
             >
               <CheckCircle className="w-5 h-5" />
               Buka / Input Absensi Kelas
@@ -465,67 +470,67 @@ export function KelasDetail() {
 
         {/* Quick Highlights / Metrics Bar */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <div className="bg-white rounded-xl border border-slate-200/70 p-4 shadow-xs">
+          <div className="glass-panel glass-card-interactive rounded-2xl p-4 shadow-xs">
             <div className="flex items-center justify-between text-slate-500 mb-1">
-              <span className="text-xs font-medium">Mahasiswa Terdaftar</span>
-              <Users className="w-4 h-4 text-indigo-500" />
+              <span className="text-xs font-bold text-slate-600">Mahasiswa Terdaftar</span>
+              <Users className="w-4 h-4 text-sky-600" />
             </div>
-            <p className="text-2xl font-bold text-slate-900">{mahasiswas.length}</p>
-            <p className="text-[11px] text-slate-400 mt-0.5">Dalam kelas ini</p>
+            <p className="text-2xl font-black text-slate-900">{mahasiswas.length}</p>
+            <p className="text-[11px] text-slate-500 mt-0.5">Dalam kelas ini</p>
           </div>
 
-          <div className="bg-white rounded-xl border border-slate-200/70 p-4 shadow-xs">
+          <div className="glass-panel glass-card-interactive rounded-2xl p-4 shadow-xs">
             <div className="flex items-center justify-between text-slate-500 mb-1">
-              <span className="text-xs font-medium">Jadwal Perkuliahan</span>
-              <Calendar className="w-4 h-4 text-sky-500" />
+              <span className="text-xs font-bold text-slate-600">Jadwal Perkuliahan</span>
+              <Calendar className="w-4 h-4 text-sky-600" />
             </div>
-            <p className="text-2xl font-bold text-slate-900">{jadwals.length}</p>
-            <p className="text-[11px] text-slate-400 mt-0.5">Sesi per minggu</p>
+            <p className="text-2xl font-black text-slate-900">{jadwals.length}</p>
+            <p className="text-[11px] text-slate-500 mt-0.5">Sesi per minggu</p>
           </div>
 
-          <div className="bg-white rounded-xl border border-slate-200/70 p-4 shadow-xs">
+          <div className="glass-panel glass-card-interactive rounded-2xl p-4 shadow-xs">
             <div className="flex items-center justify-between text-slate-500 mb-1">
-              <span className="text-xs font-medium">Sesi Terkini</span>
-              <Clock className="w-4 h-4 text-emerald-500" />
+              <span className="text-xs font-bold text-slate-600">Sesi Terkini</span>
+              <Clock className="w-4 h-4 text-emerald-600" />
             </div>
-            <p className="text-2xl font-bold text-slate-900">
+            <p className="text-2xl font-black text-slate-900">
               {latestAtt ? `Pertemuan ${latestAtt.pertemuanKe}` : "Belum Ada"}
             </p>
-            <p className="text-[11px] text-slate-400 mt-0.5">
+            <p className="text-[11px] text-slate-500 mt-0.5">
               {latestAtt ? latestAtt.date : "Mulai sesi pertama"}
             </p>
           </div>
 
-          <div className="bg-white rounded-xl border border-slate-200/70 p-4 shadow-xs">
+          <div className="glass-panel glass-card-interactive rounded-2xl p-4 shadow-xs">
             <div className="flex items-center justify-between text-slate-500 mb-1">
-              <span className="text-xs font-medium">Tingkat Hadir Sesi Terkini</span>
+              <span className="text-xs font-bold text-slate-600">Tingkat Hadir Sesi Terkini</span>
               <CheckCircle2 className="w-4 h-4 text-emerald-600" />
             </div>
-            <p className="text-2xl font-bold text-emerald-600">
+            <p className="text-2xl font-black text-emerald-700">
               {latestAtt && latestAtt.stats.total > 0
                 ? `${Math.round(((latestAtt.stats.present + latestAtt.stats.late) / latestAtt.stats.total) * 100)}%`
                 : "0%"}
             </p>
-            <p className="text-[11px] text-slate-400 mt-0.5">
+            <p className="text-[11px] text-slate-500 mt-0.5">
               {latestAtt ? `${latestAtt.stats.present} Hadir, ${latestAtt.stats.late} Telat` : "Belum ada record"}
             </p>
           </div>
         </div>
 
         {/* Tab Navigation */}
-        <div className="border-b border-slate-200">
+        <div className="border-b border-white/60">
           <nav className="flex space-x-6">
             <button
               onClick={() => setActiveTab("mahasiswa")}
               className={`pb-3 text-sm font-bold border-b-2 flex items-center gap-2 transition-all ${
                 activeTab === "mahasiswa"
-                  ? "border-indigo-600 text-indigo-600"
+                  ? "border-sky-600 text-sky-700"
                   : "border-transparent text-slate-500 hover:text-slate-800"
               }`}
             >
-              <Users className="w-4 h-4" />
+              <Users className="w-4 h-4 text-sky-600" />
               Mahasiswa di Kelas Ini
-              <span className="ml-1 px-2 py-0.5 text-xs rounded-full bg-slate-100 text-slate-700 font-semibold">
+              <span className="ml-1 px-2 py-0.5 text-xs rounded-full bg-white/70 text-slate-700 font-semibold border border-white/80">
                 {mahasiswas.length}
               </span>
             </button>
@@ -534,14 +539,14 @@ export function KelasDetail() {
               onClick={() => setActiveTab("absensi")}
               className={`pb-3 text-sm font-bold border-b-2 flex items-center gap-2 transition-all ${
                 activeTab === "absensi"
-                  ? "border-emerald-600 text-emerald-600"
+                  ? "border-emerald-600 text-emerald-700"
                   : "border-transparent text-slate-500 hover:text-slate-800"
               }`}
             >
-              <CheckCircle2 className="w-4 h-4" />
+              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
               Absensi Terkini Kelas
               {latestAtt && (
-                <span className="ml-1 px-2 py-0.5 text-xs rounded-full bg-emerald-100 text-emerald-800 font-semibold">
+                <span className="ml-1 px-2 py-0.5 text-xs rounded-full bg-emerald-500/15 text-emerald-800 font-semibold border border-emerald-400/30">
                   Sesi {latestAtt.pertemuanKe}
                 </span>
               )}
@@ -551,13 +556,13 @@ export function KelasDetail() {
               onClick={() => setActiveTab("jadwal")}
               className={`pb-3 text-sm font-bold border-b-2 flex items-center gap-2 transition-all ${
                 activeTab === "jadwal"
-                  ? "border-sky-600 text-sky-600"
+                  ? "border-sky-600 text-sky-700"
                   : "border-transparent text-slate-500 hover:text-slate-800"
               }`}
             >
-              <Calendar className="w-4 h-4" />
+              <Calendar className="w-4 h-4 text-sky-600" />
               Jadwal Kuliah
-              <span className="ml-1 px-2 py-0.5 text-xs rounded-full bg-slate-100 text-slate-700 font-semibold">
+              <span className="ml-1 px-2 py-0.5 text-xs rounded-full bg-white/70 text-slate-700 font-semibold border border-white/80">
                 {jadwals.length}
               </span>
             </button>
@@ -570,7 +575,7 @@ export function KelasDetail() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                  <Users className="w-4 h-4 text-indigo-600" />
+                  <Users className="w-4 h-4 text-sky-600" />
                   Daftar Mahasiswa Terdaftar ({mahasiswas.length})
                 </h2>
                 <p className="text-xs text-slate-500">
@@ -585,7 +590,7 @@ export function KelasDetail() {
                     setMhsError(null);
                     setMhsSuccess(null);
                   }}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs gap-1.5 h-8 px-3 font-semibold shadow-xs"
+                  className="bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white text-xs gap-1.5 h-8 px-3 font-semibold shadow-xs"
                 >
                   <UserPlus className="w-3.5 h-3.5" />
                   Tambah Mahasiswa
@@ -605,7 +610,7 @@ export function KelasDetail() {
             </div>
 
             {/* Table Mahasiswa */}
-            <div className="bg-white rounded-xl border border-slate-200/80 shadow-xs overflow-hidden">
+            <div className="glass-panel rounded-3xl shadow-xs overflow-hidden">
               <Table>
                 <TableHeader>
                   <TableRow className="bg-slate-50/70 text-xs">
@@ -632,7 +637,7 @@ export function KelasDetail() {
                             <Button
                               size="sm"
                               onClick={() => setShowAddMhsModal(true)}
-                              className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs gap-1.5 mt-2"
+                              className="bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white text-xs gap-1.5 mt-2"
                             >
                               <UserPlus className="w-3.5 h-3.5" />
                               Tambah Sekarang
@@ -743,7 +748,7 @@ export function KelasDetail() {
                 </div>
 
                 {/* Table Roster Absensi Terkini */}
-                <div className="bg-white rounded-xl border border-slate-200/80 shadow-xs overflow-hidden">
+                <div className="glass-panel rounded-3xl shadow-xs overflow-hidden">
                   <Table>
                     <TableHeader>
                       <TableRow className="bg-slate-50/70 text-xs">
@@ -812,8 +817,8 @@ export function KelasDetail() {
                 </div>
               </div>
             ) : (
-              <div className="bg-white rounded-2xl border border-slate-200/80 p-12 text-center space-y-4 shadow-xs">
-                <div className="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto">
+              <div className="glass-panel rounded-3xl p-12 text-center space-y-4 shadow-sm">
+                <div className="w-12 h-12 rounded-full bg-emerald-500/15 text-emerald-600 flex items-center justify-center mx-auto border border-emerald-400/30">
                   <CheckCircle2 className="w-6 h-6" />
                 </div>
                 <div className="space-y-1">
@@ -824,7 +829,7 @@ export function KelasDetail() {
                 </div>
                 <Button
                   onClick={() => navigate(`/kelas/${kelas.id}/absen`)}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold gap-2"
+                  className="bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white text-xs font-bold gap-2 rounded-xl shadow-md shadow-sky-500/20"
                 >
                   <CheckCircle className="w-4 h-4" />
                   Mulai / Input Absensi Pertemuan 1
@@ -851,7 +856,7 @@ export function KelasDetail() {
               <Button
                 size="sm"
                 onClick={() => setShowAddJadwalModal(true)}
-                className="bg-sky-600 hover:bg-sky-700 text-white text-xs gap-1.5 h-8 px-3 font-semibold shadow-xs"
+                className="bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white text-xs gap-1.5 h-8 px-3 font-bold rounded-xl shadow-xs"
               >
                 <Plus className="w-3.5 h-3.5" /> Tambah Jadwal
               </Button>
@@ -862,16 +867,16 @@ export function KelasDetail() {
                 jadwals.map((j: any) => (
                   <div
                     key={j.id}
-                    className="p-5 bg-white rounded-2xl border border-slate-200/80 shadow-xs space-y-3 flex flex-col justify-between"
+                    className="p-5 glass-panel glass-card-interactive rounded-3xl space-y-3 flex flex-col justify-between"
                   >
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="inline-flex items-center rounded-full px-3 py-1 text-xs font-extrabold bg-sky-50 text-sky-700 border border-sky-100">
+                        <span className="inline-flex items-center rounded-xl px-3 py-1 text-xs font-extrabold bg-sky-100/70 text-sky-800 border border-sky-200/80 shadow-xs">
                           {j.hari}
                         </span>
                         <button
                           onClick={() => handleDeleteJadwal(j.id)}
-                          className="text-slate-300 hover:text-red-500 p-1 rounded-md transition-colors"
+                          className="text-slate-400 hover:text-red-500 p-1 rounded-md transition-colors"
                           title="Hapus Jadwal"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -882,23 +887,23 @@ export function KelasDetail() {
                         {j.jamMulai} - {j.jamSelesai} WIB
                       </div>
 
-                      <p className="text-xs text-slate-500 flex items-center gap-1.5">
-                        <span className="w-2 h-2 rounded-full bg-slate-300 inline-block" />
-                        Ruangan: <strong className="text-slate-700">{j.ruangan || "Belum ditentukan"}</strong>
+                      <p className="text-xs text-slate-600 flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-sky-400 inline-block" />
+                        Ruangan: <strong className="text-slate-800">{j.ruangan || "Belum ditentukan"}</strong>
                       </p>
                     </div>
                   </div>
                 ))
               ) : (
-                <div className="col-span-full p-12 bg-white rounded-2xl border border-dashed border-slate-200 text-center space-y-3">
-                  <Calendar className="w-8 h-8 text-slate-300 mx-auto" />
-                  <p className="text-sm font-semibold text-slate-700">Belum ada jadwal perkuliahan</p>
-                  <p className="text-xs text-slate-400">Tambahkan jadwal agar mahasiswa dapat memantau waktu kuliah dan presensi tepat waktu.</p>
+                <div className="col-span-full p-12 glass-panel rounded-3xl border border-dashed border-sky-200/80 text-center space-y-3">
+                  <Calendar className="w-8 h-8 text-sky-400 mx-auto" />
+                  <p className="text-sm font-semibold text-slate-800">Belum ada jadwal perkuliahan</p>
+                  <p className="text-xs text-slate-500">Tambahkan jadwal agar mahasiswa dapat memantau waktu kuliah dan presensi tepat waktu.</p>
                   <Button
                     size="sm"
                     variant="outline"
                     onClick={() => setShowAddJadwalModal(true)}
-                    className="text-xs gap-1.5 mt-2"
+                    className="text-xs gap-1.5 mt-2 glass-pill rounded-xl"
                   >
                     <Plus className="w-3.5 h-3.5" /> Tambah Jadwal Sekarang
                   </Button>
@@ -911,16 +916,16 @@ export function KelasDetail() {
         {/* Modal Tambah Mahasiswa */}
         <AnimatePresence>
           {showAddMhsModal && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-fade-in">
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md animate-fade-in">
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="bg-white rounded-2xl max-w-md w-full overflow-hidden shadow-2xl border border-slate-200"
+                className="glass-modal rounded-3xl max-w-md w-full overflow-hidden shadow-2xl border border-white/80"
               >
-                <div className="flex items-center justify-between p-5 border-b border-slate-100 bg-slate-50/70">
+                <div className="flex items-center justify-between p-5 border-b border-white/60 bg-white/40">
                   <div className="flex items-center gap-2">
-                    <UserPlus className="w-5 h-5 text-indigo-600" />
+                    <UserPlus className="w-5 h-5 text-sky-600" />
                     <h3 className="font-bold text-slate-900 text-base">Tambah Mahasiswa ke Kelas</h3>
                   </div>
                   <button
@@ -937,7 +942,7 @@ export function KelasDetail() {
 
                 <div className="p-6 space-y-4">
                   {/* Mode Switcher */}
-                  <div className="grid grid-cols-3 p-1 bg-slate-100 rounded-lg text-xs font-semibold">
+                  <div className="grid grid-cols-3 p-1 bg-white/40 border border-white/60 rounded-xl text-xs font-semibold">
                     {(["single", "bulk", "csv"] as const).map((mode) => (
                       <button
                         key={mode}
@@ -951,10 +956,10 @@ export function KelasDetail() {
                           setCsvImportResult(null);
                           setCsvFileName("");
                         }}
-                        className={`py-1.5 px-1 rounded-md transition-all flex items-center justify-center gap-1 ${
+                        className={`py-1.5 px-1 rounded-lg transition-all flex items-center justify-center gap-1 ${
                           addMode === mode
-                            ? "bg-white text-slate-900 shadow-xs"
-                            : "text-slate-500 hover:text-slate-900"
+                            ? "bg-white text-sky-800 font-bold shadow-sm"
+                            : "text-slate-600 hover:text-slate-900"
                         }`}
                       >
                         {mode === "single" && "1 NIM"}
@@ -965,15 +970,15 @@ export function KelasDetail() {
                   </div>
 
                   {mhsError && (
-                    <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-lg flex items-center gap-2">
+                    <div className="p-3 bg-red-500/10 border border-red-400/30 text-red-700 text-xs rounded-xl flex items-center gap-2">
                       <AlertCircle className="w-4 h-4 shrink-0 text-red-500" />
                       {mhsError}
                     </div>
                   )}
 
                   {mhsSuccess && (
-                    <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs rounded-lg flex items-center gap-2">
-                      <CheckCircle className="w-4 h-4 shrink-0 text-emerald-500" />
+                    <div className="p-3 bg-emerald-500/10 border border-emerald-400/30 text-emerald-800 text-xs rounded-xl flex items-center gap-2">
+                      <CheckCircle className="w-4 h-4 shrink-0 text-emerald-600" />
                       {mhsSuccess}
                     </div>
                   )}
@@ -981,7 +986,7 @@ export function KelasDetail() {
                   {addMode === "single" && (
                     <form onSubmit={handleAddSingleMhs} className="space-y-4">
                       <div className="space-y-1.5">
-                        <Label htmlFor="nim" className="text-xs font-semibold text-slate-700">
+                        <Label htmlFor="nim" className="text-xs font-bold text-slate-700">
                           NIM Mahasiswa *
                         </Label>
                         <Input
@@ -990,10 +995,10 @@ export function KelasDetail() {
                           value={inputNim}
                           onChange={(e) => setInputNim(e.target.value)}
                           required
-                          className="font-mono text-sm"
+                          className="font-mono text-sm glass-input rounded-xl"
                           autoFocus
                         />
-                        <p className="text-[11px] text-slate-400">
+                        <p className="text-[11px] text-slate-500">
                           Mahasiswa harus sudah terdaftar di master database kampus.
                         </p>
                       </div>
@@ -1004,6 +1009,7 @@ export function KelasDetail() {
                           variant="outline"
                           size="sm"
                           onClick={() => setShowAddMhsModal(false)}
+                          className="glass-pill rounded-xl"
                         >
                           Tutup
                         </Button>
@@ -1011,7 +1017,7 @@ export function KelasDetail() {
                           type="submit"
                           size="sm"
                           disabled={savingMhs}
-                          className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                          className="bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white rounded-xl font-bold shadow-md shadow-sky-500/20"
                         >
                           {savingMhs ? "Menambahkan..." : "Tambahkan"}
                         </Button>
@@ -1021,7 +1027,7 @@ export function KelasDetail() {
                   {addMode === "bulk" && (
                     <form onSubmit={handleAddBulkMhs} className="space-y-4">
                       <div className="space-y-1.5">
-                        <Label htmlFor="bulkNims" className="text-xs font-semibold text-slate-700">
+                        <Label htmlFor="bulkNims" className="text-xs font-bold text-slate-700">
                           Daftar NIM Mahasiswa *
                         </Label>
                         <textarea
@@ -1030,10 +1036,10 @@ export function KelasDetail() {
                           placeholder="Masukkan daftar NIM (pisahkan dengan koma, spasi, atau baris baru):&#10;2021001001&#10;2021001002&#10;2021001003"
                           value={bulkNims}
                           onChange={(e) => setBulkNims(e.target.value)}
-                          className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-ring"
+                          className="w-full rounded-xl border border-white/80 bg-white/70 px-3 py-2 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-sky-400 shadow-xs"
                           required
                         />
-                        <p className="text-[11px] text-slate-400">
+                        <p className="text-[11px] text-slate-500">
                           Sistem akan memvalidasi dan mendaftarkan seluruh mahasiswa tersebut ke kelas ini.
                         </p>
                       </div>
@@ -1044,6 +1050,7 @@ export function KelasDetail() {
                           variant="outline"
                           size="sm"
                           onClick={() => setShowAddMhsModal(false)}
+                          className="glass-pill rounded-xl"
                         >
                           Tutup
                         </Button>
@@ -1051,7 +1058,7 @@ export function KelasDetail() {
                           type="submit"
                           size="sm"
                           disabled={savingMhs}
-                          className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                          className="bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white rounded-xl font-bold shadow-md shadow-sky-500/20"
                         >
                           {savingMhs ? "Mendaftarkan..." : "Tambahkan Massal"}
                         </Button>
@@ -1065,7 +1072,7 @@ export function KelasDetail() {
                       <button
                         type="button"
                         onClick={handleDownloadTemplate}
-                        className="w-full flex items-center justify-center gap-2 py-2 px-3 border border-dashed border-slate-300 rounded-lg text-xs text-slate-600 hover:border-indigo-400 hover:text-indigo-600 hover:bg-indigo-50 transition-all"
+                        className="w-full flex items-center justify-center gap-2 py-2 px-3 border border-dashed border-slate-300 rounded-lg text-xs text-slate-600 hover:border-indigo-400 hover:text-sky-600 hover:bg-indigo-50 transition-all"
                       >
                         <Download className="w-4 h-4" />
                         Download Template CSV (Excel)
@@ -1094,7 +1101,7 @@ export function KelasDetail() {
                         />
                         <Upload className="w-8 h-8 text-slate-300 mx-auto mb-2" />
                         {csvFileName ? (
-                          <p className="text-xs font-medium text-indigo-600">{csvFileName}</p>
+                          <p className="text-xs font-medium text-sky-600">{csvFileName}</p>
                         ) : (
                           <>
                             <p className="text-xs font-medium text-slate-600">Drag & drop file CSV di sini</p>
@@ -1183,18 +1190,18 @@ export function KelasDetail() {
         {/* Modal Tambah Jadwal */}
         <AnimatePresence>
           {showAddJadwalModal && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-fade-in">
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md animate-fade-in">
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="bg-white rounded-2xl max-w-sm w-full overflow-hidden shadow-2xl border border-slate-200"
+                className="glass-modal rounded-3xl max-w-sm w-full overflow-hidden shadow-2xl border border-white/80"
               >
-                <div className="flex items-center justify-between p-4 border-b border-slate-100 bg-slate-50/70">
+                <div className="flex items-center justify-between p-4 border-b border-white/60 bg-white/40">
                   <h3 className="font-bold text-slate-900 text-sm">Tambah Jadwal Perkuliahan</h3>
                   <button
                     onClick={() => setShowAddJadwalModal(false)}
-                    className="text-slate-400 hover:text-slate-700 p-1"
+                    className="text-slate-400 hover:text-slate-700 p-1 rounded-md"
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -1202,11 +1209,11 @@ export function KelasDetail() {
 
                 <form onSubmit={handleAddJadwal} className="p-5 space-y-3.5">
                   <div className="space-y-1">
-                    <Label className="text-xs text-slate-600">Hari</Label>
+                    <Label className="text-xs font-bold text-slate-700">Hari</Label>
                     <select
                       value={hari}
                       onChange={(e) => setHari(e.target.value as HariType)}
-                      className="w-full h-9 rounded-md border border-input bg-background px-3 py-1 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-ring"
+                      className="w-full h-9 rounded-xl border border-white/80 bg-white/70 px-3 py-1 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-sky-400 shadow-xs"
                     >
                       {hariOptions.map((h) => (
                         <option key={h} value={h}>
@@ -1218,41 +1225,42 @@ export function KelasDetail() {
 
                   <div className="grid grid-cols-2 gap-2">
                     <div className="space-y-1">
-                      <Label className="text-xs text-slate-600">Jam Mulai</Label>
+                      <Label className="text-xs font-bold text-slate-700">Jam Mulai</Label>
                       <Input
                         type="time"
                         value={jamMulai}
                         onChange={(e) => setJamMulai(e.target.value)}
-                        className="h-9 text-xs"
+                        className="h-9 text-xs glass-input rounded-xl"
                       />
                     </div>
                     <div className="space-y-1">
-                      <Label className="text-xs text-slate-600">Jam Selesai</Label>
+                      <Label className="text-xs font-bold text-slate-700">Jam Selesai</Label>
                       <Input
                         type="time"
                         value={jamSelesai}
                         onChange={(e) => setJamSelesai(e.target.value)}
-                        className="h-9 text-xs"
+                        className="h-9 text-xs glass-input rounded-xl"
                       />
                     </div>
                   </div>
 
                   <div className="space-y-1">
-                    <Label className="text-xs text-slate-600">Ruangan (Opsional)</Label>
+                    <Label className="text-xs font-bold text-slate-700">Ruangan (Opsional)</Label>
                     <Input
                       placeholder="Contoh: Lab Komputer 2"
                       value={ruangan}
                       onChange={(e) => setRuangan(e.target.value)}
-                      className="h-9 text-xs"
+                      className="h-9 text-xs glass-input rounded-xl"
                     />
                   </div>
 
-                  <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+                  <div className="flex items-center justify-end gap-2 pt-3 border-t border-white/60">
                     <Button
                       type="button"
                       variant="outline"
                       size="sm"
                       onClick={() => setShowAddJadwalModal(false)}
+                      className="glass-pill rounded-xl"
                     >
                       Batal
                     </Button>
@@ -1260,7 +1268,7 @@ export function KelasDetail() {
                       type="submit"
                       size="sm"
                       disabled={savingJadwal}
-                      className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                      className="bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white rounded-xl font-bold shadow-md shadow-sky-500/20"
                     >
                       {savingJadwal ? "Menyimpan..." : "Simpan"}
                     </Button>
@@ -1275,20 +1283,20 @@ export function KelasDetail() {
         <AnimatePresence>
           {previewPhoto && (
             <div
-              className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-fade-in"
+              className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md animate-fade-in"
               onClick={() => setPreviewPhoto(null)}
             >
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.9 }}
-                className="bg-white rounded-2xl max-w-md w-full overflow-hidden shadow-2xl border border-slate-200"
+                className="glass-modal rounded-3xl max-w-md w-full overflow-hidden shadow-2xl border border-white/80"
                 onClick={(e) => e.stopPropagation()}
               >
-                <div className="p-4 border-b border-slate-100 flex items-center justify-between">
+                <div className="p-4 border-b border-white/60 bg-white/40 flex items-center justify-between">
                   <div>
                     <h4 className="font-bold text-slate-900 text-sm">{previewPhoto.name}</h4>
-                    <p className="text-[11px] text-slate-400">Check-in: {previewPhoto.time}</p>
+                    <p className="text-[11px] text-slate-500">Check-in: {previewPhoto.time}</p>
                   </div>
                   <button
                     onClick={() => setPreviewPhoto(null)}
@@ -1297,11 +1305,11 @@ export function KelasDetail() {
                     <X className="w-5 h-5" />
                   </button>
                 </div>
-                <div className="p-4 bg-slate-950 flex items-center justify-center">
+                <div className="p-4 bg-slate-950/80 backdrop-blur-md flex items-center justify-center">
                   <img
                     src={previewPhoto.url}
                     alt={previewPhoto.name}
-                    className="max-h-80 w-auto rounded-lg object-contain"
+                    className="max-h-80 w-auto rounded-2xl object-contain shadow-md"
                   />
                 </div>
               </motion.div>

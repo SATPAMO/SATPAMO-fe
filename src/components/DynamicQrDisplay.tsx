@@ -96,7 +96,7 @@ export function DynamicQrDisplay({
     <div className={`flex flex-col items-center gap-2.5 ${className}`}>
       {/* QR Code Container */}
       <div
-        className="relative bg-white rounded-2xl p-3.5 shadow-md border border-sky-200/90 group transition-transform hover:scale-[1.01]"
+        className="relative bg-white/95 backdrop-blur-md rounded-3xl p-3.5 shadow-md border border-white/90 group transition-transform hover:scale-[1.01]"
         style={{ width: size + 28, height: size + 28 }}
       >
         <svg
@@ -211,14 +211,14 @@ export function DynamicQrDisplay({
       {/* Payload Details Modal */}
       {showPayloadModal && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md animate-fade-in"
           onClick={() => setShowPayloadModal(false)}
         >
           <div
-            className="bg-white rounded-2xl max-w-md w-full p-5 shadow-2xl border border-sky-200 text-left"
+            className="glass-modal rounded-3xl max-w-md w-full p-5 shadow-2xl border border-white/80 text-left"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+            <div className="flex items-center justify-between pb-3 border-b border-white/60">
               <div className="flex items-center gap-2">
                 <QrCode className="w-4 h-4 text-sky-700" />
                 <h4 className="text-sm font-bold text-slate-900">
@@ -238,15 +238,15 @@ export function DynamicQrDisplay({
               <p className="text-xs text-slate-600">
                 Data mentah yang tersimpan di dalam QR Code dinamis ini:
               </p>
-              <pre className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-[11px] font-mono text-slate-800 break-all whitespace-pre-wrap max-h-48 overflow-y-auto">
+              <pre className="p-3 bg-white/50 border border-white/80 rounded-2xl text-[11px] font-mono text-slate-800 break-all whitespace-pre-wrap max-h-48 overflow-y-auto">
                 {value}
               </pre>
               <div className="grid grid-cols-2 gap-2 pt-1 text-[11px]">
-                <div className="bg-sky-50 p-2 rounded-lg border border-sky-100">
+                <div className="glass-panel p-2.5 rounded-xl border border-white/70 shadow-xs">
                   <span className="text-slate-500 font-medium block">Kode PIN:</span>
                   <span className="font-bold text-sky-950 font-mono text-sm">{pin}</span>
                 </div>
-                <div className="bg-sky-50 p-2 rounded-lg border border-sky-100">
+                <div className="glass-panel p-2.5 rounded-xl border border-white/70 shadow-xs">
                   <span className="text-slate-500 font-medium block">Dimensi Matriks:</span>
                   <span className="font-bold text-sky-950">{qrData.size}x{qrData.size} modul</span>
                 </div>
@@ -260,7 +260,7 @@ export function DynamicQrDisplay({
                   safeCopy(value);
                   setShowPayloadModal(false);
                 }}
-                className="text-xs font-bold bg-sky-600 hover:bg-sky-700 text-white px-3.5 py-1.5 rounded-xl shadow-sm transition-all"
+                className="text-xs font-bold bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white px-3.5 py-1.5 rounded-xl shadow-sm transition-all"
               >
                 Salin String Payload
               </button>

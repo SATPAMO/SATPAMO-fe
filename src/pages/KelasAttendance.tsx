@@ -144,9 +144,9 @@ export function KelasAttendance() {
 
   if (loading && !data) {
     return (
-      <div className="min-h-screen bg-slate-50 font-sans">
+      <div className="min-h-screen text-slate-800 relative overflow-hidden satpamo-page-bg font-sans">
         <Navbar />
-        <div className="max-w-6xl mx-auto px-4 py-16 text-center text-slate-400">
+        <div className="max-w-6xl mx-auto px-4 py-16 text-center text-slate-500 font-semibold">
           Memuat lembar absensi kelas...
         </div>
       </div>
@@ -155,13 +155,13 @@ export function KelasAttendance() {
 
   if (error || !data) {
     return (
-      <div className="min-h-screen bg-slate-50 font-sans">
+      <div className="min-h-screen text-slate-800 relative overflow-hidden satpamo-page-bg font-sans">
         <Navbar />
-        <div className="max-w-xl mx-auto px-4 py-16 text-center space-y-4">
-          <AlertCircle className="w-12 h-12 text-red-500 mx-auto" />
+        <div className="max-w-xl mx-auto px-4 py-16 text-center space-y-4 glass-panel rounded-3xl mt-12 p-8">
+          <AlertCircle className="w-12 h-12 text-rose-500 mx-auto" />
           <h2 className="text-xl font-bold text-slate-900">Gagal Memuat Absensi</h2>
-          <p className="text-sm text-slate-500">{error || "Data tidak ditemukan."}</p>
-          <Button onClick={() => navigate("/kelas")} variant="outline">
+          <p className="text-sm text-slate-600">{error || "Data tidak ditemukan."}</p>
+          <Button onClick={() => navigate("/kelas")} variant="outline" className="glass-pill rounded-xl">
             Kembali ke Kelas
           </Button>
         </div>
@@ -181,17 +181,22 @@ export function KelasAttendance() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans pb-20">
+    <div className="min-h-screen text-slate-800 relative overflow-hidden satpamo-page-bg font-sans pb-20">
+      {/* Decorative ambient blobs */}
+      <div className="pointer-events-none absolute -top-32 -right-32 w-96 h-96 bg-sky-200/20 rounded-full blur-3xl" />
+      <div className="pointer-events-none absolute top-1/2 left-1/3 w-72 h-72 bg-blue-100/30 rounded-full blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-24 right-1/4 w-96 h-96 bg-sky-200/20 rounded-full blur-3xl" />
+
       <Navbar />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6 relative z-10">
         {/* Navigation Breadcrumb */}
         <div className="flex items-center gap-2 text-xs text-slate-500">
-          <button type="button" onClick={() => navigate("/kelas")} className="hover:text-indigo-600">
+          <button type="button" onClick={() => navigate("/kelas")} className="hover:text-sky-600 font-medium">
             Daftar Kelas
           </button>
           <span>/</span>
-          <button type="button" onClick={() => navigate(`/kelas/${id}`)} className="hover:underline">
+          <button type="button" onClick={() => navigate(`/kelas/${id}`)} className="hover:underline font-medium">
             {data.kelas.nama}
           </button>
           <span>/</span>
@@ -199,20 +204,20 @@ export function KelasAttendance() {
         </div>
 
         {/* Header Title & Actions */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="glass-panel rounded-3xl p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <span className="font-mono text-xs font-bold px-2.5 py-0.5 rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-100">
+              <span className="font-mono text-xs font-bold px-2.5 py-0.5 rounded-xl bg-sky-100/70 text-sky-800 border border-sky-200/80 shadow-xs">
                 {data.kelas.kode}
               </span>
-              <span className="text-xs text-slate-500">
+              <span className="text-xs text-slate-600 font-medium">
                 Pertemuan Ke-{pertemuanKe} • {date}
               </span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
               Absensi Kelas: {data.kelas.nama}
             </h1>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-slate-600">
               Tandai kehadiran mahasiswa dan klik tombol "Simpan Absensi" di bawah.
             </p>
           </div>
@@ -222,14 +227,14 @@ export function KelasAttendance() {
               variant="outline"
               size="sm"
               onClick={handleMarkAllPresent}
-              className="text-xs text-slate-700 border-slate-300 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-300 gap-1.5"
+              className="text-xs text-slate-700 glass-pill hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-300 gap-1.5 rounded-xl"
             >
-              <Check className="w-3.5 h-3.5" /> Tandai Semua Hadir
+              <Check className="w-3.5 h-3.5 text-emerald-600" /> Tandai Semua Hadir
             </Button>
             <Button
               onClick={handleSaveAttendance}
               disabled={saving}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-200 text-xs gap-1.5 h-9 px-4 font-semibold"
+              className="bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white shadow-md shadow-sky-500/20 text-xs gap-1.5 h-9 px-4 font-bold rounded-xl"
             >
               <Save className="w-4 h-4" />
               {saving ? "Menyimpan..." : "Simpan Absensi"}
@@ -239,23 +244,23 @@ export function KelasAttendance() {
 
         {/* Feedback Success */}
         {saveMessage && (
-          <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded-xl flex items-center gap-2.5 font-medium animate-fade-in">
+          <div className="p-4 glass-panel border-emerald-400/40 text-emerald-800 text-xs rounded-2xl flex items-center gap-2.5 font-bold animate-fade-in shadow-xs">
             <CheckCircle2 className="w-4 h-4 text-emerald-600" />
             {saveMessage}
           </div>
         )}
 
         {/* Filter Controls & Stats Bar */}
-        <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-sm space-y-4">
+        <div className="glass-panel rounded-2xl p-4 shadow-sm space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex flex-wrap items-center gap-3">
               {/* Selector Pertemuan */}
               <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold text-slate-700">Pertemuan:</span>
+                <span className="text-xs font-bold text-slate-700">Pertemuan:</span>
                 <select
                   value={pertemuanKe}
                   onChange={(e) => setPertemuanKe(parseInt(e.target.value, 10))}
-                  className="h-8 rounded-md border border-input bg-background px-2.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-ring"
+                  className="h-8 rounded-xl border border-white/80 bg-white/70 px-2.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-sky-400 shadow-xs"
                 >
                   {Array.from({ length: 16 }, (_, i) => i + 1).map((p) => (
                     <option key={p} value={p}>
@@ -267,34 +272,34 @@ export function KelasAttendance() {
 
               {/* Tanggal */}
               <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold text-slate-700">Tanggal:</span>
+                <span className="text-xs font-bold text-slate-700">Tanggal:</span>
                 <Input
                   type="date"
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
-                  className="h-8 text-xs w-36"
+                  className="h-8 text-xs w-36 glass-input rounded-xl"
                 />
               </div>
             </div>
 
             {/* Quick Stats Pill */}
             <div className="flex flex-wrap items-center gap-2 text-xs">
-              <span className="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-semibold">
+              <span className="px-2.5 py-1 rounded-xl bg-white/60 text-slate-700 font-semibold border border-white/80 shadow-xs">
                 Total: {currentStats.total}
               </span>
-              <span className="px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-800 font-semibold">
+              <span className="px-2.5 py-1 rounded-xl bg-emerald-500/15 text-emerald-800 font-semibold border border-emerald-400/30">
                 Hadir: {currentStats.present}
               </span>
-              <span className="px-2.5 py-1 rounded-lg bg-amber-100 text-amber-800 font-semibold">
+              <span className="px-2.5 py-1 rounded-xl bg-amber-500/15 text-amber-800 font-semibold border border-amber-400/30">
                 Terlambat: {currentStats.late}
               </span>
-              <span className="px-2.5 py-1 rounded-lg bg-blue-100 text-blue-800 font-semibold">
+              <span className="px-2.5 py-1 rounded-xl bg-sky-500/15 text-sky-800 font-semibold border border-sky-400/30">
                 Sakit: {currentStats.sakit}
               </span>
-              <span className="px-2.5 py-1 rounded-lg bg-indigo-100 text-indigo-800 font-semibold">
+              <span className="px-2.5 py-1 rounded-xl bg-blue-500/15 text-blue-800 font-semibold border border-blue-400/30">
                 Izin: {currentStats.izin}
               </span>
-              <span className="px-2.5 py-1 rounded-lg bg-red-100 text-red-800 font-semibold">
+              <span className="px-2.5 py-1 rounded-xl bg-rose-500/15 text-rose-800 font-semibold border border-rose-400/30">
                 Alpa: {currentStats.absent}
               </span>
             </div>
@@ -302,21 +307,21 @@ export function KelasAttendance() {
         </div>
 
         {/* Table Roster Absensi */}
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="glass-panel rounded-3xl shadow-sm overflow-hidden">
           <Table>
             <TableHeader>
-              <TableRow className="bg-slate-50/70 text-xs">
-                <TableHead className="w-12 text-center">No</TableHead>
-                <TableHead className="w-32">NIM</TableHead>
-                <TableHead>Nama Mahasiswa</TableHead>
-                <TableHead className="w-80 text-center">Status Kehadiran</TableHead>
-                <TableHead>Catatan / Keterangan</TableHead>
+              <TableRow className="glass-table-head text-xs border-b border-white/60">
+                <TableHead className="w-12 text-center text-slate-700 font-bold">No</TableHead>
+                <TableHead className="w-32 text-slate-700 font-bold">NIM</TableHead>
+                <TableHead className="text-slate-700 font-bold">Nama Mahasiswa</TableHead>
+                <TableHead className="w-80 text-center text-slate-700 font-bold">Status Kehadiran</TableHead>
+                <TableHead className="text-slate-700 font-bold">Catatan / Keterangan</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {data.students.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-12 text-xs text-slate-400">
+                  <TableCell colSpan={5} className="text-center py-12 text-xs text-slate-500 font-medium">
                     Tidak ada mahasiswa terdaftar di kelas ini.
                   </TableCell>
                 </TableRow>
@@ -328,7 +333,7 @@ export function KelasAttendance() {
                   };
 
                   return (
-                    <TableRow key={st.nim} className="text-xs hover:bg-slate-50/50">
+                    <TableRow key={st.nim} className="text-xs hover:bg-white/40 transition-colors border-b border-white/40">
                       <TableCell className="text-center font-medium text-slate-400">
                         {idx + 1}
                       </TableCell>
@@ -350,10 +355,10 @@ export function KelasAttendance() {
                                 key={opt.value}
                                 type="button"
                                 onClick={() => handleStatusChange(st.nim, opt.value)}
-                                className={`px-2.5 py-1 rounded-md text-[11px] font-bold border transition-all ${
+                                className={`px-2.5 py-1 rounded-xl text-[11px] font-bold border transition-all ${
                                   isSelected
                                     ? opt.activeClass
-                                    : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
+                                    : "bg-white/70 text-slate-700 border-white/80 hover:bg-white shadow-xs"
                                 }`}
                               >
                                 {opt.label}
@@ -367,7 +372,7 @@ export function KelasAttendance() {
                           placeholder="Catatan izin, sakit, dsb..."
                           value={currentItem.notes}
                           onChange={(e) => handleNotesChange(st.nim, e.target.value)}
-                          className="h-8 text-xs bg-slate-50/50"
+                          className="h-8 text-xs glass-input rounded-xl"
                         />
                       </TableCell>
                     </TableRow>
@@ -379,8 +384,8 @@ export function KelasAttendance() {
         </div>
 
         {/* Floating Bottom Bar Simpan */}
-        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-30 bg-slate-900/90 text-white backdrop-blur-md px-6 py-3 rounded-2xl shadow-xl flex items-center gap-6 border border-slate-700/50">
-          <div className="text-xs text-slate-300 hidden sm:block">
+        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-30 bg-slate-900/80 text-white backdrop-blur-xl px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-6 border border-white/20">
+          <div className="text-xs text-slate-200 hidden sm:block">
             Pertemuan <strong>{pertemuanKe}</strong> • {currentStats.present} Hadir, {currentStats.late} Telat, {currentStats.absent} Alpa
           </div>
           <div className="flex items-center gap-3">
@@ -388,7 +393,7 @@ export function KelasAttendance() {
               size="sm"
               variant="outline"
               onClick={() => navigate(`/kelas/${id}`)}
-              className="text-xs text-slate-300 border-slate-700 hover:bg-slate-800"
+              className="text-xs text-white border-white/20 bg-white/10 hover:bg-white/20 rounded-xl"
             >
               Kembali
             </Button>
@@ -396,7 +401,7 @@ export function KelasAttendance() {
               size="sm"
               onClick={handleSaveAttendance}
               disabled={saving}
-              className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs gap-1.5"
+              className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs gap-1.5 rounded-xl shadow-md shadow-emerald-500/20"
             >
               <Save className="w-3.5 h-3.5" />
               {saving ? "Menyimpan..." : "Simpan Sekarang"}

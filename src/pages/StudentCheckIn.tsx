@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Camera, RefreshCw, MapPin, CheckCircle2, AlertTriangle,
   XCircle, Sparkles, Navigation, User,
-  ShieldCheck, Upload
+  Upload
 } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../components/ui/card";
@@ -254,29 +254,38 @@ export function StudentCheckIn() {
   const selectedMhs = mahasiswas.find((m) => m.id === selectedMahasiswaId);
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col items-center justify-center p-4 md:p-8 font-sans">
-      <div className="w-full max-w-xl mx-auto space-y-6">
+    <div className="min-h-screen text-slate-800 relative overflow-hidden satpamo-page-bg flex flex-col items-center justify-center p-4 md:p-8 font-sans">
+      {/* Decorative ambient blobs */}
+      <div className="pointer-events-none absolute -top-32 -right-32 w-96 h-96 bg-sky-200/20 rounded-full blur-3xl" />
+      <div className="pointer-events-none absolute top-1/2 left-1/3 w-72 h-72 bg-blue-100/30 rounded-full blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-24 right-1/4 w-96 h-96 bg-sky-200/20 rounded-full blur-3xl" />
+
+      <div className="w-full max-w-xl mx-auto space-y-6 relative z-10">
         {/* Header bar */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-xs font-semibold tracking-wide uppercase text-slate-500 bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-sm">
+          <div className="flex items-center gap-2 text-xs font-bold tracking-wide uppercase text-sky-800 glass-pill px-3 py-1.5 rounded-xl shadow-xs">
             Portal Mahasiswa
           </div>
-          <div className="flex items-center gap-1.5 text-xs text-primary font-medium bg-primary/10 px-2.5 py-1 rounded-full">
-            <Sparkles className="w-3.5 h-3.5 text-primary" />
-            Gemini AI Vision & Geofencing
+          <div className="flex items-center gap-1.5 text-xs text-sky-800 font-bold glass-pill px-3 py-1 rounded-full shadow-xs">
+            <Sparkles className="w-3.5 h-3.5 text-sky-600" />
+            Gemini AI Vision &amp; Geofencing
           </div>
         </div>
 
         {/* Title */}
         <div className="text-center space-y-1">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/20 mb-2">
-            <ShieldCheck className="w-6 h-6" />
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-3xl glass-panel p-1.5 border border-white/80 shadow-lg shadow-sky-500/15 mb-2">
+            <img
+              src="/logo-transparent.png"
+              alt="SATPAMO Logo"
+              className="w-full h-full object-contain drop-shadow-md"
+            />
           </div>
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900">
+          <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900">
             Presensi Mandiri Mahasiswa
           </h1>
-          <p className="text-sm text-slate-500">
-            Verifikasi kehadiran otomatis dengan kamera selfie dan validasi lokasi kampus.
+          <p className="text-sm text-slate-600 font-medium">
+            SATPAMO &bull; Verifikasi kehadiran otomatis dengan kamera selfie dan validasi lokasi kampus.
           </p>
         </div>
 
@@ -288,8 +297,8 @@ export function StudentCheckIn() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95 }}
             >
-              <Card className="border-2 border-primary/30 shadow-xl overflow-hidden bg-white">
-                <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-4 text-white text-center">
+              <Card className="border border-white/80 shadow-2xl overflow-hidden glass-panel rounded-3xl">
+                <div className="bg-gradient-to-r from-sky-500 to-blue-600 p-4 text-white text-center">
                   <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/20 mb-2">
                     <CheckCircle2 className="w-6 h-6 text-white" />
                   </div>
@@ -402,7 +411,7 @@ export function StudentCheckIn() {
 
         {/* --- FORM PRESENSI (KAMERA + GPS + PILIH MHS) --- */}
         {!result && (
-          <Card className="border border-slate-200 shadow-lg overflow-hidden bg-white">
+          <Card className="border border-white/80 shadow-xl overflow-hidden glass-panel rounded-3xl">
             <CardHeader className="pb-4">
               <CardTitle className="text-base font-semibold">Formulir Check-in Mandiri</CardTitle>
               <CardDescription className="text-xs">

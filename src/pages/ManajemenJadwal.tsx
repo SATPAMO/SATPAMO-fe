@@ -8,7 +8,6 @@ import {
   Settings,
   HelpCircle,
   LogOut,
-  RotateCw,
   Plus,
   Search,
   ChevronDown,
@@ -36,6 +35,9 @@ import {
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { kelasApi, type KelasItem } from "../lib/api";
+import { TopHeaderBar } from "../components/TopHeaderBar";
+import { AccountAvatar } from "../components/AccountAvatar";
+import { formatLocationLabel } from "../lib/formatters";
 
 export interface JadwalItem {
   id: number | string;
@@ -363,12 +365,15 @@ export const ManajemenJadwal = () => {
     alasanPerubahan: "",
   });
 
-  const getInitials = (name?: string) => {
-    if (!name) return "A";
-    const parts = name.trim().split(" ");
-    if (parts.length === 1) return parts[0][0].toUpperCase();
-    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-  };
+  const activeLocationJadwal =
+    jadwalList.find((j) => j.status === "ongoing") || jadwalList[0] || null;
+  const locationLabel = activeLocationJadwal
+    ? formatLocationLabel(
+        activeLocationJadwal.ruangan,
+        activeLocationJadwal.mataKuliah,
+        activeLocationJadwal.kelas
+      )
+    : null;
 
   const navItems = [
     { icon: <Radio className="w-4 h-4" />, label: "Live Monitoring", active: false, path: "/" },
@@ -545,14 +550,14 @@ export const ManajemenJadwal = () => {
     <div
       className="min-h-screen flex text-slate-800 relative overflow-hidden"
       style={{
-        background: "linear-gradient(145deg, #38bdf8 0%, #29b6f6 30%, #0ea5e9 70%, #0284c7 100%)",
+        background: "linear-gradient(160deg, #e0f2fe 0%, #bae6fd 25%, #cfe9f8 50%, #e0ecf8 75%, #f0f7ff 100%)",
         fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
       }}
     >
       {/* Decorative ambient blobs */}
-      <div className="pointer-events-none absolute -top-32 -right-32 w-96 h-96 bg-white/15 rounded-full blur-3xl" />
-      <div className="pointer-events-none absolute top-1/2 left-1/3 w-72 h-72 bg-sky-200/20 rounded-full blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-24 right-1/4 w-96 h-96 bg-white/15 rounded-full blur-3xl" />
+      <div className="pointer-events-none absolute -top-32 -right-32 w-96 h-96 bg-sky-200/20 rounded-full blur-3xl" />
+      <div className="pointer-events-none absolute top-1/2 left-1/3 w-72 h-72 bg-blue-100/30 rounded-full blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-24 right-1/4 w-96 h-96 bg-sky-200/20 rounded-full blur-3xl" />
 
       {/* Toast Notification */}
       <AnimatePresence>
@@ -563,7 +568,7 @@ export const ManajemenJadwal = () => {
             exit={{ opacity: 0, y: -20 }}
             className="fixed top-5 right-5 z-50 bg-white/95 backdrop-blur-md text-slate-800 text-sm font-semibold px-4 py-3 rounded-2xl shadow-xl border border-sky-200 flex items-center gap-2.5"
           >
-            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+            <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
             <span>{toastMessage}</span>
           </motion.div>
         )}
@@ -573,21 +578,24 @@ export const ManajemenJadwal = () => {
       <aside
         className="w-60 shrink-0 flex flex-col py-6 px-4 gap-4 sidebar-glass z-10"
       >
-        <div className="mb-2">
-          <h1 className="text-3xl font-black text-yellow-300 tracking-tight leading-none drop-shadow-xs">SATPAMO</h1>
-          <p className="text-sky-950 font-black text-[11px] tracking-widest mt-0.5">ADMIN</p>
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-11 h-11 rounded-2xl glass-panel p-1 border border-white/80 shadow-sm flex items-center justify-center shrink-0">
+            <img src="/logo-transparent.png" alt="SATPAMO Logo" className="w-full h-full object-contain drop-shadow-sm" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-black text-sky-600 tracking-tight leading-none drop-shadow-xs">SATPAMO</h1>
+            <p className="text-slate-500 font-black text-[10px] tracking-widest mt-1 uppercase">ADMIN PANEL</p>
+          </div>
         </div>
 
         {/* Profile Card */}
-        <div className="flex items-center gap-3 bg-white/25 border border-white/40 rounded-2xl px-3 py-2.5">
-          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-sky-400 to-blue-600 flex items-center justify-center text-white text-sm font-black shrink-0 shadow-xs">
-            {dosen?.username ? getInitials(dosen.username) : "YK"}
-          </div>
+        <div className="flex items-center gap-3 bg-white/50 border border-white/60 rounded-2xl px-3 py-2.5">
+          <AccountAvatar />
           <div className="min-w-0">
             <p className="text-slate-900 text-xs font-black leading-tight truncate">
               {dosen?.username ?? "Dr. Yurii Kharlistov, M.T."}
             </p>
-            <p className="text-sky-950 text-[10px] font-bold truncate">NIP: 123456789098761</p>
+            <p className="text-slate-500 text-[10px] font-bold truncate">NIP: 123456789098761</p>
           </div>
         </div>
 
@@ -599,21 +607,21 @@ export const ManajemenJadwal = () => {
               onClick={() => navigate(item.path)}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all text-left ${
                 item.active
-                  ? "bg-sky-500/40 text-slate-950 font-black shadow-xs border border-white/40"
-                  : "text-slate-800 hover:bg-white/20 hover:text-black font-semibold"
+                  ? "bg-white/85 text-sky-800 font-extrabold shadow-sm border border-white/90"
+                  : "text-slate-700 hover:bg-white/40 hover:text-slate-950 font-semibold"
               }`}
             >
               {item.icon}
               <span className="flex-1">{item.label}</span>
               {item.active && (
-                <span className="w-2.5 h-2.5 rounded-full bg-sky-950 ring-2 ring-sky-300 shrink-0" />
+                <span className="w-2.5 h-2.5 rounded-full bg-sky-500 ring-2 ring-sky-200 shrink-0" />
               )}
             </button>
           ))}
         </nav>
 
         {/* Sidebar Footer */}
-        <div className="flex flex-col gap-1 border-t border-white/25 pt-3">
+        <div className="flex flex-col gap-1 border-t border-slate-200/50 pt-3">
           <button
             onClick={() => setShowHelpModal(true)}
             className="flex items-center gap-2 text-slate-800 hover:text-black text-xs px-2 py-2 rounded-lg hover:bg-white/20 transition-all font-semibold"
@@ -626,7 +634,7 @@ export const ManajemenJadwal = () => {
               logout();
               navigate("/login");
             }}
-            className="flex items-center gap-2 text-red-600 hover:text-red-700 text-xs px-2 py-2 rounded-lg hover:bg-red-500/15 transition-all font-bold"
+            className="flex items-center gap-2 text-red-500 hover:text-red-700 text-xs px-2 py-2 rounded-lg hover:bg-red-50/50 transition-all font-bold"
           >
             <LogOut className="w-4 h-4" />
             Keluar
@@ -635,29 +643,23 @@ export const ManajemenJadwal = () => {
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 overflow-y-auto px-8 py-6 relative z-10 flex flex-col gap-5">
-        {/* Top Header / Breadcrumb */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-slate-500 text-xs font-semibold">
-            <button onClick={() => navigate("/")} className="hover:text-slate-800 transition-colors flex items-center gap-1">
-              <span>Beranda</span>
-            </button>
-            <span>&gt;</span>
-            <span className="text-slate-800 font-bold">Manajemen Jadwal</span>
-          </div>
+      <main className="flex-1 overflow-y-auto no-scrollbar px-7 py-5 relative z-10 flex flex-col gap-5 w-full min-w-0">
+        <TopHeaderBar
+          locationLabel={locationLabel}
+          onRefresh={handleRefresh}
+          isRefreshing={isRefreshing || isLoading}
+          refreshTitle="Perbarui Data"
+        />
 
-          <div className="flex items-center gap-3">
-            <button
-              onClick={handleRefresh}
-              title="Perbarui Data"
-              className="w-9 h-9 rounded-xl bg-white/70 hover:bg-white text-slate-700 flex items-center justify-center backdrop-blur-md border border-white/80 shadow-sm transition-all active:scale-95"
-            >
-              <RotateCw className={`w-4 h-4 ${isRefreshing || isLoading ? "animate-spin text-sky-600" : ""}`} />
-            </button>
-            <div className="w-9 h-9 rounded-xl bg-sky-500 text-white font-bold text-xs flex items-center justify-center shadow-sm">
-              {dosen?.username ? getInitials(dosen.username) : "A"}
-            </div>
-          </div>
+        <div className="flex items-center gap-2 text-slate-500 text-xs font-semibold">
+          <button
+            onClick={() => navigate("/")}
+            className="hover:text-slate-800 transition-colors flex items-center gap-1"
+          >
+            <span>Beranda</span>
+          </button>
+          <span>&gt;</span>
+          <span className="text-slate-800 font-bold">Manajemen Jadwal</span>
         </div>
 
         {/* Page Title & Action Button */}
@@ -1091,16 +1093,16 @@ export const ManajemenJadwal = () => {
       ========================================================================= */}
       <AnimatePresence>
         {editingJadwal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-sky-950/25 backdrop-blur-[2px]">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md animate-fade-in">
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
               transition={{ duration: 0.15 }}
-              className="bg-white rounded-3xl shadow-2xl border border-slate-100 w-full max-w-lg overflow-hidden flex flex-col max-h-[92vh]"
+              className="glass-modal rounded-3xl shadow-2xl border border-white/80 w-full max-w-lg overflow-hidden flex flex-col max-h-[92vh]"
             >
               {/* Modal Header */}
-              <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between shrink-0">
+              <div className="px-6 py-4 border-b border-white/60 bg-white/40 flex items-center justify-between shrink-0">
                 <div className="flex items-center gap-2.5">
                   <div className="w-8 h-8 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center">
                     <CalendarCheck className="w-4 h-4" />
@@ -1315,14 +1317,14 @@ export const ManajemenJadwal = () => {
       ========================================================================= */}
       <AnimatePresence>
         {showAddModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md animate-fade-in">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white rounded-3xl shadow-2xl border border-slate-100 w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]"
+              className="glass-modal rounded-3xl shadow-2xl border border-white/80 w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]"
             >
-              <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+              <div className="px-6 py-4 border-b border-white/60 bg-white/40 flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
                   <div className="w-8 h-8 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center">
                     <Plus className="w-4 h-4" />
@@ -1473,14 +1475,14 @@ export const ManajemenJadwal = () => {
       ========================================================================= */}
       <AnimatePresence>
         {showDetailModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md animate-fade-in">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white rounded-3xl shadow-2xl border border-slate-100 w-full max-w-md overflow-hidden p-6"
+              className="glass-modal rounded-3xl shadow-2xl border border-white/80 w-full max-w-md overflow-hidden p-6"
             >
-              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div className="flex items-center justify-between pb-3 border-b border-white/60">
                 <div className="flex items-center gap-2">
                   <span className="px-2.5 py-0.5 rounded-md bg-sky-500 text-white font-extrabold text-xs">
                     SESI {showDetailModal.sesi}
@@ -1551,14 +1553,14 @@ export const ManajemenJadwal = () => {
       ========================================================================= */}
       <AnimatePresence>
         {showBapGuideModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md animate-fade-in">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white rounded-3xl shadow-2xl border border-slate-100 w-full max-w-lg overflow-hidden p-6"
+              className="glass-modal rounded-3xl shadow-2xl border border-white/80 w-full max-w-lg overflow-hidden p-6"
             >
-              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div className="flex items-center justify-between pb-3 border-b border-white/60">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
                     <BookOpen className="w-4 h-4" />
@@ -1612,15 +1614,15 @@ export const ManajemenJadwal = () => {
       ========================================================================= */}
       <AnimatePresence>
         {showImportModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md animate-fade-in">
             <motion.div
               initial={{ opacity: 0, scale: 0.96 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.96 }}
-              className="bg-white rounded-3xl shadow-2xl border border-slate-100 w-full max-w-xl overflow-hidden p-6"
+              className="glass-modal rounded-3xl shadow-2xl border border-white/80 w-full max-w-xl overflow-hidden p-6"
             >
               {/* Modal Header */}
-              <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+              <div className="flex items-center justify-between pb-4 border-b border-white/60">
                 <div className="flex items-center gap-2.5">
                   <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
                     <FileSpreadsheet className="w-5 h-5" />
@@ -1860,14 +1862,14 @@ export const ManajemenJadwal = () => {
       ========================================================================= */}
       <AnimatePresence>
         {showHelpModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md animate-fade-in">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white rounded-3xl shadow-2xl border border-slate-100 w-full max-w-md overflow-hidden p-6"
+              className="glass-modal rounded-3xl shadow-2xl border border-white/80 w-full max-w-md overflow-hidden p-6"
             >
-              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div className="flex items-center justify-between pb-3 border-b border-white/60">
                 <div className="flex items-center gap-2">
                   <HelpCircle className="w-5 h-5 text-sky-600" />
                   <h3 className="font-bold text-slate-900 text-sm">Bantuan Manajemen Jadwal</h3>

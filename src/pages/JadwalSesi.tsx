@@ -12,7 +12,6 @@ import {
   RefreshCw,
   Download,
   Plus,
-  DoorOpen,
   ChevronLeft,
   ChevronRight,
   Bell,
@@ -30,6 +29,9 @@ import {
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { kelasApi, type KelasItem } from "../lib/api";
+import { TopHeaderBar } from "../components/TopHeaderBar";
+import { AccountAvatar } from "../components/AccountAvatar";
+import { formatLocationLabel } from "../lib/formatters";
 
 interface SessionItem {
   id: number;
@@ -186,12 +188,17 @@ export function JadwalSesi() {
     fetchRealData();
   }, []);
 
-  const getInitials = (name?: string) => {
-    if (!name) return "YK";
-    const parts = name.trim().split(" ");
-    if (parts.length === 1) return parts[0][0].toUpperCase();
-    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-  };
+  const selectedKelas =
+    classes.find((c) => c.id === selectedKelasId) || classes[0] || null;
+  const locationLabel = selectedKelas
+    ? formatLocationLabel(
+        selectedKelas.jadwals?.[0]?.ruangan ??
+          selectedKelas.jadwal?.[0]?.ruangan ??
+          "Ruang 207",
+        selectedKelas.nama,
+        selectedKelas.kode
+      )
+    : "Ruang 207: Pemrograman Mobile (Kelas T3A)";
 
   const navItems = [
     { icon: <Radio className="w-4 h-4" />, label: "Live Monitoring", active: false, path: "/" },
@@ -284,14 +291,14 @@ export function JadwalSesi() {
     <div
       className="min-h-screen flex text-slate-800 relative overflow-hidden"
       style={{
-        background: "linear-gradient(145deg, #38bdf8 0%, #29b6f6 30%, #0ea5e9 70%, #0284c7 100%)",
+        background: "linear-gradient(160deg, #e0f2fe 0%, #bae6fd 25%, #cfe9f8 50%, #e0ecf8 75%, #f0f7ff 100%)",
         fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
       }}
     >
       {/* Decorative ambient blobs */}
-      <div className="pointer-events-none absolute -top-32 -right-32 w-96 h-96 bg-white/15 rounded-full blur-3xl" />
-      <div className="pointer-events-none absolute top-1/2 left-1/3 w-72 h-72 bg-sky-200/20 rounded-full blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-24 right-1/4 w-96 h-96 bg-white/15 rounded-full blur-3xl" />
+      <div className="pointer-events-none absolute -top-32 -right-32 w-96 h-96 bg-sky-200/20 rounded-full blur-3xl" />
+      <div className="pointer-events-none absolute top-1/2 left-1/3 w-72 h-72 bg-blue-100/30 rounded-full blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-24 right-1/4 w-96 h-96 bg-sky-200/20 rounded-full blur-3xl" />
       {/* Toast Notification */}
       <AnimatePresence>
         {syncToast && (
@@ -301,7 +308,7 @@ export function JadwalSesi() {
             exit={{ opacity: 0, y: -20 }}
             className="fixed top-5 right-5 z-50 bg-white/95 backdrop-blur-md text-slate-800 text-sm font-semibold px-4 py-3 rounded-2xl shadow-xl border border-sky-200 flex items-center gap-2"
           >
-            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+            <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
             <span>{syncToast}</span>
           </motion.div>
         )}
@@ -311,21 +318,24 @@ export function JadwalSesi() {
       <aside
         className="w-60 shrink-0 flex flex-col py-6 px-4 gap-4 sidebar-glass z-10"
       >
-        <div className="mb-2">
-          <h1 className="text-3xl font-black text-yellow-300 tracking-tight leading-none drop-shadow-xs">SATPAMO</h1>
-          <p className="text-sky-950 font-black text-[11px] tracking-widest mt-0.5">ADMIN</p>
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-11 h-11 rounded-2xl glass-panel p-1 border border-white/80 shadow-sm flex items-center justify-center shrink-0">
+            <img src="/logo-transparent.png" alt="SATPAMO Logo" className="w-full h-full object-contain drop-shadow-sm" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-black text-sky-600 tracking-tight leading-none drop-shadow-xs">SATPAMO</h1>
+            <p className="text-slate-500 font-black text-[10px] tracking-widest mt-1 uppercase">ADMIN PANEL</p>
+          </div>
         </div>
 
         {/* Profile Card */}
-        <div className="flex items-center gap-3 bg-white/25 border border-white/40 rounded-2xl px-3 py-2.5">
-          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-sky-400 to-blue-600 flex items-center justify-center text-white text-sm font-black shrink-0 shadow-xs">
-            {dosen ? getInitials(dosen.username) : "YK"}
-          </div>
+        <div className="flex items-center gap-3 bg-white/50 border border-white/60 rounded-2xl px-3 py-2.5">
+          <AccountAvatar />
           <div className="min-w-0">
             <p className="text-slate-900 text-xs font-black leading-tight truncate">
               {dosen?.username ?? "Dr. Yurii Kharlistov, M.T."}
             </p>
-            <p className="text-sky-950 text-[10px] font-bold truncate">NIP: 123456789098761</p>
+            <p className="text-slate-500 text-[10px] font-bold truncate">NIP: 123456789098761</p>
           </div>
         </div>
 
@@ -337,21 +347,21 @@ export function JadwalSesi() {
               onClick={() => navigate(item.path)}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all text-left ${
                 item.active
-                  ? "bg-sky-500/40 text-slate-950 font-black shadow-xs border border-white/40"
-                  : "text-slate-800 hover:bg-white/20 hover:text-black font-semibold"
+                  ? "bg-white/85 text-sky-800 font-extrabold shadow-sm border border-white/90"
+                  : "text-slate-700 hover:bg-white/40 hover:text-slate-950 font-semibold"
               }`}
             >
               {item.icon}
               <span className="flex-1">{item.label}</span>
               {item.active && (
-                <span className="w-2.5 h-2.5 rounded-full bg-sky-950 ring-2 ring-sky-300 shrink-0" />
+                <span className="w-2.5 h-2.5 rounded-full bg-sky-500 ring-2 ring-sky-200 shrink-0" />
               )}
             </button>
           ))}
         </nav>
 
         {/* Sidebar Footer */}
-        <div className="flex flex-col gap-1 border-t border-white/25 pt-3">
+        <div className="flex flex-col gap-1 border-t border-slate-200/50 pt-3">
           <button
             onClick={() => setShowBapModal(true)}
             className="flex items-center gap-2 text-slate-800 hover:text-black text-xs px-2 py-2 rounded-lg hover:bg-white/20 transition-all font-semibold"
@@ -364,7 +374,7 @@ export function JadwalSesi() {
               logout();
               navigate("/login");
             }}
-            className="flex items-center gap-2 text-red-400 hover:text-red-600 text-xs px-2 py-2 rounded-lg hover:bg-red-50 transition-all font-semibold"
+            className="flex items-center gap-2 text-red-500 hover:text-red-700 text-xs px-2 py-2 rounded-lg hover:bg-red-50/50 transition-all font-semibold"
           >
             <LogOut className="w-4 h-4" />
             Keluar
@@ -373,31 +383,16 @@ export function JadwalSesi() {
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 overflow-y-auto no-scrollbar px-7 py-5 flex flex-col gap-5">
-        {/* Top Header Pill & User Avatar */}
-        <div className="flex items-center justify-between">
-          <div className="inline-flex items-center gap-2.5 glass-pill rounded-2xl px-4 py-2 shadow-sm">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0 animate-pulse" />
-            <span className="text-xs font-bold text-slate-900">
-              Ruang 207: Pemrograman Mobile (Kelas T3A)
-            </span>
-            <DoorOpen className="w-3.5 h-3.5 text-slate-800 ml-1" />
-          </div>
-
-          <div className="flex items-center gap-2.5">
-            <button
-              onClick={() => setSyncToast("Menyegarkan data jadwal sesi...")}
-              className="p-2 rounded-xl bg-white/70 hover:bg-white text-slate-700 border border-white/80 shadow-sm transition-all"
-              title="Refresh Data Jadwal"
-            >
-              <RefreshCw className="w-4 h-4" />
-            </button>
-
-            <div className="w-9 h-9 rounded-full bg-sky-600 border border-sky-300 flex items-center justify-center text-white text-xs font-black shadow-sm">
-              {dosen ? getInitials(dosen.username) : "YK"}
-            </div>
-          </div>
-        </div>
+      <main className="flex-1 overflow-y-auto no-scrollbar px-7 py-5 flex flex-col gap-5 w-full min-w-0">
+        <TopHeaderBar
+          locationLabel={locationLabel}
+          onRefresh={() => {
+            setSyncToast("Menyegarkan data jadwal sesi...");
+            setTimeout(() => setSyncToast(null), 2500);
+          }}
+          isRefreshing={isSyncing}
+          refreshTitle="Refresh Data Jadwal"
+        />
 
         {/* Breadcrumb, Title & Top Action Buttons */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -980,9 +975,7 @@ export function JadwalSesi() {
             {/* Asisten Dosen (TA) Card */}
             <div className="glass-panel rounded-2xl p-3.5 shadow-sm flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-sky-600 text-white text-xs font-black flex items-center justify-center shrink-0">
-                  {dosen ? getInitials(dosen.username) : "YK"}
-                </div>
+                <AccountAvatar />
                 <div>
                   <p className="text-[10px] font-semibold text-slate-600 leading-tight">
                     Asisten Dosen (TA)
@@ -1015,7 +1008,7 @@ export function JadwalSesi() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-slate-950/40 backdrop-blur-md flex items-center justify-center p-4"
+            className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4"
           >
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
@@ -1172,7 +1165,7 @@ export function JadwalSesi() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-slate-950/40 backdrop-blur-md flex items-center justify-center p-4"
+            className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4"
           >
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
@@ -1239,7 +1232,7 @@ export function JadwalSesi() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-slate-950/40 backdrop-blur-md flex items-center justify-center p-4"
+            className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4"
           >
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
@@ -1316,7 +1309,7 @@ export function JadwalSesi() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-slate-950/40 backdrop-blur-md flex items-center justify-center p-4"
+            className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4"
           >
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
@@ -1364,7 +1357,7 @@ export function JadwalSesi() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-slate-950/40 backdrop-blur-md flex items-center justify-center p-4"
+            className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4"
           >
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}

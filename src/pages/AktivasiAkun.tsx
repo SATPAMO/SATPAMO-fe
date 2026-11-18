@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Mail,
   KeyRound,
-  ShieldCheck,
   CheckCircle2,
   AlertCircle,
   Eye,
@@ -167,28 +166,37 @@ export function AktivasiAkun() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/20 flex items-center justify-center p-4">
+    <div className="min-h-screen text-slate-800 relative overflow-hidden satpamo-page-bg flex items-center justify-center p-4">
+      {/* Decorative ambient blobs */}
+      <div className="pointer-events-none absolute -top-32 -right-32 w-96 h-96 bg-sky-200/20 rounded-full blur-3xl" />
+      <div className="pointer-events-none absolute top-1/2 left-1/3 w-72 h-72 bg-blue-100/30 rounded-full blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-24 right-1/4 w-96 h-96 bg-sky-200/20 rounded-full blur-3xl" />
+
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: "easeOut" }}
-        className="w-full max-w-lg"
+        className="w-full max-w-lg relative z-10"
       >
         {/* Header Logo */}
         <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-500/25 mb-3">
-            <ShieldCheck className="w-8 h-8" />
+          <div className="inline-flex items-center justify-center w-18 h-18 rounded-3xl glass-panel p-2 border border-white/80 shadow-lg shadow-sky-500/15 mb-3">
+            <img
+              src="/logo-transparent.png"
+              alt="SATPAMO Logo"
+              className="w-full h-full object-contain drop-shadow-md"
+            />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
-            Sistem Absensi Mahasiswa
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            SATPAMO
           </h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Aktivasi Akun Mahasiswa Terdaftar
+          <p className="text-sm text-slate-600 mt-1 font-medium">
+            Sistem Absensi Mahasiswa &bull; Aktivasi Akun
           </p>
         </div>
 
         {/* Card Kontainer Utama */}
-        <div className="bg-white rounded-2xl border border-gray-200/80 shadow-[0_12px_40px_rgb(0,0,0,0.06)] p-6 sm:p-8">
+        <div className="auth-card-glass rounded-3xl p-6 sm:p-8">
           <AnimatePresence mode="wait">
             {/* 1. SUKSES AKTIVASI */}
             {activationDone ? (
@@ -215,7 +223,7 @@ export function AktivasiAkun() {
                 <div className="pt-4">
                   <Button
                     onClick={() => navigate("/login")}
-                    className="w-full gap-2 bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-500/20"
+                    className="w-full gap-2 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white shadow-md shadow-sky-500/20 rounded-xl font-bold py-2.5"
                   >
                     Masuk ke Akun Sekarang
                     <ArrowRight className="w-4 h-4" />
@@ -349,7 +357,7 @@ export function AktivasiAkun() {
                     <Button
                       type="submit"
                       disabled={activateLoading}
-                      className="w-full gap-2 bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-500/20"
+                      className="w-full gap-2 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white shadow-md shadow-sky-500/20 rounded-xl font-bold py-2.5"
                     >
                       {activateLoading ? (
                         <span className="flex items-center gap-2">
@@ -478,7 +486,7 @@ export function AktivasiAkun() {
                     <Button
                       type="submit"
                       disabled={requestLoading}
-                      className="w-full gap-2 bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-500/20"
+                      className="w-full gap-2 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white shadow-md shadow-sky-500/20 rounded-xl font-bold py-2.5"
                     >
                       {requestLoading ? (
                         <span className="flex items-center gap-2">
